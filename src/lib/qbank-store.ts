@@ -206,8 +206,12 @@ const _chapterMcqs: Record<string, Mcq[]> = {};
 })();
 
 export function readLevels(): Level[] {
-  return _levels;
+  // The academic hierarchy lives in the database (Academic Manager). Local
+  // fake/seed trees are no longer surfaced — student pages must derive their
+  // Level → Subject → Chapter list from the server tree instead.
+  return [];
 }
+
 
 export function chapterMcqTotal(chapterId: string): number {
   return _chapterMcqs[chapterId]?.length ?? 0;
