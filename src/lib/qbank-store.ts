@@ -278,7 +278,7 @@ export function writeProgress(map: ProgressMap) {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(map));
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 export function chapterCompleted(progress: ProgressMap, chapterId: string): number {

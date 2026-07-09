@@ -10,6 +10,9 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
+
+type McqQuestionRow = Database["public"]["Tables"]["mcq_questions"]["Row"];
 
 // ---------------------------------------------------------------------------
 // Types
@@ -154,7 +157,7 @@ async function fetchCreatorNames(
 }
 
 function mapRow(
-  r: any,
+  r: McqQuestionRow,
   chapters: Awaited<ReturnType<typeof loadAcademicIndex>>["chapters"],
   creators: Map<string, string>,
 ): McqRow {
@@ -169,7 +172,7 @@ function mapRow(
     answer: answerKey,
     correctIndex,
     explanation: r.explanation ?? "",
-    status: r.status,
+    status: (r.status ?? "draft") as McqStatus,
     position: r.position,
     chapterId: r.chapter_id,
     chapterName: chapter?.name ?? "",

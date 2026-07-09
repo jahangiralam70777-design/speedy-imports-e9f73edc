@@ -13,7 +13,12 @@
 // to any authenticated user (RLS handles the actual gating).
 
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
+
+type DbClient = SupabaseClient<Database>;
+type LevelRow = Database["public"]["Tables"]["academic_levels"]["Row"];
 
 export type ApiChapter = {
   id: string;
@@ -44,7 +49,7 @@ export type ApiLevel = {
   subjects: ApiSubject[];
 };
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: DbClient; userId: string }) {
   const { data, error } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",
@@ -53,7 +58,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   if (!data) throw new Error("Forbidden: admin role required");
 }
 
-async function loadTree(supabase: any): Promise<ApiLevel[]> {
+async function loadTree(supabase: DbClient): Promise<ApiLevel[]> {
   const [levelsRes, subjectsRes, chaptersRes] = await Promise.all([
     supabase.from("academic_levels").select("*").order("position"),
     supabase.from("academic_subjects").select("*").order("position"),
@@ -92,7 +97,7 @@ async function loadTree(supabase: any): Promise<ApiLevel[]> {
     subjectsByLevel.set(s.level_id, arr);
   }
 
-  return (levelsRes.data ?? []).map((l: any) => ({
+  return (levelsRes.data ?? []).map((l: LevelRow) => ({
     id: l.id,
     name: l.name,
     code: l.slug ?? "",

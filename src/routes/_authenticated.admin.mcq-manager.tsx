@@ -178,7 +178,7 @@ function McqManagerPage() {
           sortPreset,
         }),
       );
-    } catch {}
+    } catch { /* ignore */ }
   }, [levelId, subjectId, chapterId, status, dateRange, batch, sortPreset]);
 
   const [page, setPage] = useState(1);
@@ -190,7 +190,7 @@ function McqManagerPage() {
   useEffect(() => {
     try {
       window.localStorage.setItem(PAGE_SIZE_KEY, String(pageSize));
-    } catch {}
+    } catch { /* ignore */ }
   }, [pageSize]);
 
   useEffect(() => {
