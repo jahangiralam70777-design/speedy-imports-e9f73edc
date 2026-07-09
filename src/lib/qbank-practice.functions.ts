@@ -173,9 +173,7 @@ export const getQbankTaxonomy = createServerFn({ method: "GET" })
         wrong: Number(r.wrong) || 0,
         timeSpentMs: Number(r.time_spent_ms) || 0,
         bookmarks: Number(r.bookmarks) || 0,
-        lastPracticedAt: r.last_practiced_at
-          ? new Date(r.last_practiced_at).getTime()
-          : 0,
+        lastPracticedAt: r.last_practiced_at ? new Date(r.last_practiced_at).getTime() : 0,
       });
     }
 
@@ -306,92 +304,81 @@ export const submitQbankAnswer = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => {
     const src = (input ?? {}) as Record<string, unknown>;
     const questionId = typeof src.questionId === "string" ? src.questionId : "";
-    const selectedIndex = Number.isInteger(src.selectedIndex)
-      ? (src.selectedIndex as number)
-      : -1;
+    const selectedIndex = Number.isInteger(src.selectedIndex) ? (src.selectedIndex as number) : -1;
     const timeSpentMs =
-      typeof src.timeSpentMs === "number" && src.timeSpentMs >= 0
-        ? Math.floor(src.timeSpentMs)
-        : 0;
+      typeof src.timeSpentMs === "number" && src.timeSpentMs >= 0 ? Math.floor(src.timeSpentMs) : 0;
     if (!questionId) throw new Error("questionId required");
     if (selectedIndex < 0) throw new Error("selectedIndex required");
     return { questionId, selectedIndex, timeSpentMs };
   })
-  .handler(
-    async ({
-      data,
-      context,
-    }): Promise<{ isCorrect: boolean; correctIndex: number }> => {
-      const { supabase, userId } = context;
+  .handler(async ({ data, context }): Promise<{ isCorrect: boolean; correctIndex: number }> => {
+    const { supabase, userId } = context;
 
-      // Fetch canonical question to score server-side (never trust client).
-      const { data: q, error: qErr } = await supabase
-        .from("qbank_questions")
-        .select("id, chapter_id, correct_index, options, status")
-        .eq("id", data.questionId)
+    // Fetch canonical question to score server-side (never trust client).
+    const { data: q, error: qErr } = await supabase
+      .from("qbank_questions")
+      .select("id, chapter_id, correct_index, options, status")
+      .eq("id", data.questionId)
+      .maybeSingle();
+    if (qErr) throw new Error(qErr.message);
+    if (!q) throw new Error("Question not found");
+    if (q.status !== "published") throw new Error("Question not available");
+
+    const options = normalizeOptions(q.options);
+    const correctIndex = Number.isInteger(q.correct_index)
+      ? Math.max(0, Math.min(options.length - 1, q.correct_index))
+      : 0;
+    const isCorrect = data.selectedIndex === correctIndex;
+
+    // Upsert attempt (one row per user+question — updates on repeat submit).
+    const { error: aErr } = await supabase.from("qbank_attempts").upsert(
+      {
+        user_id: userId,
+        question_id: data.questionId,
+        chapter_id: q.chapter_id,
+        selected_index: data.selectedIndex,
+        is_correct: isCorrect,
+        time_spent_ms: data.timeSpentMs,
+      },
+      { onConflict: "user_id,question_id" },
+    );
+    if (aErr) throw new Error(aErr.message);
+
+    // Wrong-answer bookkeeping — bump counter or resurrect a cleared row.
+    if (!isCorrect) {
+      const { data: existing, error: exErr } = await supabase
+        .from("wrong_answer_bookmarks")
+        .select("id, wrong_count, cleared_at")
+        .eq("user_id", userId)
+        .eq("source", "qbank")
+        .eq("question_id", data.questionId)
         .maybeSingle();
-      if (qErr) throw new Error(qErr.message);
-      if (!q) throw new Error("Question not found");
-      if (q.status !== "published") throw new Error("Question not available");
-
-      const options = normalizeOptions(q.options);
-      const correctIndex = Number.isInteger(q.correct_index)
-        ? Math.max(0, Math.min(options.length - 1, q.correct_index))
-        : 0;
-      const isCorrect = data.selectedIndex === correctIndex;
-
-      // Upsert attempt (one row per user+question — updates on repeat submit).
-      const { error: aErr } = await supabase.from("qbank_attempts").upsert(
-        {
-          user_id: userId,
-          question_id: data.questionId,
-          chapter_id: q.chapter_id,
-          selected_index: data.selectedIndex,
-          is_correct: isCorrect,
-          time_spent_ms: data.timeSpentMs,
-        },
-        { onConflict: "user_id,question_id" },
-      );
-      if (aErr) throw new Error(aErr.message);
-
-      // Wrong-answer bookkeeping — bump counter or resurrect a cleared row.
-      if (!isCorrect) {
-        const { data: existing, error: exErr } = await supabase
+      if (exErr) throw new Error(exErr.message);
+      const nowIso = new Date().toISOString();
+      if (existing) {
+        const { error: uErr } = await supabase
           .from("wrong_answer_bookmarks")
-          .select("id, wrong_count, cleared_at")
-          .eq("user_id", userId)
-          .eq("source", "qbank")
-          .eq("question_id", data.questionId)
-          .maybeSingle();
-        if (exErr) throw new Error(exErr.message);
-        const nowIso = new Date().toISOString();
-        if (existing) {
-          const { error: uErr } = await supabase
-            .from("wrong_answer_bookmarks")
-            .update({
-              wrong_count: (existing.wrong_count ?? 0) + 1,
-              last_wrong_at: nowIso,
-              cleared_at: null,
-            })
-            .eq("id", existing.id);
-          if (uErr) throw new Error(uErr.message);
-        } else {
-          const { error: iErr } = await supabase
-            .from("wrong_answer_bookmarks")
-            .insert({
-              user_id: userId,
-              source: "qbank",
-              question_id: data.questionId,
-              wrong_count: 1,
-              last_wrong_at: nowIso,
-            });
-          if (iErr) throw new Error(iErr.message);
-        }
+          .update({
+            wrong_count: (existing.wrong_count ?? 0) + 1,
+            last_wrong_at: nowIso,
+            cleared_at: null,
+          })
+          .eq("id", existing.id);
+        if (uErr) throw new Error(uErr.message);
+      } else {
+        const { error: iErr } = await supabase.from("wrong_answer_bookmarks").insert({
+          user_id: userId,
+          source: "qbank",
+          question_id: data.questionId,
+          wrong_count: 1,
+          last_wrong_at: nowIso,
+        });
+        if (iErr) throw new Error(iErr.message);
       }
+    }
 
-      return { isCorrect, correctIndex };
-    },
-  );
+    return { isCorrect, correctIndex };
+  });
 
 // ---------------------------------------------------------------------------
 // toggleQbankBookmark

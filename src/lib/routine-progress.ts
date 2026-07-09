@@ -14,10 +14,7 @@ import {
   type TrackerCompletion,
   type TrackerTaskStatus,
 } from "@/lib/routine-tracker.functions";
-import {
-  getRoutineTasksFromCache,
-  getTaskRoutineId,
-} from "@/lib/routine-tasks-cache";
+import { getRoutineTasksFromCache, getTaskRoutineId } from "@/lib/routine-tasks-cache";
 
 export type TaskStatus = TrackerTaskStatus;
 
@@ -138,19 +135,15 @@ export function useRoutineProgress() {
       await queryClient.cancelQueries({ queryKey: COMPLETIONS_KEY });
       const prev = queryClient.getQueryData<TrackerCompletion[]>(COMPLETIONS_KEY) ?? [];
       const routineId = getTaskRoutineId(input.taskId) ?? "";
-      const idx = prev.findIndex(
-        (c) => c.taskId === input.taskId && c.completedOn === input.date,
-      );
+      const idx = prev.findIndex((c) => c.taskId === input.taskId && c.completedOn === input.date);
       const optimistic: TrackerCompletion = {
         id: idx >= 0 ? prev[idx].id : `optimistic-${input.taskId}-${input.date}`,
         taskId: input.taskId,
         routineId: idx >= 0 && prev[idx].routineId ? prev[idx].routineId : routineId,
         completedOn: input.date,
         status: input.status,
-        studyHours:
-          input.studyHours ?? (idx >= 0 ? prev[idx].studyHours : 0),
-        completedAt:
-          input.status === "completed" ? new Date().toISOString() : null,
+        studyHours: input.studyHours ?? (idx >= 0 ? prev[idx].studyHours : 0),
+        completedAt: input.status === "completed" ? new Date().toISOString() : null,
         note: idx >= 0 ? prev[idx].note : null,
       };
       const next = idx >= 0 ? [...prev] : [...prev, optimistic];
@@ -184,27 +177,19 @@ export function useRoutineProgress() {
       const today = todayISO();
       const existingByRoutine = query.data ?? [];
       const routineTaskIds = Array.from(
-        new Set(
-          existingByRoutine
-            .filter((c) => c.routineId === routineId)
-            .map((c) => c.taskId),
-        ),
+        new Set(existingByRoutine.filter((c) => c.routineId === routineId).map((c) => c.taskId)),
       );
       // If we don't have completions for this routine yet, fall back to using
       // the task cache populated by useMyRoutines(). Import lazily to keep
       // this hook file self-contained on the SSR side.
       const cachedTaskIds =
-        routineTaskIds.length > 0
-          ? routineTaskIds
-          : getRoutineTaskIds(routineId);
+        routineTaskIds.length > 0 ? routineTaskIds : getRoutineTaskIds(routineId);
       if (!cachedTaskIds.length) return;
 
       const hours = typeof patch.hours === "number" ? patch.hours : undefined;
       const notes = typeof patch.notes === "string" ? patch.notes : undefined;
       const perTaskHours =
-        hours !== undefined
-          ? Math.round((hours / cachedTaskIds.length) * 100) / 100
-          : undefined;
+        hours !== undefined ? Math.round((hours / cachedTaskIds.length) * 100) / 100 : undefined;
 
       cachedTaskIds.forEach((taskId, i) => {
         const status: TaskStatus =

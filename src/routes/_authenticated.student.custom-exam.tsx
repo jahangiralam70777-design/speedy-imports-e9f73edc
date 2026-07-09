@@ -37,12 +37,15 @@ type ChapterRef = {
   count: number;
 };
 
-
 export const Route = createFileRoute("/_authenticated/student/custom-exam")({
   head: () => ({
     meta: [
       { title: "Custom Exam — CL Aspire Student" },
-      { name: "description", content: "Design your own timed exam. Pick level, subjects, question sources and chapters — we sample real questions from the admin banks." },
+      {
+        name: "description",
+        content:
+          "Design your own timed exam. Pick level, subjects, question sources and chapters — we sample real questions from the admin banks.",
+      },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -113,24 +116,16 @@ function CustomExamBuilder() {
   const subjectOptions = useMemo(() => {
     if (!levelName) return [] as string[];
     return Array.from(
-      new Set(
-        allChapterRefs
-          .filter((c) => c.levelName === levelName)
-          .map((c) => c.subjectName),
-      ),
+      new Set(allChapterRefs.filter((c) => c.levelName === levelName).map((c) => c.subjectName)),
     ).sort();
   }, [allChapterRefs, levelName]);
 
   const availableChapters = useMemo<ChapterRef[]>(() => {
-    if (!levelName || subjectNames.length === 0 || sources.length === 0)
-      return [];
+    if (!levelName || subjectNames.length === 0 || sources.length === 0) return [];
     const subjSet = new Set(subjectNames);
     const srcSet = new Set(sources);
     return allChapterRefs.filter(
-      (c) =>
-        c.levelName === levelName &&
-        subjSet.has(c.subjectName) &&
-        srcSet.has(c.src),
+      (c) => c.levelName === levelName && subjSet.has(c.subjectName) && srcSet.has(c.src),
     );
   }, [allChapterRefs, levelName, subjectNames, sources]);
 
@@ -138,9 +133,7 @@ function CustomExamBuilder() {
     const q = search.trim().toLowerCase();
     if (!q) return availableChapters;
     return availableChapters.filter(
-      (c) =>
-        c.chapterName.toLowerCase().includes(q) ||
-        c.subjectName.toLowerCase().includes(q),
+      (c) => c.chapterName.toLowerCase().includes(q) || c.subjectName.toLowerCase().includes(q),
     );
   }, [availableChapters, search]);
 
@@ -179,19 +172,10 @@ function CustomExamBuilder() {
   const step2Done = step1Done && subjectNames.length > 0;
   const step3Done = step2Done && sources.length > 0;
   const step4Done = step3Done && chapterKeys.size > 0;
-  const canGenerate =
-    step4Done && numQuestions > 0 && durationMin > 0 && totalAvailable > 0;
+  const canGenerate = step4Done && numQuestions > 0 && durationMin > 0 && totalAvailable > 0;
   const shortfall = step4Done && numQuestions > totalAvailable;
 
-  const currentStep = !step1Done
-    ? 1
-    : !step2Done
-      ? 2
-      : !step3Done
-        ? 3
-        : !step4Done
-          ? 4
-          : 5;
+  const currentStep = !step1Done ? 1 : !step2Done ? 2 : !step3Done ? 3 : !step4Done ? 4 : 5;
 
   // ---- Actions --------------------------------------------------------
   const reset = () => {
@@ -269,18 +253,17 @@ function CustomExamBuilder() {
     setError("");
     if (!canGenerate) return;
     if (shortfall) {
-      const ok = typeof window !== "undefined"
-        ? window.confirm(
-            `Only ${totalAvailable} question${totalAvailable === 1 ? "" : "s"} are available in the selected chapters, but you asked for ${numQuestions}.\n\nGenerate an exam with ${totalAvailable} question${totalAvailable === 1 ? "" : "s"} instead?`,
-          )
-        : false;
+      const ok =
+        typeof window !== "undefined"
+          ? window.confirm(
+              `Only ${totalAvailable} question${totalAvailable === 1 ? "" : "s"} are available in the selected chapters, but you asked for ${numQuestions}.\n\nGenerate an exam with ${totalAvailable} question${totalAvailable === 1 ? "" : "s"} instead?`,
+            )
+          : false;
       if (!ok) return;
     }
     const target = Math.min(numQuestions, totalAvailable);
     // Distinct chapter ids across selection (server samples per source).
-    const chapterIds = Array.from(
-      new Set(selectedChapters.map((c) => c.chapterId)),
-    );
+    const chapterIds = Array.from(new Set(selectedChapters.map((c) => c.chapterId)));
     generateMutation.mutate({
       title: examName.trim(),
       sources,
@@ -302,17 +285,13 @@ function CustomExamBuilder() {
   if (taxonomyError) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-6 text-center">
-        <div className="mb-2 text-sm font-semibold text-rose-500">
-          Couldn't load question banks
-        </div>
+        <div className="mb-2 text-sm font-semibold text-rose-500">Couldn't load question banks</div>
         <div className="text-xs text-muted-foreground">
           {taxonomyError instanceof Error ? taxonomyError.message : "Please try again."}
         </div>
       </div>
     );
   }
-
-
 
   // ---- Render ---------------------------------------------------------
   return (
@@ -493,9 +472,12 @@ function CustomExamBuilder() {
                                   {on && <Check className="h-3 w-3" strokeWidth={3} />}
                                 </span>
                                 <div className="min-w-0 flex-1">
-                                  <div className="truncate text-sm font-medium">{c.chapterName}</div>
+                                  <div className="truncate text-sm font-medium">
+                                    {c.chapterName}
+                                  </div>
                                   <div className="truncate text-[11px] text-muted-foreground">
-                                    {c.subjectName} · {c.src === "mcq" ? "MCQ Practice" : "Question Bank"}
+                                    {c.subjectName} ·{" "}
+                                    {c.src === "mcq" ? "MCQ Practice" : "Question Bank"}
                                   </div>
                                 </div>
                                 <span className="shrink-0 rounded-full border border-border/60 bg-card/60 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
@@ -530,11 +512,7 @@ function CustomExamBuilder() {
                   max={Math.max(1, totalAvailable)}
                   onChange={setNumQuestions}
                   disabled={!step4Done}
-                  hint={
-                    step4Done
-                      ? `Up to ${totalAvailable} available`
-                      : "Pick chapters first"
-                  }
+                  hint={step4Done ? `Up to ${totalAvailable} available` : "Pick chapters first"}
                 />
                 <NumberField
                   icon={<Clock className="h-3.5 w-3.5" />}
@@ -552,9 +530,7 @@ function CustomExamBuilder() {
                   value={examName}
                   onChange={setExamName}
                   placeholder={
-                    step2Done
-                      ? defaultExamName(levelName, subjectNames)
-                      : "My custom exam"
+                    step2Done ? defaultExamName(levelName, subjectNames) : "My custom exam"
                   }
                   disabled={!step4Done}
                 />
@@ -566,8 +542,8 @@ function CustomExamBuilder() {
               )}
               {step4Done && numQuestions > totalAvailable && (
                 <div className="mt-3 rounded-xl border border-amber-400/60 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-300">
-                  You asked for {numQuestions} questions but only {totalAvailable} are
-                  available in the selected chapters.
+                  You asked for {numQuestions} questions but only {totalAvailable} are available in
+                  the selected chapters.
                 </div>
               )}
             </StepCard>
@@ -598,11 +574,12 @@ function CustomExamBuilder() {
 
 function defaultExamName(level: string, subjects: string[]): string {
   if (!level) return "Custom Exam";
-  const subj = subjects.length === 0
-    ? ""
-    : subjects.length <= 2
-      ? ` — ${subjects.join(" & ")}`
-      : ` — ${subjects.length} subjects`;
+  const subj =
+    subjects.length === 0
+      ? ""
+      : subjects.length <= 2
+        ? ` — ${subjects.join(" & ")}`
+        : ` — ${subjects.length} subjects`;
   return `${level}${subj} Custom Exam`;
 }
 
@@ -616,12 +593,10 @@ function Header({ currentStep }: { currentStep: number }) {
           <Sparkles className="h-3 w-3" />
           Custom Exam Builder
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Design your exam
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Design your exam</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Choose level, subjects, question sources and chapters — we sample real
-          questions from the admin banks and time your session like a real exam.
+          Choose level, subjects, question sources and chapters — we sample real questions from the
+          admin banks and time your session like a real exam.
         </p>
       </div>
       <div className="inline-flex items-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 px-3 py-2 text-xs">
@@ -776,9 +751,7 @@ function SourceCard({
           {icon}
         </span>
         <span className="text-sm font-semibold">{label}</span>
-        {active && (
-          <Check className="ml-auto h-4 w-4 text-indigo-500" strokeWidth={3} />
-        )}
+        {active && <Check className="ml-auto h-4 w-4 text-indigo-500" strokeWidth={3} />}
       </div>
       <div className="text-[11px] text-muted-foreground">{hint}</div>
     </button>
@@ -886,13 +859,14 @@ function SummaryPanel({
   onGenerate: () => void;
   onReset: () => void;
 }) {
-  const srcLabel = sources.length === 0
-    ? "—"
-    : sources.length === 2
-      ? "MCQ + Question Bank"
-      : sources[0] === "mcq"
-        ? "MCQ Practice"
-        : "Question Bank";
+  const srcLabel =
+    sources.length === 0
+      ? "—"
+      : sources.length === 2
+        ? "MCQ + Question Bank"
+        : sources[0] === "mcq"
+          ? "MCQ Practice"
+          : "Question Bank";
   return (
     <div className="rounded-2xl border border-border/60 bg-card/70 p-5 shadow-xl shadow-indigo-500/[0.08] backdrop-blur-xl">
       <div className="mb-3 flex items-center gap-2">
@@ -906,19 +880,13 @@ function SummaryPanel({
       </div>
       <dl className="space-y-2 text-xs">
         <SummaryRow label="Level" value={levelName || "—"} />
-        <SummaryRow
-          label="Subjects"
-          value={subjectNames.length ? subjectNames.join(", ") : "—"}
-        />
+        <SummaryRow label="Subjects" value={subjectNames.length ? subjectNames.join(", ") : "—"} />
         <SummaryRow label="Source" value={srcLabel} />
         <SummaryRow
           label="Chapters"
           value={selectedChapterCount ? `${selectedChapterCount} selected` : "—"}
         />
-        <SummaryRow
-          label="Available Qs"
-          value={totalAvailable ? totalAvailable.toString() : "—"}
-        />
+        <SummaryRow label="Available Qs" value={totalAvailable ? totalAvailable.toString() : "—"} />
         <SummaryRow label="Exam length" value={`${numQuestions} questions`} />
         <SummaryRow label="Duration" value={`${durationMin} min`} />
       </dl>
@@ -950,12 +918,8 @@ function SummaryPanel({
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-3 rounded-lg border border-border/50 bg-background/40 px-2.5 py-1.5">
-      <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
-        {label}
-      </dt>
-      <dd className="max-w-[65%] truncate text-right text-xs font-semibold">
-        {value}
-      </dd>
+      <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</dt>
+      <dd className="max-w-[65%] truncate text-right text-xs font-semibold">{value}</dd>
     </div>
   );
 }

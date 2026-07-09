@@ -40,7 +40,10 @@ export const Route = createFileRoute("/_authenticated/student/mcq-practice")({
   head: () => ({
     meta: [
       { title: "MCQ Practice — Student Panel" },
-      { name: "description", content: "Practice chapter-wise MCQs across every level and subject." },
+      {
+        name: "description",
+        content: "Practice chapter-wise MCQs across every level and subject.",
+      },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -193,13 +196,13 @@ function McqPracticePage() {
 
   const levels: PracticeLevel[] = taxonomyQ.data?.levels ?? [];
   const activeLevel = useMemo(
-    () => (levelId ? levels.find((l) => l.id === levelId) ?? null : null),
+    () => (levelId ? (levels.find((l) => l.id === levelId) ?? null) : null),
     [levels, levelId],
   );
   const activeSubject = useMemo(
     () =>
       activeLevel && subjectId
-        ? activeLevel.subjects.find((s) => s.id === subjectId) ?? null
+        ? (activeLevel.subjects.find((s) => s.id === subjectId) ?? null)
         : null,
     [activeLevel, subjectId],
   );
@@ -212,7 +215,10 @@ function McqPracticePage() {
 
   const crumbs = [
     { label: "MCQ Practice", to: { search: {} } as const },
-    activeLevel && { label: activeLevel.name, to: { search: { levelId: activeLevel.id } } as const },
+    activeLevel && {
+      label: activeLevel.name,
+      to: { search: { levelId: activeLevel.id } } as const,
+    },
     activeSubject && {
       label: activeSubject.name,
       to: { search: { levelId: activeLevel!.id, subjectId: activeSubject.id } } as const,
@@ -569,9 +575,7 @@ function SubjectGrid({ level, query }: { level: PracticeLevel; query: string }) 
                 subject={sub}
                 rollup={rollupSubject(sub)}
                 gradient={grad(i + 1)}
-                onOpen={() =>
-                  navigate({ search: { levelId: level.id, subjectId: sub.id } })
-                }
+                onOpen={() => navigate({ search: { levelId: level.id, subjectId: sub.id } })}
               />
             ))}
           </AnimatePresence>
@@ -600,10 +604,7 @@ function ChapterGrid({
 
   return (
     <>
-      <BackLink
-        to={{ search: { levelId: level.id } }}
-        label={`Back to ${level.name}`}
-      />
+      <BackLink to={{ search: { levelId: level.id } }} label={`Back to ${level.name}`} />
       {subject.chapters.length === 0 ? (
         <EmptyState
           title="No chapters yet"
@@ -680,9 +681,7 @@ function LevelCard({
           )}
           <h3 className="truncate text-lg font-semibold tracking-tight">{level.name}</h3>
           {level.description && (
-            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-              {level.description}
-            </p>
+            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{level.description}</p>
           )}
         </div>
       </div>
@@ -693,10 +692,7 @@ function LevelCard({
         <MetricTile label="MCQs" value={rollup.totalMcqs} />
         <MetricTile label="Completed" value={rollup.completedMcqs} />
         <MetricTile label="Accuracy" value={`${rollup.avgAccuracy}%`} />
-        <MetricTile
-          label="Chapters ✓"
-          value={`${rollup.completedChapters}/${rollup.chapters}`}
-        />
+        <MetricTile label="Chapters ✓" value={`${rollup.completedChapters}/${rollup.chapters}`} />
       </div>
 
       <div className="relative mt-5 flex items-center justify-between text-xs">
@@ -723,10 +719,7 @@ function SubjectCard({
 }) {
   const value = pct(rollup.completedMcqs, rollup.totalMcqs);
   const remaining = Math.max(0, rollup.totalMcqs - rollup.completedMcqs);
-  const estMs = subject.chapters.reduce(
-    (acc, ch) => acc + estimateChapterTimeLeft(ch),
-    0,
-  );
+  const estMs = subject.chapters.reduce((acc, ch) => acc + estimateChapterTimeLeft(ch), 0);
   const motiv = motivationalMessage(value);
   return (
     <motion.button
@@ -753,9 +746,7 @@ function SubjectCard({
           )}
           <h3 className="truncate text-lg font-semibold tracking-tight">{subject.name}</h3>
           {subject.description && (
-            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-              {subject.description}
-            </p>
+            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{subject.description}</p>
           )}
         </div>
         <CircularProgress value={value} size={64} stroke={6}>
@@ -874,9 +865,7 @@ function ChapterCard({
           <span className="inline-flex items-center gap-1">
             <Clock className="h-3 w-3" />
             Last practice:{" "}
-            <span className="font-semibold text-foreground">
-              {formatRelativeTime(lastAt)}
-            </span>
+            <span className="font-semibold text-foreground">{formatRelativeTime(lastAt)}</span>
           </span>
           <span className="inline-flex items-center gap-1">
             Est. completion:{" "}
@@ -969,7 +958,9 @@ function MetricTile({
         : "text-foreground";
   return (
     <div className="rounded-xl border border-border/50 bg-background/40 px-2.5 py-2">
-      <div className={`flex items-center justify-center gap-1 text-sm font-semibold tabular-nums ${toneCls}`}>
+      <div
+        className={`flex items-center justify-center gap-1 text-sm font-semibold tabular-nums ${toneCls}`}
+      >
         {icon}
         {value}
       </div>
@@ -1024,21 +1015,13 @@ function ContinueCell({
         : "text-foreground";
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-        {label}
-      </div>
+      <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{label}</div>
       <div className={`mt-0.5 text-sm font-semibold tabular-nums ${valueCls}`}>{value}</div>
     </div>
   );
 }
 
-function BackLink({
-  to,
-  label,
-}: {
-  to: { search: Record<string, string> };
-  label: string;
-}) {
+function BackLink({ to, label }: { to: { search: Record<string, string> }; label: string }) {
   return (
     <Link
       to="/student/mcq-practice"

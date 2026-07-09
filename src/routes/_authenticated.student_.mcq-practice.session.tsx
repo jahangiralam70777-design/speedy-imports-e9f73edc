@@ -100,10 +100,7 @@ function SessionPage() {
   const fetchSession = useServerFn(getChapterSession);
   const restart = useServerFn(restartChapterMcqSession);
 
-  const queryKey = useMemo(
-    () => ["mcq-practice", "session", chapterId] as const,
-    [chapterId],
-  );
+  const queryKey = useMemo(() => ["mcq-practice", "session", chapterId] as const, [chapterId]);
 
   const sessionQ = useQuery({
     queryKey,
@@ -145,14 +142,8 @@ function SessionPage() {
     return (
       <NotFoundShell
         title="Couldn't load this chapter"
-        message={
-          sessionQ.error instanceof Error
-            ? sessionQ.error.message
-            : "Something went wrong."
-        }
-        onBack={() =>
-          navigate({ to: "/student/mcq-practice", search: { levelId, subjectId } })
-        }
+        message={sessionQ.error instanceof Error ? sessionQ.error.message : "Something went wrong."}
+        onBack={() => navigate({ to: "/student/mcq-practice", search: { levelId, subjectId } })}
       />
     );
   }
@@ -171,9 +162,7 @@ function SessionPage() {
       <NotFoundShell
         title="No published questions yet"
         message="This chapter has no published MCQs. Check back later."
-        onBack={() =>
-          navigate({ to: "/student/mcq-practice", search: { levelId, subjectId } })
-        }
+        onBack={() => navigate({ to: "/student/mcq-practice", search: { levelId, subjectId } })}
       />
     );
   }
@@ -263,10 +252,7 @@ function Session({
     return m;
   }, [attempts]);
 
-  const bookmarkedSet = useMemo(
-    () => new Set(bookmarkedQuestionIds),
-    [bookmarkedQuestionIds],
-  );
+  const bookmarkedSet = useMemo(() => new Set(bookmarkedQuestionIds), [bookmarkedQuestionIds]);
 
   // Cursor: pick up at first unanswered (server-provided) on first mount.
   const [cursor, setCursor] = useState<number>(() =>
@@ -322,7 +308,7 @@ function Session({
 
   const currentChosenKey = submitted
     ? currentAttempt
-      ? current.options[currentAttempt.selectedIndex]?.key ?? null
+      ? (current.options[currentAttempt.selectedIndex]?.key ?? null)
       : null
     : currentLocalChoice;
 
@@ -361,10 +347,7 @@ function Session({
   // -------- Mutations --------
   const submitMutation = useMutation({
     mutationFn: async (vars: { questionId: string; selectedIndex: number }) => {
-      const timeSpentMs = Math.max(
-        0,
-        Math.min(10 * 60_000, Date.now() - questionStartRef.current),
-      );
+      const timeSpentMs = Math.max(0, Math.min(10 * 60_000, Date.now() - questionStartRef.current));
       return submitFn({
         data: {
           questionId: vars.questionId,
@@ -507,9 +490,7 @@ function Session({
                 <span>Chapter progress</span>
                 <MotivationChip progressPct={runProgressPct} />
               </div>
-              <span className="font-semibold text-foreground tabular-nums">
-                {runProgressPct}%
-              </span>
+              <span className="font-semibold text-foreground tabular-nums">{runProgressPct}%</span>
             </div>
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted/70">
               <motion.div
@@ -608,9 +589,7 @@ function Session({
                       {showCorrect && (
                         <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
                       )}
-                      {showWrong && (
-                        <XCircle className="h-5 w-5 shrink-0 text-rose-500" />
-                      )}
+                      {showWrong && <XCircle className="h-5 w-5 shrink-0 text-rose-500" />}
                     </motion.button>
                   );
                 })}
@@ -630,8 +609,7 @@ function Session({
                       outcome={submittedOutcome as Outcome}
                       correctKey={current.answerKey}
                       correctText={
-                        current.options.find((o) => o.key === current.answerKey)?.text ??
-                        ""
+                        current.options.find((o) => o.key === current.answerKey)?.text ?? ""
                       }
                     />
                     {current.explanation && (
@@ -687,8 +665,7 @@ function Session({
               {questions.map((_, i) => {
                 const persisted = persistedByIndex[i];
                 const localSkipped = skippedIdx.has(i);
-                const state: OutcomeState | null =
-                  persisted ?? (localSkipped ? "skipped" : null);
+                const state: OutcomeState | null = persisted ?? (localSkipped ? "skipped" : null);
                 const isCurrent = i === cursor;
                 return (
                   <button
@@ -696,9 +673,7 @@ function Session({
                     type="button"
                     onClick={() => setCursor(i)}
                     className={`relative flex h-8 items-center justify-center rounded-md text-[11px] font-semibold tabular-nums transition ${
-                      isCurrent
-                        ? "ring-2 ring-indigo-400 ring-offset-2 ring-offset-background"
-                        : ""
+                      isCurrent ? "ring-2 ring-indigo-400 ring-offset-2 ring-offset-background" : ""
                     } ${
                       state === "correct"
                         ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300"
@@ -837,7 +812,9 @@ function ResultBanner({
         <div className="min-w-0 flex-1">
           <div
             className={`text-lg font-semibold tracking-tight ${
-              isCorrect ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"
+              isCorrect
+                ? "text-emerald-600 dark:text-emerald-300"
+                : "text-rose-600 dark:text-rose-300"
             }`}
           >
             {isCorrect ? "Correct!" : "Not quite"}
@@ -892,7 +869,12 @@ function BottomBar({
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-3 pb-3 sm:px-6 sm:pb-5">
       <div className="pointer-events-auto mx-auto flex w-full max-w-3xl items-center gap-1.5 rounded-2xl border border-border/60 bg-background/80 p-1.5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:gap-2 sm:p-2">
-        <BarBtn onClick={onPrev} disabled={atFirst} label="Previous" icon={<ChevronLeft className="h-4 w-4" />} />
+        <BarBtn
+          onClick={onPrev}
+          disabled={atFirst}
+          label="Previous"
+          icon={<ChevronLeft className="h-4 w-4" />}
+        />
         <BarBtn
           onClick={onBookmark}
           label={isBookmarked ? "Saved" : "Bookmark"}
@@ -971,7 +953,13 @@ function BarBtn({
       ? "text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-300"
       : "text-muted-foreground hover:bg-accent hover:text-foreground";
   return (
-    <button type="button" onClick={onClick} disabled={disabled} className={`${base} ${state}`} aria-label={label}>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`${base} ${state}`}
+      aria-label={label}
+    >
       {!reverse && icon}
       <span className="hidden sm:inline">{label}</span>
       {reverse && icon}
@@ -1145,7 +1133,9 @@ function StatsCard({
         <StatCell label="Skipped" value={stats.skipped} tone="amber" />
       </div>
       <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-        <span>Answered {answered} of {total}</span>
+        <span>
+          Answered {answered} of {total}
+        </span>
         <span className="tabular-nums">
           <span className="opacity-70">Session</span>{" "}
           <span className="font-semibold text-foreground">{formatDuration(elapsedMs)}</span>
@@ -1239,9 +1229,7 @@ function MetricsStrip({
           ) : (
             <Bookmark className="h-3.5 w-3.5" />
           )}
-          <span className="hidden sm:inline">
-            {isBookmarked ? "Bookmarked" : "Bookmark"}
-          </span>
+          <span className="hidden sm:inline">{isBookmarked ? "Bookmarked" : "Bookmark"}</span>
         </button>
         <button
           type="button"
@@ -1253,9 +1241,7 @@ function MetricsStrip({
           }`}
         >
           <Flag className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">
-            {isReported ? "Reported" : "Report"}
-          </span>
+          <span className="hidden sm:inline">{isReported ? "Reported" : "Report"}</span>
         </button>
       </div>
     </div>
@@ -1424,8 +1410,7 @@ function MobileProgressSheet({
                 {questions.map((_, i) => {
                   const persisted = persistedByIndex[i];
                   const localSkipped = skippedIdx.has(i);
-                  const state: OutcomeState | null =
-                    persisted ?? (localSkipped ? "skipped" : null);
+                  const state: OutcomeState | null = persisted ?? (localSkipped ? "skipped" : null);
                   const isCurrent = i === cursor;
                   return (
                     <button
@@ -1484,13 +1469,7 @@ function StatCell({
   );
 }
 
-function ModalShell({
-  onClose,
-  children,
-}: {
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
+function ModalShell({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -1593,15 +1572,11 @@ function ReportModal({
         <div className="py-6 text-center">
           <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
           <h3 className="mt-3 text-lg font-semibold">Thanks — report sent</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Our team will review this question.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Our team will review this question.</p>
         </div>
       ) : (
         <>
-          <h3 className="text-lg font-semibold tracking-tight">
-            Report Q{questionNumber}
-          </h3>
+          <h3 className="text-lg font-semibold tracking-tight">Report Q{questionNumber}</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Let us know what's off — your feedback improves the bank.
           </p>

@@ -36,10 +36,7 @@ export const saveAdminSettings = createServerFn({ method: "POST" })
 
     const { error } = await context.supabase
       .from("admin_settings")
-      .upsert(
-        { singleton: true, settings: data.settings as never },
-        { onConflict: "singleton" },
-      );
+      .upsert({ singleton: true, settings: data.settings as never }, { onConflict: "singleton" });
     if (error) throw new Error(error.message);
     return { ok: true, savedAt: new Date().toISOString() };
   });
@@ -85,8 +82,7 @@ export const getSystemStats = createServerFn({ method: "GET" })
     return {
       counts,
       settingsUpdatedAt: (settingsRow?.updated_at as string | undefined) ?? null,
-      environment:
-        process.env.NODE_ENV === "production" ? "Production" : "Preview",
+      environment: process.env.NODE_ENV === "production" ? "Production" : "Preview",
       appVersion: "CL Aspire · 1.5.0",
       runtime: "TanStack Start · React 19",
       generatedAt: new Date().toISOString(),

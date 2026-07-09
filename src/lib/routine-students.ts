@@ -59,14 +59,56 @@ function makeRng(seedStr: string) {
 }
 
 const FIRST_NAMES = [
-  "Aarav","Ananya","Arjun","Diya","Ishaan","Kavya","Krish","Meera",
-  "Neel","Nisha","Om","Pari","Rohan","Saanvi","Shaurya","Tara",
-  "Vihaan","Zara","Aditya","Riya","Kabir","Anika","Dhruv","Ira",
-  "Yash","Aisha","Reyansh","Myra","Vivaan","Kiara","Advait","Navya",
+  "Aarav",
+  "Ananya",
+  "Arjun",
+  "Diya",
+  "Ishaan",
+  "Kavya",
+  "Krish",
+  "Meera",
+  "Neel",
+  "Nisha",
+  "Om",
+  "Pari",
+  "Rohan",
+  "Saanvi",
+  "Shaurya",
+  "Tara",
+  "Vihaan",
+  "Zara",
+  "Aditya",
+  "Riya",
+  "Kabir",
+  "Anika",
+  "Dhruv",
+  "Ira",
+  "Yash",
+  "Aisha",
+  "Reyansh",
+  "Myra",
+  "Vivaan",
+  "Kiara",
+  "Advait",
+  "Navya",
 ];
 const LAST_NAMES = [
-  "Sharma","Iyer","Menon","Patel","Nair","Rao","Khan","Shah",
-  "Singh","Reddy","Ghosh","Bose","Kapoor","Verma","Joshi","Bhat",
+  "Sharma",
+  "Iyer",
+  "Menon",
+  "Patel",
+  "Nair",
+  "Rao",
+  "Khan",
+  "Shah",
+  "Singh",
+  "Reddy",
+  "Ghosh",
+  "Bose",
+  "Kapoor",
+  "Verma",
+  "Joshi",
+  "Bhat",
 ];
 
 export function parseLevel(audience: string) {
@@ -101,12 +143,18 @@ export function synthesizeStudents(routines: TrackedRoutine[]): Student[] {
       if (r.status === "completed") progress = 100;
 
       const missedDays = Math.max(0, Math.round((100 - progress) / 18 + (rng() - 0.5) * 2));
-      const streak = progress >= 90 ? Math.round(18 + rng() * 12) : progress >= 60 ? Math.round(6 + rng() * 10) : Math.round(rng() * 4);
-      const todayHours = Math.round((rng() * r.dailyHours) * 10) / 10;
+      const streak =
+        progress >= 90
+          ? Math.round(18 + rng() * 12)
+          : progress >= 60
+            ? Math.round(6 + rng() * 10)
+            : Math.round(rng() * 4);
+      const todayHours = Math.round(rng() * r.dailyHours * 10) / 10;
 
       let status: StudentStatus;
       if (progress >= 100) status = "completed";
-      else if (missedDays >= 5 || todayHours === 0) status = missedDays >= 8 ? "inactive" : "behind";
+      else if (missedDays >= 5 || todayHours === 0)
+        status = missedDays >= 8 ? "inactive" : "behind";
       else if (progress >= r.completion - 5) status = "on-track";
       else status = "behind";
 
@@ -146,7 +194,9 @@ export function synthesizeStudents(routines: TrackedRoutine[]): Student[] {
 
       out.push({
         id: `${r.id}_s${i}`,
-        name, initials, level,
+        name,
+        initials,
+        level,
         routineId: r.id,
         routineTitle: r.title,
         subjects: r.tags,
@@ -158,7 +208,9 @@ export function synthesizeStudents(routines: TrackedRoutine[]): Student[] {
         lastActivity: formatRelative(hoursAgo),
         lastActivityAt: lastAt,
         status,
-        daily, weekly, monthly,
+        daily,
+        weekly,
+        monthly,
         mcqsCompleted: Math.round((progress / 100) * mcqsTotal),
         mcqsTotal,
         quizCompleted: Math.round((progress / 100) * quizTotal),

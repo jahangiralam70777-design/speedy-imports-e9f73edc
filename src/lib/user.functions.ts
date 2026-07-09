@@ -70,8 +70,7 @@ async function assertAdmin(context: Ctx) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapRow(r: any): AdminUserRow {
-  const banned =
-    r.banned_until && new Date(r.banned_until).getTime() > Date.now();
+  const banned = r.banned_until && new Date(r.banned_until).getTime() > Date.now();
   return {
     id: r.id,
     email: r.email ?? "",
@@ -133,12 +132,9 @@ function validateList(input: unknown): ListUsersInput {
     page,
     pageSize,
     search: typeof src.search === "string" && src.search.trim() ? src.search.trim() : null,
-    role:
-      src.role === "admin" || src.role === "student" ? (src.role as UserRole) : null,
+    role: src.role === "admin" || src.role === "student" ? (src.role as UserRole) : null,
     status:
-      src.status === "active" || src.status === "disabled"
-        ? (src.status as UserStatus)
-        : null,
+      src.status === "active" || src.status === "disabled" ? (src.status as UserStatus) : null,
     verified:
       src.verified === "verified" || src.verified === "unverified"
         ? (src.verified as "verified" | "unverified")
@@ -161,20 +157,14 @@ export const listUsers = createServerFn({ method: "POST" })
       p_status: data.status ?? undefined,
       p_verified: data.verified ?? undefined,
       p_from: data.from ?? undefined,
-      p_to: data.to
-        ? new Date(new Date(data.to).getTime() + 86_399_000).toISOString()
-        : undefined,
+      p_to: data.to ? new Date(new Date(data.to).getTime() + 86_399_000).toISOString() : undefined,
       p_sort: data.sort,
       p_limit: data.pageSize,
       p_offset: offset,
     };
-    const { data: rows, error } = await context.supabase.rpc(
-      "admin_list_users",
-      params,
-    );
+    const { data: rows, error } = await context.supabase.rpc("admin_list_users", params);
     if (error) throw new Error(error.message);
-    const total =
-      rows && rows.length > 0 ? Number(rows[0].total_count ?? 0) : 0;
+    const total = rows && rows.length > 0 ? Number(rows[0].total_count ?? 0) : 0;
     return {
       rows: (rows ?? []).map(mapRow),
       total,
@@ -238,14 +228,10 @@ export const updateUserProfile = createServerFn({ method: "POST" })
     const src = (input ?? {}) as Record<string, unknown>;
     const userId = typeof src.userId === "string" ? src.userId : "";
     if (!userId) throw new Error("userId required");
-    const fullName =
-      typeof src.fullName === "string" ? src.fullName.trim().slice(0, 200) : null;
-    const phone =
-      typeof src.phone === "string" ? src.phone.trim().slice(0, 40) : null;
+    const fullName = typeof src.fullName === "string" ? src.fullName.trim().slice(0, 200) : null;
+    const phone = typeof src.phone === "string" ? src.phone.trim().slice(0, 40) : null;
     const institution =
-      typeof src.institution === "string"
-        ? src.institution.trim().slice(0, 200)
-        : null;
+      typeof src.institution === "string" ? src.institution.trim().slice(0, 200) : null;
     return { userId, fullName, phone, institution };
   })
   .handler(async ({ data, context }) => {
@@ -255,10 +241,12 @@ export const updateUserProfile = createServerFn({ method: "POST" })
     if (data.phone !== null) patch.phone = data.phone;
     if (data.institution !== null) patch.institution = data.institution;
     if (Object.keys(patch).length === 0) return { ok: true as const };
-    const { error } = await (context.supabase.from("profiles") as {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      update: (v: Record<string, unknown>) => any;
-    })
+    const { error } = await (
+      context.supabase.from("profiles") as {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        update: (v: Record<string, unknown>) => any;
+      }
+    )
       .update(patch)
       .eq("id", data.userId);
     if (error) throw new Error(error.message);
@@ -283,14 +271,9 @@ export const changeUserRole = createServerFn({ method: "POST" })
     if (data.userId === context.userId && data.role !== "admin") {
       throw new Error("You cannot demote yourself.");
     }
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Wipe then insert the desired role.
-    const del = await supabaseAdmin
-      .from("user_roles")
-      .delete()
-      .eq("user_id", data.userId);
+    const del = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId);
     if (del.error) throw new Error(del.error.message);
     const ins = await supabaseAdmin
       .from("user_roles")
@@ -324,9 +307,7 @@ export const setUsersBanned = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     if (data.banned) await ensureNotSelf(data.userIds, context.userId);
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Supabase admin API takes ban_duration as a Go-style duration string.
     // "876000h" ≈ 100 years disables; "none" removes any ban.
     const ban_duration = data.banned ? "876000h" : "none";
@@ -355,9 +336,7 @@ export const forceLogout = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.signOut(data.userId, "global");
     if (error) throw new Error(error.message);
     return { ok: true as const };
@@ -372,16 +351,13 @@ export const sendPasswordReset = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => {
     const src = (input ?? {}) as Record<string, unknown>;
     const email = typeof src.email === "string" ? src.email.trim() : "";
-    const redirectTo =
-      typeof src.redirectTo === "string" ? src.redirectTo : undefined;
+    const redirectTo = typeof src.redirectTo === "string" ? src.redirectTo : undefined;
     if (!email) throw new Error("email required");
     return { email, redirectTo };
   })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.resetPasswordForEmail(data.email, {
       redirectTo: data.redirectTo,
     });
@@ -407,9 +383,7 @@ export const deleteUsers = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     await ensureNotSelf(data.userIds, context.userId);
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Cascade-clean rows that reference the user across the app before removing
     // the auth record. Tables not in this list either cascade automatically via

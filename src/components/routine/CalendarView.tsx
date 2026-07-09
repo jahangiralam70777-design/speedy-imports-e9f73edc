@@ -116,14 +116,14 @@ export function CalendarView({ routines }: { routines: CalendarRoutine[] }) {
   const rescheduleTo = (id: string, targetDate: string, targetStartMin?: number) => {
     setBlocks((prev) =>
       prev.map((b) =>
-        b.id === id
-          ? { ...b, date: targetDate, startMin: targetStartMin ?? b.startMin }
-          : b,
+        b.id === id ? { ...b, date: targetDate, startMin: targetStartMin ?? b.startMin } : b,
       ),
     );
     const b = blocks.find((x) => x.id === id);
     if (b) {
-      setToast(`Rescheduled "${b.title}" → ${targetDate}${targetStartMin != null ? ` · ${minToLabel(targetStartMin)}` : ""}`);
+      setToast(
+        `Rescheduled "${b.title}" → ${targetDate}${targetStartMin != null ? ` · ${minToLabel(targetStartMin)}` : ""}`,
+      );
       setTimeout(() => setToast(null), 2200);
     }
   };
@@ -139,7 +139,12 @@ export function CalendarView({ routines }: { routines: CalendarRoutine[] }) {
   };
 
   const label = useMemo(() => {
-    if (view === "day") return cursor.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    if (view === "day")
+      return cursor.toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      });
     if (view === "week" || view === "timeline") {
       const s = startOfWeek(cursor);
       const e = addDays(s, 6);
@@ -155,7 +160,10 @@ export function CalendarView({ routines }: { routines: CalendarRoutine[] }) {
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/60 p-6 backdrop-blur-2xl sm:p-8"
     >
-      <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-gradient-to-br from-accent/20 via-primary/15 to-transparent blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-gradient-to-br from-accent/20 via-primary/15 to-transparent blur-3xl"
+      />
 
       {/* Header */}
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -168,13 +176,18 @@ export function CalendarView({ routines }: { routines: CalendarRoutine[] }) {
             Routine Calendar
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Every published routine, plotted across time. Drag blocks between days or hours to reschedule instantly.
+            Every published routine, plotted across time. Drag blocks between days or hours to
+            reschedule instantly.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div role="tablist" aria-label="Calendar view mode" className="inline-flex items-center gap-1 rounded-2xl border border-border/70 bg-card/60 p-1 shadow-sm backdrop-blur-md">
-            {(["day","week","month","timeline"] as ViewMode[]).map((v) => (
+          <div
+            role="tablist"
+            aria-label="Calendar view mode"
+            className="inline-flex items-center gap-1 rounded-2xl border border-border/70 bg-card/60 p-1 shadow-sm backdrop-blur-md"
+          >
+            {(["day", "week", "month", "timeline"] as ViewMode[]).map((v) => (
               <button
                 key={v}
                 type="button"
@@ -183,7 +196,9 @@ export function CalendarView({ routines }: { routines: CalendarRoutine[] }) {
                 aria-label={`${v} view`}
                 onClick={() => setView(v)}
                 className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold capitalize transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 ${
-                  view === v ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+                  view === v
+                    ? "bg-primary text-primary-foreground shadow"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {v === "day" && <Clock className="h-3.5 w-3.5" aria-hidden />}
@@ -196,13 +211,27 @@ export function CalendarView({ routines }: { routines: CalendarRoutine[] }) {
           </div>
 
           <div className="inline-flex items-center gap-1 rounded-2xl border border-border/70 bg-card/60 p-1 shadow-sm backdrop-blur-md">
-            <button type="button" onClick={() => nav(-1)} aria-label="Previous period" className="grid h-9 w-9 place-items-center rounded-xl text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60">
+            <button
+              type="button"
+              onClick={() => nav(-1)}
+              aria-label="Previous period"
+              className="grid h-9 w-9 place-items-center rounded-xl text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+            >
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </button>
-            <button type="button" onClick={() => setCursor(startOfDay(new Date()))} className="rounded-xl px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60">
+            <button
+              type="button"
+              onClick={() => setCursor(startOfDay(new Date()))}
+              className="rounded-xl px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+            >
               Today
             </button>
-            <button type="button" onClick={() => nav(1)} aria-label="Next period" className="grid h-9 w-9 place-items-center rounded-xl text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60">
+            <button
+              type="button"
+              onClick={() => nav(1)}
+              aria-label="Next period"
+              className="grid h-9 w-9 place-items-center rounded-xl text-muted-foreground transition hover:bg-secondary/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+            >
               <ChevronRight className="h-4 w-4" aria-hidden />
             </button>
           </div>
@@ -214,10 +243,51 @@ export function CalendarView({ routines }: { routines: CalendarRoutine[] }) {
       {/* Body */}
       <div className="relative mt-6 -mx-1 overflow-x-auto pb-1">
         <div className="min-w-[720px] px-1">
-          {view === "day" && <DayGrid cursor={cursor} blocks={blocks} dragId={dragId} setDragId={setDragId} hoverTarget={hoverTarget} setHoverTarget={setHoverTarget} onReschedule={rescheduleTo} />}
-          {view === "week" && <WeekGrid cursor={cursor} blocks={blocks} dragId={dragId} setDragId={setDragId} hoverTarget={hoverTarget} setHoverTarget={setHoverTarget} onReschedule={rescheduleTo} />}
-          {view === "month" && <MonthGrid cursor={cursor} blocks={blocks} dragId={dragId} setDragId={setDragId} hoverTarget={hoverTarget} setHoverTarget={setHoverTarget} onReschedule={rescheduleTo} />}
-          {view === "timeline" && <TimelineGrid routines={routines} cursor={cursor} blocks={blocks} dragId={dragId} setDragId={setDragId} hoverTarget={hoverTarget} setHoverTarget={setHoverTarget} onReschedule={rescheduleTo} />}
+          {view === "day" && (
+            <DayGrid
+              cursor={cursor}
+              blocks={blocks}
+              dragId={dragId}
+              setDragId={setDragId}
+              hoverTarget={hoverTarget}
+              setHoverTarget={setHoverTarget}
+              onReschedule={rescheduleTo}
+            />
+          )}
+          {view === "week" && (
+            <WeekGrid
+              cursor={cursor}
+              blocks={blocks}
+              dragId={dragId}
+              setDragId={setDragId}
+              hoverTarget={hoverTarget}
+              setHoverTarget={setHoverTarget}
+              onReschedule={rescheduleTo}
+            />
+          )}
+          {view === "month" && (
+            <MonthGrid
+              cursor={cursor}
+              blocks={blocks}
+              dragId={dragId}
+              setDragId={setDragId}
+              hoverTarget={hoverTarget}
+              setHoverTarget={setHoverTarget}
+              onReschedule={rescheduleTo}
+            />
+          )}
+          {view === "timeline" && (
+            <TimelineGrid
+              routines={routines}
+              cursor={cursor}
+              blocks={blocks}
+              dragId={dragId}
+              setDragId={setDragId}
+              hoverTarget={hoverTarget}
+              setHoverTarget={setHoverTarget}
+              onReschedule={rescheduleTo}
+            />
+          )}
         </div>
       </div>
 
@@ -239,7 +309,9 @@ export function CalendarView({ routines }: { routines: CalendarRoutine[] }) {
 
 /* Tiny helper: re-run an effect only when a signature string changes */
 function useMemoResync(fn: () => void, sig: string) {
-  useMemo(() => { fn(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [sig]);
+  useMemo(() => {
+    fn(); /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [sig]);
 }
 
 /* ------------------------------------------------------------------ */
@@ -257,7 +329,10 @@ type DnDProps = {
 };
 
 function BlockChip({
-  block, compact, onDragStart, onDragEnd,
+  block,
+  compact,
+  onDragStart,
+  onDragEnd,
 }: {
   block: ScheduledBlock;
   compact?: boolean;
@@ -286,7 +361,9 @@ function BlockChip({
           {minToLabel(block.startMin)} · {block.durationMin}m
         </span>
       </div>
-      <div className={`truncate font-semibold text-foreground ${compact ? "text-[11px]" : "text-xs mt-0.5"}`}>
+      <div
+        className={`truncate font-semibold text-foreground ${compact ? "text-[11px]" : "text-xs mt-0.5"}`}
+      >
         {block.title}
       </div>
       {!compact && (
@@ -307,7 +384,14 @@ function BlockChip({
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 6); // 06:00–21:00
 
-function DayGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onReschedule }: DnDProps) {
+function DayGrid({
+  cursor,
+  blocks,
+  setDragId,
+  hoverTarget,
+  setHoverTarget,
+  onReschedule,
+}: DnDProps) {
   const key = dayKey(cursor);
   const dayBlocks = blocks.filter((b) => b.date === key);
 
@@ -316,7 +400,10 @@ function DayGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onRes
       <div className="grid grid-cols-[64px_1fr]">
         <div className="border-r border-border/60">
           {HOURS.map((h) => (
-            <div key={h} className="flex h-20 items-start justify-end px-2 pt-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <div
+              key={h}
+              className="flex h-20 items-start justify-end px-2 pt-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
+            >
               {String(h).padStart(2, "0")}:00
             </div>
           ))}
@@ -327,7 +414,10 @@ function DayGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onRes
             return (
               <div
                 key={h}
-                onDragOver={(e) => { e.preventDefault(); setHoverTarget(slot); }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setHoverTarget(slot);
+                }}
                 onDragLeave={() => setHoverTarget(null)}
                 onDrop={(e) => {
                   const id = e.dataTransfer.getData("text/plain");
@@ -344,7 +434,11 @@ function DayGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onRes
             const height = Math.max(40, (b.durationMin / 60) * 80 - 4);
             return (
               <div key={b.id} className="absolute left-2 right-2" style={{ top, height }}>
-                <BlockChip block={b} onDragStart={() => setDragId(b.id)} onDragEnd={() => setDragId(null)} />
+                <BlockChip
+                  block={b}
+                  onDragStart={() => setDragId(b.id)}
+                  onDragEnd={() => setDragId(null)}
+                />
               </div>
             );
           })}
@@ -358,7 +452,14 @@ function DayGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onRes
 /* Week view                                                           */
 /* ------------------------------------------------------------------ */
 
-function WeekGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onReschedule }: DnDProps) {
+function WeekGrid({
+  cursor,
+  blocks,
+  setDragId,
+  hoverTarget,
+  setHoverTarget,
+  onReschedule,
+}: DnDProps) {
   const start = startOfWeek(cursor);
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
 
@@ -370,7 +471,9 @@ function WeekGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onRe
             <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               {d.toLocaleDateString(undefined, { weekday: "short" })}
             </div>
-            <div className={`mt-0.5 text-sm font-semibold ${dayKey(d) === dayKey(new Date()) ? "text-primary" : "text-foreground"}`}>
+            <div
+              className={`mt-0.5 text-sm font-semibold ${dayKey(d) === dayKey(new Date()) ? "text-primary" : "text-foreground"}`}
+            >
               {d.getDate()}
             </div>
           </div>
@@ -379,11 +482,16 @@ function WeekGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onRe
       <div className="grid min-h-[420px] grid-cols-7">
         {days.map((d) => {
           const key = dayKey(d);
-          const items = blocks.filter((b) => b.date === key).sort((a, b) => a.startMin - b.startMin);
+          const items = blocks
+            .filter((b) => b.date === key)
+            .sort((a, b) => a.startMin - b.startMin);
           return (
             <div
               key={key}
-              onDragOver={(e) => { e.preventDefault(); setHoverTarget(key); }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setHoverTarget(key);
+              }}
               onDragLeave={() => setHoverTarget(null)}
               onDrop={(e) => {
                 const id = e.dataTransfer.getData("text/plain");
@@ -399,7 +507,12 @@ function WeekGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onRe
                 </div>
               )}
               {items.map((b) => (
-                <BlockChip key={b.id} block={b} onDragStart={() => setDragId(b.id)} onDragEnd={() => setDragId(null)} />
+                <BlockChip
+                  key={b.id}
+                  block={b}
+                  onDragStart={() => setDragId(b.id)}
+                  onDragEnd={() => setDragId(null)}
+                />
               ))}
             </div>
           );
@@ -413,7 +526,14 @@ function WeekGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onRe
 /* Month view                                                          */
 /* ------------------------------------------------------------------ */
 
-function MonthGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onReschedule }: DnDProps) {
+function MonthGrid({
+  cursor,
+  blocks,
+  setDragId,
+  hoverTarget,
+  setHoverTarget,
+  onReschedule,
+}: DnDProps) {
   const first = startOfMonth(cursor);
   const gridStart = startOfWeek(first);
   const cells = Array.from({ length: 42 }, (_, i) => addDays(gridStart, i));
@@ -422,20 +542,30 @@ function MonthGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onR
   return (
     <div className="overflow-hidden rounded-2xl border border-border/70 bg-background/40 backdrop-blur">
       <div className="grid grid-cols-7 border-b border-border/60 bg-card/50 text-center">
-        {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
-          <div key={d} className="py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">{d}</div>
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+          <div
+            key={d}
+            className="py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground"
+          >
+            {d}
+          </div>
         ))}
       </div>
       <div className="grid grid-cols-7">
         {cells.map((d) => {
           const key = dayKey(d);
-          const items = blocks.filter((b) => b.date === key).sort((a, b) => a.startMin - b.startMin);
+          const items = blocks
+            .filter((b) => b.date === key)
+            .sort((a, b) => a.startMin - b.startMin);
           const inMonth = d.getMonth() === monthIdx;
           const isToday = key === dayKey(new Date());
           return (
             <div
               key={key}
-              onDragOver={(e) => { e.preventDefault(); setHoverTarget(key); }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setHoverTarget(key);
+              }}
               onDragLeave={() => setHoverTarget(null)}
               onDrop={(e) => {
                 const id = e.dataTransfer.getData("text/plain");
@@ -447,14 +577,24 @@ function MonthGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onR
                 inMonth ? "bg-transparent" : "bg-secondary/20"
               } ${hoverTarget === key ? "bg-primary/5" : ""}`}
             >
-              <div className={`text-right text-[11px] font-semibold ${isToday ? "text-primary" : inMonth ? "text-foreground" : "text-muted-foreground/50"}`}>
+              <div
+                className={`text-right text-[11px] font-semibold ${isToday ? "text-primary" : inMonth ? "text-foreground" : "text-muted-foreground/50"}`}
+              >
                 {d.getDate()}
               </div>
               {items.slice(0, 3).map((b) => (
-                <BlockChip key={b.id} block={b} compact onDragStart={() => setDragId(b.id)} onDragEnd={() => setDragId(null)} />
+                <BlockChip
+                  key={b.id}
+                  block={b}
+                  compact
+                  onDragStart={() => setDragId(b.id)}
+                  onDragEnd={() => setDragId(null)}
+                />
               ))}
               {items.length > 3 && (
-                <div className="text-[10px] font-medium text-muted-foreground">+{items.length - 3} more</div>
+                <div className="text-[10px] font-medium text-muted-foreground">
+                  +{items.length - 3} more
+                </div>
               )}
             </div>
           );
@@ -469,7 +609,13 @@ function MonthGrid({ cursor, blocks, setDragId, hoverTarget, setHoverTarget, onR
 /* ------------------------------------------------------------------ */
 
 function TimelineGrid({
-  routines, cursor, blocks, setDragId, hoverTarget, setHoverTarget, onReschedule,
+  routines,
+  cursor,
+  blocks,
+  setDragId,
+  hoverTarget,
+  setHoverTarget,
+  onReschedule,
 }: DnDProps & { routines: CalendarRoutine[] }) {
   const start = startOfWeek(cursor);
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
@@ -483,7 +629,10 @@ function TimelineGrid({
         </div>
         <div className="grid grid-cols-7 bg-card/50">
           {days.map((d) => (
-            <div key={d.toISOString()} className="border-l border-border/60 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <div
+              key={d.toISOString()}
+              className="border-l border-border/60 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+            >
               {d.toLocaleDateString(undefined, { weekday: "short" })} {d.getDate()}
             </div>
           ))}
@@ -496,7 +645,9 @@ function TimelineGrid({
             <span className="h-2 w-2 rounded-full" style={{ background: r.accent }} />
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-foreground">{r.title}</div>
-              <div className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">{r.audience}</div>
+              <div className="truncate text-[10px] uppercase tracking-widest text-muted-foreground">
+                {r.audience}
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-7">
@@ -506,7 +657,10 @@ function TimelineGrid({
               return (
                 <div
                   key={key}
-                  onDragOver={(e) => { e.preventDefault(); setHoverTarget(key); }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setHoverTarget(key);
+                  }}
                   onDragLeave={() => setHoverTarget(null)}
                   onDrop={(e) => {
                     const id = e.dataTransfer.getData("text/plain");
@@ -517,7 +671,13 @@ function TimelineGrid({
                   className={`min-h-[72px] space-y-1 border-l border-border/40 p-1.5 transition ${hoverTarget === key ? "bg-primary/5" : ""}`}
                 >
                   {items.map((b) => (
-                    <BlockChip key={b.id} block={b} compact onDragStart={() => setDragId(b.id)} onDragEnd={() => setDragId(null)} />
+                    <BlockChip
+                      key={b.id}
+                      block={b}
+                      compact
+                      onDragStart={() => setDragId(b.id)}
+                      onDragEnd={() => setDragId(null)}
+                    />
                   ))}
                 </div>
               );

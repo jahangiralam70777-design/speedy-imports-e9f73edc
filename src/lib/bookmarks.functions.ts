@@ -86,7 +86,9 @@ export const getMyBookmarks = createServerFn({ method: "GET" })
       qbankIds.length
         ? supabase
             .from("qbank_questions")
-            .select("id, chapter_id, position, question, prompt, options, correct_index, explanation")
+            .select(
+              "id, chapter_id, position, question, prompt, options, correct_index, explanation",
+            )
             .in("id", qbankIds)
         : Promise.resolve({ data: [] as (QRow & { prompt: string | null })[], error: null }),
     ]);

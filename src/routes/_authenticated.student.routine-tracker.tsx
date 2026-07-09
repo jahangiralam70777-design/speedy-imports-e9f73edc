@@ -15,11 +15,7 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
-import {
-  useMyRoutines,
-  tasksForRoutine,
-  type SharedRoutine,
-} from "@/lib/routines-shared";
+import { useMyRoutines, tasksForRoutine, type SharedRoutine } from "@/lib/routines-shared";
 import {
   emptyDailyLog,
   todayISO,
@@ -29,11 +25,7 @@ import {
 } from "@/lib/routine-progress";
 import { ReportsSection } from "@/components/routine-tracker/ReportsSection";
 import { IntelligencePanel } from "@/components/routine-tracker/IntelligencePanel";
-import {
-  computeRoutineStatus,
-  STATUS_LABEL,
-  STATUS_TONE,
-} from "@/lib/routine-intelligence";
+import { computeRoutineStatus, STATUS_LABEL, STATUS_TONE } from "@/lib/routine-intelligence";
 
 export const Route = createFileRoute("/_authenticated/student/routine-tracker")({
   head: () => ({
@@ -49,10 +41,25 @@ export const Route = createFileRoute("/_authenticated/student/routine-tracker")(
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-const STATUS_META: Record<TaskStatus, { label: string; tone: string; icon: React.ComponentType<{ className?: string }> }> = {
-  not_started: { label: "Not Started", tone: "text-muted-foreground bg-muted/60 border-border", icon: Circle },
-  in_progress: { label: "In Progress", tone: "text-indigo-500 bg-indigo-500/10 border-indigo-500/30", icon: PlayCircle },
-  completed: { label: "Completed", tone: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30", icon: CheckCircle2 },
+const STATUS_META: Record<
+  TaskStatus,
+  { label: string; tone: string; icon: React.ComponentType<{ className?: string }> }
+> = {
+  not_started: {
+    label: "Not Started",
+    tone: "text-muted-foreground bg-muted/60 border-border",
+    icon: Circle,
+  },
+  in_progress: {
+    label: "In Progress",
+    tone: "text-indigo-500 bg-indigo-500/10 border-indigo-500/30",
+    icon: PlayCircle,
+  },
+  completed: {
+    label: "Completed",
+    tone: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30",
+    icon: CheckCircle2,
+  },
 };
 
 function routineStatusLabel(pct: number) {
@@ -79,12 +86,15 @@ function round1(n: number) {
 
 function RoutineTrackerPage() {
   const { routines: myRoutines, isLoading: routinesLoading } = useMyRoutines();
-  const assigned = useMemo(
-    () => myRoutines.filter((r) => r.status === "active"),
-    [myRoutines],
-  );
+  const assigned = useMemo(() => myRoutines.filter((r) => r.status === "active"), [myRoutines]);
 
-  const { map: progressMap, get, hydrated: progressHydrated, setTaskStatus, updateDailyLog } = useRoutineProgress();
+  const {
+    map: progressMap,
+    get,
+    hydrated: progressHydrated,
+    setTaskStatus,
+    updateDailyLog,
+  } = useRoutineProgress();
   const hydrated = progressHydrated && !routinesLoading;
   const [viewing, setViewing] = useState<SharedRoutine | null>(null);
   const [updating, setUpdating] = useState<SharedRoutine | null>(null);
@@ -212,7 +222,11 @@ function RoutineTrackerPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <HeaderChip icon={BookOpen} label="Current Routine" value={truncate(currentRoutine, 28)} />
+          <HeaderChip
+            icon={BookOpen}
+            label="Current Routine"
+            value={truncate(currentRoutine, 28)}
+          />
           <HeaderChip
             icon={Target}
             label="Today's Goal"
@@ -224,13 +238,62 @@ function RoutineTrackerPage() {
 
       {/* Summary cards */}
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7">
-        <StatCard icon={CalendarClock} label="Today's Routine" value={`${stats.todaysTasksDone}/${stats.todaysTasksTotal}`} hint="tasks today" tone="from-indigo-500/20 via-indigo-500/5 to-transparent" accent="text-indigo-500" />
-        <StatCard icon={Flame} label="Current Streak" value={`${stats.bestStreak}`} hint="days" tone="from-orange-500/20 via-orange-500/5 to-transparent" accent="text-orange-500" />
-        <StatCard icon={TrendingUp} label="Completion %" value={`${stats.avgPct}%`} hint="overall" tone="from-fuchsia-500/20 via-fuchsia-500/5 to-transparent" accent="text-fuchsia-500" />
-        <StatCard icon={Clock} label="Completed Hours" value={`${stats.completedH}h`} hint="logged" tone="from-emerald-500/20 via-emerald-500/5 to-transparent" accent="text-emerald-500" />
-        <StatCard icon={Activity} label="Remaining Hours" value={`${stats.remainingH}h`} hint="to finish" tone="from-sky-500/20 via-sky-500/5 to-transparent" accent="text-sky-500" />
-        <StatCard icon={CheckCircle2} label="Completed Tasks" value={`${stats.completedTasks}`} hint="finished" tone="from-teal-500/20 via-teal-500/5 to-transparent" accent="text-teal-500" />
-        <StatCard icon={ListTodo} label="Pending Tasks" value={`${stats.pendingTasks}`} hint="remaining" tone="from-amber-500/20 via-amber-500/5 to-transparent" accent="text-amber-500" />
+        <StatCard
+          icon={CalendarClock}
+          label="Today's Routine"
+          value={`${stats.todaysTasksDone}/${stats.todaysTasksTotal}`}
+          hint="tasks today"
+          tone="from-indigo-500/20 via-indigo-500/5 to-transparent"
+          accent="text-indigo-500"
+        />
+        <StatCard
+          icon={Flame}
+          label="Current Streak"
+          value={`${stats.bestStreak}`}
+          hint="days"
+          tone="from-orange-500/20 via-orange-500/5 to-transparent"
+          accent="text-orange-500"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Completion %"
+          value={`${stats.avgPct}%`}
+          hint="overall"
+          tone="from-fuchsia-500/20 via-fuchsia-500/5 to-transparent"
+          accent="text-fuchsia-500"
+        />
+        <StatCard
+          icon={Clock}
+          label="Completed Hours"
+          value={`${stats.completedH}h`}
+          hint="logged"
+          tone="from-emerald-500/20 via-emerald-500/5 to-transparent"
+          accent="text-emerald-500"
+        />
+        <StatCard
+          icon={Activity}
+          label="Remaining Hours"
+          value={`${stats.remainingH}h`}
+          hint="to finish"
+          tone="from-sky-500/20 via-sky-500/5 to-transparent"
+          accent="text-sky-500"
+        />
+        <StatCard
+          icon={CheckCircle2}
+          label="Completed Tasks"
+          value={`${stats.completedTasks}`}
+          hint="finished"
+          tone="from-teal-500/20 via-teal-500/5 to-transparent"
+          accent="text-teal-500"
+        />
+        <StatCard
+          icon={ListTodo}
+          label="Pending Tasks"
+          value={`${stats.pendingTasks}`}
+          hint="remaining"
+          tone="from-amber-500/20 via-amber-500/5 to-transparent"
+          accent="text-amber-500"
+        />
       </section>
 
       {/* Today's ring + aggregates */}
@@ -247,8 +310,14 @@ function RoutineTrackerPage() {
             <Ring value={stats.todaysPct} size={148} stroke={12} color="oklch(0.65 0.22 280)" />
             <div className="mt-4 text-center text-xs text-muted-foreground">
               <div>
-                <span className="font-semibold text-foreground tabular-nums">{stats.todaysHoursDone}h</span> of{" "}
-                <span className="font-semibold text-foreground tabular-nums">{stats.todaysHoursTarget}h</span> today
+                <span className="font-semibold text-foreground tabular-nums">
+                  {stats.todaysHoursDone}h
+                </span>{" "}
+                of{" "}
+                <span className="font-semibold text-foreground tabular-nums">
+                  {stats.todaysHoursTarget}h
+                </span>{" "}
+                today
               </div>
               <div className="mt-0.5 tabular-nums">
                 {stats.todaysTasksDone}/{stats.todaysTasksTotal} tasks
@@ -258,8 +327,16 @@ function RoutineTrackerPage() {
         </div>
 
         <AggregateCard title="Level Progress" items={groupAgg.level} color="oklch(0.68 0.19 30)" />
-        <AggregateCard title="Subject Progress" items={groupAgg.subject} color="oklch(0.72 0.17 150)" />
-        <AggregateCard title="Chapter Progress" items={groupAgg.chapter} color="oklch(0.7 0.18 260)" />
+        <AggregateCard
+          title="Subject Progress"
+          items={groupAgg.subject}
+          color="oklch(0.72 0.17 150)"
+        />
+        <AggregateCard
+          title="Chapter Progress"
+          items={groupAgg.chapter}
+          color="oklch(0.7 0.18 260)"
+        />
       </section>
 
       {hydrated && <IntelligencePanel routines={assigned} progressMap={progressMap} />}
@@ -308,7 +385,9 @@ function RoutineTrackerPage() {
                   />
                   <div className="relative mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h3 className="truncate text-sm font-semibold tracking-tight sm:text-[15px]">{p.r.title}</h3>
+                      <h3 className="truncate text-sm font-semibold tracking-tight sm:text-[15px]">
+                        {p.r.title}
+                      </h3>
                       {p.r.description && (
                         <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                           {p.r.description}
@@ -411,12 +490,19 @@ function StatCard({
 }) {
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-border hover:shadow-lg">
-      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tone} opacity-80 transition-opacity duration-300 group-hover:opacity-100`} aria-hidden />
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tone} opacity-80 transition-opacity duration-300 group-hover:opacity-100`}
+        aria-hidden
+      />
       <div className="relative">
-        <Icon className={`mb-2 h-4 w-4 ${accent} transition-transform duration-300 group-hover:scale-110`} />
+        <Icon
+          className={`mb-2 h-4 w-4 ${accent} transition-transform duration-300 group-hover:scale-110`}
+        />
         <div className="text-[11px] font-medium leading-tight text-muted-foreground">{label}</div>
         <div className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{value}</div>
-        <div className="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{hint}</div>
+        <div className="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+          {hint}
+        </div>
       </div>
     </div>
   );
@@ -492,7 +578,10 @@ function Ring({
   const clamped = Math.max(0, Math.min(100, display));
   const offset = c - (clamped / 100) * c;
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <div
+      className="relative inline-flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2}
@@ -512,12 +601,19 @@ function Ring({
           strokeLinecap="round"
           strokeDasharray={c}
           strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 700ms ease-out", filter: `drop-shadow(0 0 6px ${color})` }}
+          style={{
+            transition: "stroke-dashoffset 700ms ease-out",
+            filter: `drop-shadow(0 0 6px ${color})`,
+          }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div className="text-xl font-semibold tabular-nums">{Math.round(clamped)}%</div>
-        {label && <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>}
+        {label && (
+          <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+            {label}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -536,7 +632,9 @@ function AggregateCard({
   return (
     <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{title}</div>
+        <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          {title}
+        </div>
         <Ring value={avg} size={44} stroke={5} color={color} />
       </div>
       {items.length === 0 ? (
@@ -652,7 +750,11 @@ function UpdateDialog({
 }: {
   routine: SharedRoutine;
   onClose: () => void;
-  progress: { taskStatuses: Record<string, TaskStatus>; dailyLogs: Record<string, DailyLog>; streak: number };
+  progress: {
+    taskStatuses: Record<string, TaskStatus>;
+    dailyLogs: Record<string, DailyLog>;
+    streak: number;
+  };
   setTaskStatus: (routineId: string, taskId: string, status: TaskStatus) => void;
   updateDailyLog: (routineId: string, patch: Partial<DailyLog>) => void;
 }) {
@@ -679,7 +781,12 @@ function UpdateDialog({
     }
     setErr(null);
     // Only push if values differ from stored
-    if (h.value !== log.hours || m.value !== log.mcqs || c.value !== log.chapters || n !== log.notes) {
+    if (
+      h.value !== log.hours ||
+      m.value !== log.mcqs ||
+      c.value !== log.chapters ||
+      n !== log.notes
+    ) {
       updateDailyLog(routine.id, { hours: h.value, mcqs: m.value, chapters: c.value, notes: n });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -690,18 +797,25 @@ function UpdateDialog({
     .filter((t) => progress.taskStatuses[t.id] === "completed")
     .reduce((s, t) => s + t.hours, 0);
   const routinePct = totalH ? Math.round((doneH / totalH) * 100) : 0;
-  const todayPct = Math.min(100, Math.round(((log.hours || 0) / Math.max(0.1, routine.hoursPerDay)) * 100));
+  const todayPct = Math.min(
+    100,
+    Math.round(((log.hours || 0) / Math.max(0.1, routine.hoursPerDay)) * 100),
+  );
 
   return (
     <DialogShell title={`Update Today · ${routine.title}`} onClose={onClose} wide>
       <div className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <div className="flex flex-col items-center rounded-xl border border-border/60 bg-background p-3">
           <Ring value={todayPct} size={92} stroke={8} color="oklch(0.65 0.22 280)" />
-          <div className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">Today</div>
+          <div className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+            Today
+          </div>
         </div>
         <div className="flex flex-col items-center rounded-xl border border-border/60 bg-background p-3">
           <Ring value={routinePct} size={92} stroke={8} color={routine.accent} />
-          <div className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">Routine</div>
+          <div className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+            Routine
+          </div>
         </div>
         <div className="col-span-2 flex flex-col justify-center rounded-xl border border-border/60 bg-background p-3 sm:col-span-1">
           <div className="text-xs text-muted-foreground">Streak</div>
@@ -710,7 +824,9 @@ function UpdateDialog({
             <span className="text-2xl font-semibold tabular-nums">{progress.streak}</span>
             <span className="text-xs text-muted-foreground">days</span>
           </div>
-          <div className="mt-2 text-xs text-muted-foreground">Editing: <span className="font-medium text-foreground">{today}</span></div>
+          <div className="mt-2 text-xs text-muted-foreground">
+            Editing: <span className="font-medium text-foreground">{today}</span>
+          </div>
         </div>
       </div>
 
@@ -720,9 +836,22 @@ function UpdateDialog({
           Today's log
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <NumField label="Study Hours" value={hours} onChange={setHours} step="0.1" max={24} suffix="h" />
+          <NumField
+            label="Study Hours"
+            value={hours}
+            onChange={setHours}
+            step="0.1"
+            max={24}
+            suffix="h"
+          />
           <NumField label="Completed MCQs" value={mcqs} onChange={setMcqs} step="1" max={100000} />
-          <NumField label="Completed Chapters" value={chapters} onChange={setChapters} step="1" max={10000} />
+          <NumField
+            label="Completed Chapters"
+            value={chapters}
+            onChange={setChapters}
+            step="1"
+            max={10000}
+          />
         </div>
         <label className="mt-3 block">
           <div className="mb-1 text-xs text-muted-foreground">Notes (optional)</div>
@@ -757,7 +886,9 @@ function UpdateDialog({
                 key={t.id}
                 className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-background px-3 py-2.5"
               >
-                <span className={`flex-1 min-w-0 truncate text-sm ${s === "completed" ? "text-muted-foreground line-through" : ""}`}>
+                <span
+                  className={`flex-1 min-w-0 truncate text-sm ${s === "completed" ? "text-muted-foreground line-through" : ""}`}
+                >
                   {t.title}
                 </span>
                 <span className="shrink-0 text-xs text-muted-foreground">{t.hours}h</span>

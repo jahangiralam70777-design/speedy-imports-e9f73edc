@@ -42,7 +42,8 @@ const TEMPLATES: {
       "It repeats the introduction verbatim.",
     ],
     answer: "A",
-    explanation: "The opening of any well-structured section defines scope and objectives before detail.",
+    explanation:
+      "The opening of any well-structured section defines scope and objectives before detail.",
   },
   {
     q: "Which of the following is a valid application of the concept discussed?",

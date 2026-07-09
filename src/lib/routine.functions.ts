@@ -97,10 +97,7 @@ async function computeAssignedAndCompletion(supabase: any, routineIds: string[])
   // followers = distinct user_id in routine_task_completions per routine
   // completion % = avg over followers of completed tasks / total tasks
   const [{ data: tasks }, { data: comps }] = await Promise.all([
-    supabase
-      .from("routine_tasks")
-      .select("id,routine_id")
-      .in("routine_id", routineIds),
+    supabase.from("routine_tasks").select("id,routine_id").in("routine_id", routineIds),
     supabase
       .from("routine_task_completions")
       .select("task_id,user_id,status")
@@ -134,10 +131,7 @@ async function computeAssignedAndCompletion(supabase: any, routineIds: string[])
   void comps;
 
   // group by routine → user → count completed & total
-  const perRoutine = new Map<
-    string,
-    Map<string, { completed: number; total: number }>
-  >();
+  const perRoutine = new Map<string, Map<string, { completed: number; total: number }>>();
   for (const rid of routineIds) perRoutine.set(rid, new Map());
 
   for (const c of completions) {
@@ -249,26 +243,39 @@ export const listRoutines = createServerFn({ method: "POST" })
     if (data.type) q = q.eq("routine_type", data.type);
     if (data.status === "archived") q = q.eq("is_archived", true);
     else if (data.status === "active")
-      q = q.eq("is_archived", false).eq("is_active", true).lte("starts_on", now).gte("ends_on", now);
-    else if (data.status === "inactive")
-      q = q.eq("is_archived", false).eq("is_active", false);
-    else if (data.status === "upcoming")
-      q = q.eq("is_archived", false).gt("starts_on", now);
-    else if (data.status === "completed")
-      q = q.eq("is_archived", false).lt("ends_on", now);
+      q = q
+        .eq("is_archived", false)
+        .eq("is_active", true)
+        .lte("starts_on", now)
+        .gte("ends_on", now);
+    else if (data.status === "inactive") q = q.eq("is_archived", false).eq("is_active", false);
+    else if (data.status === "upcoming") q = q.eq("is_archived", false).gt("starts_on", now);
+    else if (data.status === "completed") q = q.eq("is_archived", false).lt("ends_on", now);
     else q = q.eq("is_archived", false);
 
     if (data.search) {
       const s = data.search.replace(/[%_]/g, "\\$&");
-      q = q.or(`title.ilike.%${s}%,description.ilike.%${s}%,level.ilike.%${s}%,subject.ilike.%${s}%,chapter.ilike.%${s}%`);
+      q = q.or(
+        `title.ilike.%${s}%,description.ilike.%${s}%,level.ilike.%${s}%,subject.ilike.%${s}%,chapter.ilike.%${s}%`,
+      );
     }
 
     switch (data.sort) {
-      case "newest": q = q.order("created_at", { ascending: false }); break;
-      case "oldest": q = q.order("created_at", { ascending: true }); break;
-      case "title": q = q.order("title", { ascending: true }); break;
-      case "updated": q = q.order("updated_at", { ascending: false }); break;
-      case "endDate": q = q.order("ends_on", { ascending: true, nullsFirst: false }); break;
+      case "newest":
+        q = q.order("created_at", { ascending: false });
+        break;
+      case "oldest":
+        q = q.order("created_at", { ascending: true });
+        break;
+      case "title":
+        q = q.order("title", { ascending: true });
+        break;
+      case "updated":
+        q = q.order("updated_at", { ascending: false });
+        break;
+      case "endDate":
+        q = q.order("ends_on", { ascending: true, nullsFirst: false });
+        break;
     }
 
     const from = (data.page! - 1) * data.pageSize!;
@@ -304,20 +311,20 @@ export const getRoutineStats = createServerFn({ method: "POST" })
     const { supabase } = context;
     const now = today();
 
-    const [{ data: all, error: e1 }, { data: assignments }, { data: comps }] =
-      await Promise.all([
-        supabase.from("routines").select("id,is_archived,is_active,starts_on,ends_on"),
-        supabase.from("routine_assignments").select("target_user_id"),
-        supabase.from("routine_task_completions").select("user_id"),
-      ]);
+    const [{ data: all, error: e1 }, { data: assignments }, { data: comps }] = await Promise.all([
+      supabase.from("routines").select("id,is_archived,is_active,starts_on,ends_on"),
+      supabase.from("routine_assignments").select("target_user_id"),
+      supabase.from("routine_task_completions").select("user_id"),
+    ]);
     if (e1) throw new Error(e1.message);
 
     const rows = all ?? [];
     const archived = rows.filter((r: { is_archived: boolean }) => r.is_archived).length;
     const nonArchived = rows.filter((r: { is_archived: boolean }) => !r.is_archived);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const active = nonArchived.filter((r: any) =>
-      r.is_active && (!r.starts_on || r.starts_on <= now) && (!r.ends_on || r.ends_on >= now),
+
+    const active = nonArchived.filter(
+      (r: any) =>
+        r.is_active && (!r.starts_on || r.starts_on <= now) && (!r.ends_on || r.ends_on >= now),
     ).length;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const upcoming = nonArchived.filter((r: any) => r.starts_on && r.starts_on > now).length;
@@ -337,7 +344,10 @@ export const getRoutineStats = createServerFn({ method: "POST" })
     const { completion } = await computeAssignedAndCompletion(supabase, ids);
     let sum = 0;
     let n = 0;
-    for (const v of completion.values()) { sum += v; n++; }
+    for (const v of completion.values()) {
+      sum += v;
+      n++;
+    }
     const avgCompletion = n ? Math.round(sum / n) : 0;
 
     return {
@@ -377,19 +387,25 @@ function validateUpsert(input: unknown): UpsertInput {
   const title = typeof s.title === "string" ? s.title.trim() : "";
   if (!title) throw new Error("Title required");
   if (title.length > 200) throw new Error("Title too long");
-  const type = typeof s.type === "string" && TYPES.includes(s.type as RoutineType)
-    ? (s.type as RoutineType) : "daily";
+  const type =
+    typeof s.type === "string" && TYPES.includes(s.type as RoutineType)
+      ? (s.type as RoutineType)
+      : "daily";
   const hoursPerDay = Math.max(0.25, Math.min(24, Number(s.hoursPerDay ?? 1) || 1));
-  const startDate = typeof s.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.startDate)
-    ? s.startDate : today();
-  const endDate = typeof s.endDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.endDate)
-    ? s.endDate : startDate;
+  const startDate =
+    typeof s.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.startDate)
+      ? s.startDate
+      : today();
+  const endDate =
+    typeof s.endDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.endDate) ? s.endDate : startDate;
   if (endDate < startDate) throw new Error("End date before start date");
   const status: RoutineStatus = s.status === "inactive" ? "inactive" : "active";
-  const num = (v: unknown) => (typeof v === "number" && v >= 0 && Number.isFinite(v) ? Math.floor(v) : null);
+  const num = (v: unknown) =>
+    typeof v === "number" && v >= 0 && Number.isFinite(v) ? Math.floor(v) : null;
   return {
     title,
-    description: typeof s.description === "string" && s.description.trim() ? s.description.trim() : null,
+    description:
+      typeof s.description === "string" && s.description.trim() ? s.description.trim() : null,
     level: typeof s.level === "string" && s.level ? s.level : null,
     subject: typeof s.subject === "string" && s.subject ? s.subject : null,
     chapter: typeof s.chapter === "string" && s.chapter ? s.chapter : null,
@@ -453,10 +469,7 @@ export const updateRoutine = createServerFn({ method: "POST" })
     // Do not overwrite user_id on update
     const { user_id: _u, ...patch } = row;
     void _u;
-    const { error } = await context.supabase
-      .from("routines")
-      .update(patch)
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("routines").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -563,14 +576,32 @@ export const listRoutineStudents = createServerFn({ method: "POST" })
       .in("task_id", taskIds);
 
     // key = routineId::userId
-    const agg = new Map<string, {
-      routineId: string; userId: string; completed: number; last: string | null; todayCompleted: number;
-    }>();
-    for (const c of (comps ?? []) as { task_id: string; user_id: string; status: string; completed_on: string }[]) {
+    const agg = new Map<
+      string,
+      {
+        routineId: string;
+        userId: string;
+        completed: number;
+        last: string | null;
+        todayCompleted: number;
+      }
+    >();
+    for (const c of (comps ?? []) as {
+      task_id: string;
+      user_id: string;
+      status: string;
+      completed_on: string;
+    }[]) {
       const rid = routineByTask.get(c.task_id);
       if (!rid) continue;
       const key = `${rid}::${c.user_id}`;
-      const cur = agg.get(key) ?? { routineId: rid, userId: c.user_id, completed: 0, last: null, todayCompleted: 0 };
+      const cur = agg.get(key) ?? {
+        routineId: rid,
+        userId: c.user_id,
+        completed: 0,
+        last: null,
+        todayCompleted: 0,
+      };
       if (c.status === "completed") {
         cur.completed += 1;
         if (c.completed_on === now) cur.todayCompleted += 1;
@@ -584,7 +615,8 @@ export const listRoutineStudents = createServerFn({ method: "POST" })
       ? await supabase.from("profiles").select("id,full_name,email").in("id", userIds)
       : { data: [] as { id: string; full_name: string | null; email: string | null }[] };
     const profMap = new Map<string, { name: string; email: string }>();
-    for (const p of profs ?? []) profMap.set(p.id, { name: p.full_name ?? p.email ?? "Unknown", email: p.email ?? "" });
+    for (const p of profs ?? [])
+      profMap.set(p.id, { name: p.full_name ?? p.email ?? "Unknown", email: p.email ?? "" });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const routineMap = new Map<string, any>();
@@ -620,7 +652,6 @@ export const listRoutineStudents = createServerFn({ method: "POST" })
     return out;
   });
 
-
 export const duplicateRoutine = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => {
@@ -637,7 +668,7 @@ export const duplicateRoutine = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .single();
     if (error) throw new Error(error.message);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const { id: _drop, created_at: _c, updated_at: _u, ...rest } = src;
     const { data: created, error: e2 } = await context.supabase
       .from("routines")
@@ -663,9 +694,15 @@ export const setRoutineAssignments = createServerFn({ method: "POST" })
     const s = (input ?? {}) as Record<string, unknown>;
     const routineId = typeof s.routineId === "string" ? s.routineId : "";
     if (!routineId) throw new Error("routineId required");
-    const levels = Array.isArray(s.levels) ? s.levels.filter((v) => typeof v === "string") as string[] : [];
-    const subjects = Array.isArray(s.subjects) ? s.subjects.filter((v) => typeof v === "string") as string[] : [];
-    const userIds = Array.isArray(s.userIds) ? s.userIds.filter((v) => typeof v === "string") as string[] : [];
+    const levels = Array.isArray(s.levels)
+      ? (s.levels.filter((v) => typeof v === "string") as string[])
+      : [];
+    const subjects = Array.isArray(s.subjects)
+      ? (s.subjects.filter((v) => typeof v === "string") as string[])
+      : [];
+    const userIds = Array.isArray(s.userIds)
+      ? (s.userIds.filter((v) => typeof v === "string") as string[])
+      : [];
     return { routineId, levels, subjects, userIds };
   })
   .handler(async ({ data, context }) => {
@@ -677,9 +714,27 @@ export const setRoutineAssignments = createServerFn({ method: "POST" })
       .eq("routine_id", data.routineId);
     if (dErr) throw new Error(dErr.message);
     const rows = [
-      ...data.levels.map((v) => ({ routine_id: data.routineId, target_type: "level", target_value: v, target_user_id: null, created_by: userId })),
-      ...data.subjects.map((v) => ({ routine_id: data.routineId, target_type: "subject", target_value: v, target_user_id: null, created_by: userId })),
-      ...data.userIds.map((u) => ({ routine_id: data.routineId, target_type: "user", target_value: null, target_user_id: u, created_by: userId })),
+      ...data.levels.map((v) => ({
+        routine_id: data.routineId,
+        target_type: "level",
+        target_value: v,
+        target_user_id: null,
+        created_by: userId,
+      })),
+      ...data.subjects.map((v) => ({
+        routine_id: data.routineId,
+        target_type: "subject",
+        target_value: v,
+        target_user_id: null,
+        created_by: userId,
+      })),
+      ...data.userIds.map((u) => ({
+        routine_id: data.routineId,
+        target_type: "user",
+        target_value: null,
+        target_user_id: u,
+        created_by: userId,
+      })),
     ];
     if (rows.length) {
       const { error } = await supabase.from("routine_assignments").insert(rows);
@@ -764,7 +819,8 @@ export const getRoutineProgress = createServerFn({ method: "POST" })
       .select("id,full_name,email")
       .in("id", ids);
     const profMap = new Map<string, { full_name: string; email: string }>();
-    for (const p of profs ?? []) profMap.set(p.id, { full_name: p.full_name ?? "", email: p.email ?? "" });
+    for (const p of profs ?? [])
+      profMap.set(p.id, { full_name: p.full_name ?? "", email: p.email ?? "" });
     return ids.map((uid) => {
       const v = byUser.get(uid)!;
       const p = profMap.get(uid);

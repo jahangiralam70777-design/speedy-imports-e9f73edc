@@ -54,7 +54,13 @@ export type StudentDashboardData = {
   overallPct: number;
   wrongTotal: number;
   bookmarks: number;
-  today: { mcqs: number; qbanks: number; completedTasks: number; plannedTasks: number; routinePct: number };
+  today: {
+    mcqs: number;
+    qbanks: number;
+    completedTasks: number;
+    plannedTasks: number;
+    routinePct: number;
+  };
   chapters: ChapterActivity[];
   routines: RoutineActivity[];
   continueTargets: ContinueTarget[];
@@ -103,22 +109,41 @@ export const getStudentDashboard = createServerFn({ method: "GET" })
       recentExamsRes,
     ] = await Promise.all([
       supabase.from("profiles").select("full_name,email").eq("id", userId).maybeSingle(),
-      supabase.from("student_preferences").select("preferences").eq("user_id", userId).maybeSingle(),
-      supabase.from("mcq_attempts").select("question_id,chapter_id,is_correct,created_at").eq("user_id", userId),
-      supabase.from("qbank_attempts").select("question_id,chapter_id,is_correct,created_at").eq("user_id", userId),
+      supabase
+        .from("student_preferences")
+        .select("preferences")
+        .eq("user_id", userId)
+        .maybeSingle(),
+      supabase
+        .from("mcq_attempts")
+        .select("question_id,chapter_id,is_correct,created_at")
+        .eq("user_id", userId),
+      supabase
+        .from("qbank_attempts")
+        .select("question_id,chapter_id,is_correct,created_at")
+        .eq("user_id", userId),
       supabase.from("mcq_questions").select("chapter_id").eq("status", "published"),
       supabase.from("qbank_questions").select("chapter_id").eq("status", "published"),
       supabase.from("mcq_questions").select("chapter_id").eq("status", "published"),
       supabase.from("qbank_questions").select("chapter_id").eq("status", "published"),
-      supabase.from("wrong_answer_bookmarks").select("source,question_id").eq("user_id", userId).is("cleared_at", null),
+      supabase
+        .from("wrong_answer_bookmarks")
+        .select("source,question_id")
+        .eq("user_id", userId)
+        .is("cleared_at", null),
       supabase.from("bookmarks").select("id", { count: "exact", head: true }).eq("user_id", userId),
       supabase
         .from("routine_assignments")
-        .select("routine_id, routines:routine_id(id,title,is_active,is_archived,starts_on,ends_on,routine_type)")
+        .select(
+          "routine_id, routines:routine_id(id,title,is_active,is_archived,starts_on,ends_on,routine_type)",
+        )
         .eq("target_type", "user")
         .eq("target_user_id", userId),
       Promise.resolve({ data: null, error: null }), // routine_tasks fetched below after we know the ids
-      supabase.from("routine_task_completions").select("task_id,status,completed_on,created_at").eq("user_id", userId),
+      supabase
+        .from("routine_task_completions")
+        .select("task_id,status,completed_on,created_at")
+        .eq("user_id", userId),
       supabase
         .from("custom_exam_sessions")
         .select("id,title,started_at,total_questions,correct_count")
@@ -137,9 +162,19 @@ export const getStudentDashboard = createServerFn({ method: "GET" })
     void qbankPerChapterRes;
 
     for (const r of [
-      profileRes, prefRes, mcqAttemptsRes, qbankAttemptsRes, mcqTotalRes, qbankTotalRes,
-      wrongRes, bookmarksRes, routinesRes, routineTasksRes, routineCompletionsRes,
-      activeExamRes, recentExamsRes,
+      profileRes,
+      prefRes,
+      mcqAttemptsRes,
+      qbankAttemptsRes,
+      mcqTotalRes,
+      qbankTotalRes,
+      wrongRes,
+      bookmarksRes,
+      routinesRes,
+      routineTasksRes,
+      routineCompletionsRes,
+      activeExamRes,
+      recentExamsRes,
     ]) {
       if (r?.error) throw new Error(r.error.message);
     }
@@ -161,14 +196,15 @@ export const getStudentDashboard = createServerFn({ method: "GET" })
     // -----------------------------------------------------------------
     // Aggregate MCQ / QBank per chapter
     // -----------------------------------------------------------------
-    type AttemptRow = { question_id: string; chapter_id: string | null; is_correct: boolean; created_at: string };
+    type AttemptRow = {
+      question_id: string;
+      chapter_id: string | null;
+      is_correct: boolean;
+      created_at: string;
+    };
     type QuestionRow = { chapter_id: string };
 
-    const aggregate = (
-      attempts: AttemptRow[],
-      totals: QuestionRow[],
-      source: "mcq" | "qbank",
-    ) => {
+    const aggregate = (attempts: AttemptRow[], totals: QuestionRow[], source: "mcq" | "qbank") => {
       // totals per chapter (published)
       const totalPer = new Map<string, number>();
       for (const q of totals) {
@@ -192,7 +228,10 @@ export const getStudentDashboard = createServerFn({ method: "GET" })
         if (a.is_correct === false) wrong++;
         if (a.chapter_id) {
           let set = donePer.get(a.chapter_id);
-          if (!set) { set = new Set(); donePer.set(a.chapter_id, set); }
+          if (!set) {
+            set = new Set();
+            donePer.set(a.chapter_id, set);
+          }
           set.add(a.question_id);
           if (at > (lastPer.get(a.chapter_id) ?? 0)) lastPer.set(a.chapter_id, at);
         }
@@ -200,7 +239,11 @@ export const getStudentDashboard = createServerFn({ method: "GET" })
       let total = 0;
       for (const v of totalPer.values()) total += v;
 
-      const chapters: Array<Omit<ChapterActivity, "chapterName" | "subjectName" | "levelName"> & { source: "mcq" | "qbank" }> = [];
+      const chapters: Array<
+        Omit<ChapterActivity, "chapterName" | "subjectName" | "levelName"> & {
+          source: "mcq" | "qbank";
+        }
+      > = [];
       for (const [chId, doneSet] of donePer.entries()) {
         chapters.push({
           source,
@@ -230,10 +273,7 @@ export const getStudentDashboard = createServerFn({ method: "GET" })
     const chapterIds = Array.from(
       new Set([...mcqAgg.chapters, ...qbAgg.chapters].map((c) => c.chapterId).filter(Boolean)),
     );
-    const chapterMap = new Map<
-      string,
-      { name: string; subjectName: string; levelName: string }
-    >();
+    const chapterMap = new Map<string, { name: string; subjectName: string; levelName: string }>();
     if (chapterIds.length) {
       const { data: chRows, error: chErr } = await supabase
         .from("academic_chapters")
@@ -283,8 +323,13 @@ export const getStudentDashboard = createServerFn({ method: "GET" })
     // Routines
     // -----------------------------------------------------------------
     type RoutineRow = {
-      id: string; title: string; is_active: boolean; is_archived: boolean;
-      starts_on: string | null; ends_on: string | null; routine_type: string;
+      id: string;
+      title: string;
+      is_active: boolean;
+      is_archived: boolean;
+      starts_on: string | null;
+      ends_on: string | null;
+      routine_type: string;
     };
     type TaskRow = { id: string; routine_id: string };
     type CompRow = { task_id: string; status: string; completed_on: string; created_at: string };
@@ -308,7 +353,10 @@ export const getStudentDashboard = createServerFn({ method: "GET" })
       const { data: taskRows, error: taskErr } = await supabase
         .from("routine_tasks")
         .select("id,routine_id")
-        .in("routine_id", routines.map((r) => r.id));
+        .in(
+          "routine_id",
+          routines.map((r) => r.id),
+        );
       if (taskErr) throw new Error(taskErr.message);
       tasks = (taskRows ?? []) as TaskRow[];
     }
@@ -435,7 +483,7 @@ export const getStudentDashboard = createServerFn({ method: "GET" })
       });
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const e of ((recentExamsRes.data ?? []) as any[])) {
+    for (const e of (recentExamsRes.data ?? []) as any[]) {
       const at = tsOf(e.finished_at ?? e.started_at ?? e.created_at);
       if (at <= 0) continue;
       activityItems.push({

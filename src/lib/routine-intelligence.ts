@@ -96,20 +96,30 @@ export function computeRoutineStatus(
   else if (todayHours === 0 && daysElapsed >= 1) status = "missed_today";
   else status = "behind";
 
-  return { status, expectedH, actualH, ratio, todayHours, todayTarget, todayPct, daysElapsed, totalDays };
+  return {
+    status,
+    expectedH,
+    actualH,
+    ratio,
+    todayHours,
+    todayTarget,
+    todayPct,
+    daysElapsed,
+    totalDays,
+  };
 }
 
 // Aggregate across all routines to give one dashboard-level verdict.
-export function computeOverallStatus(
-  routines: SharedRoutine[],
-  progressMap: ProgressMap,
-) {
+export function computeOverallStatus(routines: SharedRoutine[], progressMap: ProgressMap) {
   let expected = 0;
   let actual = 0;
   let todayHours = 0;
   let todayTarget = 0;
   const perRoutine = routines.map((r) => {
-    const info = computeRoutineStatus(r, progressMap[r.id] ?? { taskStatuses: {}, dailyLogs: {}, lastStudyDate: null, streak: 0 });
+    const info = computeRoutineStatus(
+      r,
+      progressMap[r.id] ?? { taskStatuses: {}, dailyLogs: {}, lastStudyDate: null, streak: 0 },
+    );
     expected += info.expectedH;
     actual += info.actualH;
     todayHours += info.todayHours;
@@ -165,14 +175,8 @@ function totalTarget(routines: SharedRoutine[], iso: string) {
   return t;
 }
 
-export function computeBadges(
-  routines: SharedRoutine[],
-  progressMap: ProgressMap,
-): Badge[] {
-  const bestStreak = Math.max(
-    0,
-    ...Object.values(progressMap).map((p) => p.streak || 0),
-  );
+export function computeBadges(routines: SharedRoutine[], progressMap: ProgressMap): Badge[] {
+  const bestStreak = Math.max(0, ...Object.values(progressMap).map((p) => p.streak || 0));
 
   // Perfect Week / Month: every day in the past N (that's within any routine range) met its target.
   function perfectWindow(days: number) {

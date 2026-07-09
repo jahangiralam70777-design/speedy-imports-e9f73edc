@@ -73,22 +73,18 @@ type Summary = {
 };
 
 function toSummary(d: StudentDashboardData): Summary {
-  const continueMcq =
-    d.continueTargets.find((t) => t.kind === "mcq") as
-      | { kind: "mcq"; chapter: ChapterActivity }
-      | undefined;
-  const continueQb =
-    d.continueTargets.find((t) => t.kind === "qbank") as
-      | { kind: "qbank"; chapter: ChapterActivity }
-      | undefined;
-  const continueRoutine =
-    d.continueTargets.find((t) => t.kind === "routine") as
-      | { kind: "routine"; routine: RoutineActivity }
-      | undefined;
-  const continueExam =
-    d.continueTargets.find((t) => t.kind === "custom-exam") as
-      | { kind: "custom-exam"; sessionId: string; title: string; at: number }
-      | undefined;
+  const continueMcq = d.continueTargets.find((t) => t.kind === "mcq") as
+    | { kind: "mcq"; chapter: ChapterActivity }
+    | undefined;
+  const continueQb = d.continueTargets.find((t) => t.kind === "qbank") as
+    | { kind: "qbank"; chapter: ChapterActivity }
+    | undefined;
+  const continueRoutine = d.continueTargets.find((t) => t.kind === "routine") as
+    | { kind: "routine"; routine: RoutineActivity }
+    | undefined;
+  const continueExam = d.continueTargets.find((t) => t.kind === "custom-exam") as
+    | { kind: "custom-exam"; sessionId: string; title: string; at: number }
+    | undefined;
   const lastCustomActivity = d.recentActivity.find((a) => a.kind === "custom-exam");
   return {
     mcq: d.mcq,
@@ -232,10 +228,7 @@ function StudentDashboard() {
   return (
     <div className="relative mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-12">
       {/* Ambient luxe background */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
-      >
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
           className="absolute -top-40 left-1/2 h-[520px] w-[900px] -translate-x-1/2 rounded-full opacity-40 blur-3xl"
           style={{
@@ -252,10 +245,7 @@ function StudentDashboard() {
         />
       </div>
 
-      <Header
-        name={displayName}
-        onSaveName={(n) => nameMutation.mutate(n)}
-      />
+      <Header name={displayName} onSaveName={(n) => nameMutation.mutate(n)} />
 
       {error && (
         <div className="mt-6 rounded-2xl border border-red-500/40 bg-red-500/10 px-5 py-4 text-sm text-red-600 dark:text-red-300">
@@ -283,7 +273,6 @@ function StudentDashboard() {
         <SectionTitle icon={<Target className="h-4 w-4" />} title="Your progress" />
         <SummaryGrid summary={summary} hydrated={hydrated} />
       </div>
-
 
       <div className="mt-6 grid gap-4 sm:gap-5 lg:grid-cols-2">
         <TodayCard summary={summary} hydrated={hydrated} />
@@ -325,12 +314,13 @@ function Header({ name, onSaveName }: { name: string; onSaveName: (n: string) =>
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  const initials = (name || "S")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("") || "S";
+  const initials =
+    (name || "S")
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join("") || "S";
 
   return (
     <div className="flex items-start justify-between gap-4">
@@ -542,11 +532,7 @@ function CountdownCard({
             }}
           />
         ) : (
-          <CountdownDisplay
-            value={value!}
-            parts={parts}
-            onEdit={() => setEditing(true)}
-          />
+          <CountdownDisplay value={value!} parts={parts} onEdit={() => setEditing(true)} />
         )}
       </div>
     </div>
@@ -673,9 +659,7 @@ function CountdownDisplay({
               <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Exam countdown
               </div>
-              <div className="truncate text-lg font-semibold tracking-tight">
-                {value.name}
-              </div>
+              <div className="truncate text-lg font-semibold tracking-tight">{value.name}</div>
             </div>
           </div>
           <div className="mt-1 pl-11 text-xs text-muted-foreground">{dateLabel}</div>
@@ -796,7 +780,9 @@ function SummaryGrid({ summary, hydrated }: { summary: Summary | null; hydrated:
         label="Question bank"
         value={summary.qbank.done}
         unit={` / ${summary.qbank.total}`}
-        pct={summary.qbank.total > 0 ? Math.round((summary.qbank.done / summary.qbank.total) * 100) : 0}
+        pct={
+          summary.qbank.total > 0 ? Math.round((summary.qbank.done / summary.qbank.total) * 100) : 0
+        }
         accent="from-emerald-500 to-teal-500"
       />
       <StatCard
@@ -805,7 +791,11 @@ function SummaryGrid({ summary, hydrated }: { summary: Summary | null; hydrated:
         label="Routine completion"
         value={summary.routine.done}
         unit={` / ${summary.routine.total}`}
-        pct={summary.routine.total > 0 ? Math.round((summary.routine.done / summary.routine.total) * 100) : 0}
+        pct={
+          summary.routine.total > 0
+            ? Math.round((summary.routine.done / summary.routine.total) * 100)
+            : 0
+        }
         accent="from-amber-500 to-orange-500"
       />
       <StatCard
@@ -877,9 +867,7 @@ function StatCard({
         <span className="tabular-nums text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           {animated.toLocaleString()}
         </span>
-        {unit && (
-          <span className="text-sm font-medium text-muted-foreground">{unit}</span>
-        )}
+        {unit && <span className="text-sm font-medium text-muted-foreground">{unit}</span>}
       </div>
 
       <div className="relative mt-5">
@@ -1072,12 +1060,8 @@ function ContinueCard({ summary, hydrated }: { summary: Summary | null; hydrated
                   <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                     {it.label}
                   </div>
-                  <div className="truncate text-sm font-semibold text-foreground">
-                    {it.title}
-                  </div>
-                  <div className="truncate text-[11px] text-muted-foreground">
-                    {it.subtitle}
-                  </div>
+                  <div className="truncate text-sm font-semibold text-foreground">{it.title}</div>
+                  <div className="truncate text-[11px] text-muted-foreground">{it.subtitle}</div>
                 </div>
                 <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-muted/70 text-muted-foreground transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-md">
                   <Play className="h-3.5 w-3.5" />
@@ -1124,7 +1108,12 @@ function LatestActivity({ summary, hydrated }: { summary: Summary | null; hydrat
   for (const ch of summary.chapters) {
     items.push({
       key: `${ch.source}-${ch.chapterName}-${ch.at}`,
-      icon: ch.source === "qbank" ? <Database className="h-4 w-4" /> : <ListChecks className="h-4 w-4" />,
+      icon:
+        ch.source === "qbank" ? (
+          <Database className="h-4 w-4" />
+        ) : (
+          <ListChecks className="h-4 w-4" />
+        ),
       label: ch.source === "qbank" ? "Question Bank Practice" : "MCQ Practice",
       title: ch.chapterName,
       subtitle: `${ch.subjectName} · ${ch.done}/${ch.total}`,

@@ -57,10 +57,7 @@ export function subscribeAuth(listener: Listener): () => void {
 }
 
 async function fetchRole(userId: string): Promise<AppRole | null> {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) {
     console.error("[auth] failed to fetch role", error);
     return null;
@@ -211,10 +208,7 @@ export async function updatePassword(newPassword: string) {
 /**
  * Ordered sign-out: cancel queries, clear cache, sign out, invalidate router.
  */
-export async function signOut(opts: {
-  queryClient: QueryClient;
-  onDone?: () => void;
-}) {
+export async function signOut(opts: { queryClient: QueryClient; onDone?: () => void }) {
   await opts.queryClient.cancelQueries();
   opts.queryClient.clear();
   await supabase.auth.signOut();

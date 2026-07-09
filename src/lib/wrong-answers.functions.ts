@@ -100,7 +100,9 @@ export const getMyWrongAnswers = createServerFn({ method: "GET" })
       qbankIds.length
         ? supabase
             .from("qbank_questions")
-            .select("id, chapter_id, position, question, prompt, options, correct_index, explanation")
+            .select(
+              "id, chapter_id, position, question, prompt, options, correct_index, explanation",
+            )
             .in("id", qbankIds)
         : Promise.resolve({ data: [] as (QRow & { prompt: string | null })[], error: null }),
     ]);
@@ -194,8 +196,10 @@ export const getMyWrongAnswers = createServerFn({ method: "GET" })
     if (mcqAtt.error) throw new Error(mcqAtt.error.message);
     if (qbankAtt.error) throw new Error(qbankAtt.error.message);
     const selMap = new Map<string, number | null>();
-    for (const a of (mcqAtt.data ?? []) as AttRow[]) selMap.set(`mcq::${a.question_id}`, a.selected_index);
-    for (const a of (qbankAtt.data ?? []) as AttRow[]) selMap.set(`qbank::${a.question_id}`, a.selected_index);
+    for (const a of (mcqAtt.data ?? []) as AttRow[])
+      selMap.set(`mcq::${a.question_id}`, a.selected_index);
+    for (const a of (qbankAtt.data ?? []) as AttRow[])
+      selMap.set(`qbank::${a.question_id}`, a.selected_index);
 
     // Build rows
     const out: WrongAnswerRow[] = [];
@@ -254,10 +258,7 @@ export const setWrongCleared = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { error, count } = await supabase
       .from("wrong_answer_bookmarks")
-      .update(
-        { cleared_at: data.cleared ? new Date().toISOString() : null },
-        { count: "exact" },
-      )
+      .update({ cleared_at: data.cleared ? new Date().toISOString() : null }, { count: "exact" })
       .eq("user_id", userId)
       .in("id", data.ids);
     if (error) throw new Error(error.message);
@@ -311,9 +312,7 @@ export const submitWrongRetry = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => {
     const src = (input ?? {}) as Record<string, unknown>;
     const id = typeof src.id === "string" ? src.id : "";
-    const selectedIndex = Number.isInteger(src.selectedIndex)
-      ? (src.selectedIndex as number)
-      : -1;
+    const selectedIndex = Number.isInteger(src.selectedIndex) ? (src.selectedIndex as number) : -1;
     if (!id) throw new Error("id required");
     if (selectedIndex < 0) throw new Error("selectedIndex required");
     return { id, selectedIndex };

@@ -166,8 +166,7 @@ function AdminLoginPage() {
           { value: "AES-256", label: "At Rest" },
           { value: "TLS 1.3", label: "In Transit" },
         ],
-        gradient:
-          "linear-gradient(135deg, #020617 0%, #0f172a 30%, #1e293b 60%, #4338ca 130%)",
+        gradient: "linear-gradient(135deg, #020617 0%, #0f172a 30%, #1e293b 60%, #4338ca 130%)",
       }}
     >
       <div className="relative pt-14">

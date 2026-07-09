@@ -76,7 +76,11 @@ function normalise(text: string): string {
 }
 
 function normaliseForCompare(s: string): string {
-  return s.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /* ------------------------------------------------------------------ */
@@ -285,10 +289,7 @@ export function parseMcqs(input: string): ParsedMcq[] {
   return rows;
 }
 
-export function checkAgainstExisting(
-  rows: ParsedMcq[],
-  existingQuestions: string[],
-): void {
+export function checkAgainstExisting(rows: ParsedMcq[], existingQuestions: string[]): void {
   const existing = new Set(existingQuestions.map(normaliseForCompare).filter(Boolean));
   if (existing.size === 0) return;
   for (const r of rows) {
@@ -306,9 +307,7 @@ export function checkAgainstExisting(
 export function summarise(rows: ParsedMcq[]): ParseSummary {
   const duplicates = rows.filter((r) => r.isDuplicate).length;
   const valid = rows.filter((r) => r.valid).length;
-  const invalid = rows.filter(
-    (r) => !r.valid && !r.isDuplicate,
-  ).length;
+  const invalid = rows.filter((r) => !r.valid && !r.isDuplicate).length;
   return {
     total: rows.length,
     valid,
@@ -322,8 +321,6 @@ export function summarise(rows: ParsedMcq[]): ParseSummary {
 /* ------------------------------------------------------------------ */
 /* Sample text                                                         */
 /* ------------------------------------------------------------------ */
-
-
 
 export const SAMPLE_TEXT = `Q1: What is a major obstacle to increasing tax revenue in Bangladesh?
 A. High corporate income tax rates

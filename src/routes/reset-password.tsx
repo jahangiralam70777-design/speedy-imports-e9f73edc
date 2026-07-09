@@ -138,8 +138,7 @@ function ResetPasswordPage() {
           { value: "A1!", label: "Mix it up" },
           { value: "TLS", label: "Secure" },
         ],
-        gradient:
-          "linear-gradient(135deg, #0f172a 0%, #4338ca 40%, #7c3aed 75%, #06b6d4 130%)",
+        gradient: "linear-gradient(135deg, #0f172a 0%, #4338ca 40%, #7c3aed 75%, #06b6d4 130%)",
       }}
     >
       <div className="glass shadow-glow relative overflow-hidden rounded-3xl border border-border p-6 sm:p-9">

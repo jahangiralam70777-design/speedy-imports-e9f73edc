@@ -193,21 +193,15 @@ export const syncAcademicTree = createServerFn({ method: "POST" })
 
     // Upsert in parent-first order.
     if (levelRows.length) {
-      const r = await supabase
-        .from("academic_levels")
-        .upsert(levelRows, { onConflict: "id" });
+      const r = await supabase.from("academic_levels").upsert(levelRows, { onConflict: "id" });
       if (r.error) throw new Error(r.error.message);
     }
     if (subjectRows.length) {
-      const r = await supabase
-        .from("academic_subjects")
-        .upsert(subjectRows, { onConflict: "id" });
+      const r = await supabase.from("academic_subjects").upsert(subjectRows, { onConflict: "id" });
       if (r.error) throw new Error(r.error.message);
     }
     if (chapterRows.length) {
-      const r = await supabase
-        .from("academic_chapters")
-        .upsert(chapterRows, { onConflict: "id" });
+      const r = await supabase.from("academic_chapters").upsert(chapterRows, { onConflict: "id" });
       if (r.error) throw new Error(r.error.message);
     }
 
@@ -221,7 +215,10 @@ export const syncAcademicTree = createServerFn({ method: "POST" })
           .from("academic_chapters")
           .delete()
           .not("id", "in", `(${keepChapterIds.map((id) => `"${id}"`).join(",")})`)
-      : await supabase.from("academic_chapters").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      : await supabase
+          .from("academic_chapters")
+          .delete()
+          .neq("id", "00000000-0000-0000-0000-000000000000");
     if (delChapters.error) throw new Error(delChapters.error.message);
 
     const delSubjects = keepSubjectIds.length
@@ -229,7 +226,10 @@ export const syncAcademicTree = createServerFn({ method: "POST" })
           .from("academic_subjects")
           .delete()
           .not("id", "in", `(${keepSubjectIds.map((id) => `"${id}"`).join(",")})`)
-      : await supabase.from("academic_subjects").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      : await supabase
+          .from("academic_subjects")
+          .delete()
+          .neq("id", "00000000-0000-0000-0000-000000000000");
     if (delSubjects.error) throw new Error(delSubjects.error.message);
 
     const delLevels = keepLevelIds.length
@@ -237,7 +237,10 @@ export const syncAcademicTree = createServerFn({ method: "POST" })
           .from("academic_levels")
           .delete()
           .not("id", "in", `(${keepLevelIds.map((id) => `"${id}"`).join(",")})`)
-      : await supabase.from("academic_levels").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      : await supabase
+          .from("academic_levels")
+          .delete()
+          .neq("id", "00000000-0000-0000-0000-000000000000");
     if (delLevels.error) throw new Error(delLevels.error.message);
 
     return loadTree(supabase);

@@ -205,20 +205,17 @@ function WrongAnswersPage() {
   }, [queryClient]);
 
   const bookmarkMutation = useMutation({
-    mutationFn: (args: { questionId: string; source: Source }) =>
-      toggleBookmarkFn({ data: args }),
+    mutationFn: (args: { questionId: string; source: Source }) => toggleBookmarkFn({ data: args }),
     onSuccess: invalidateList,
   });
 
   const clearMutation = useMutation({
-    mutationFn: (args: { ids: string[]; cleared: boolean }) =>
-      setClearedFn({ data: args }),
+    mutationFn: (args: { ids: string[]; cleared: boolean }) => setClearedFn({ data: args }),
     onSuccess: invalidateList,
   });
 
   const retryMutation = useMutation({
-    mutationFn: (args: { id: string; selectedIndex: number }) =>
-      submitRetryFn({ data: args }),
+    mutationFn: (args: { id: string; selectedIndex: number }) => submitRetryFn({ data: args }),
     onSuccess: invalidateList,
   });
 
@@ -275,9 +272,7 @@ function WrongAnswersPage() {
     const qbankCount = allWrong.filter((w) => w.source === "qbank").length;
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
-    const today = allWrong.filter(
-      (w) => w.lastWrongAt >= startOfDay.getTime(),
-    ).length;
+    const today = allWrong.filter((w) => w.lastWrongAt >= startOfDay.getTime()).length;
     const reviewed = allWrong.filter((w) => reviewMap[w.key]?.reviewed).length;
     const pending = total - reviewed;
     const repeated = allWrong.filter((w) => w.attempts > 1).length;
@@ -288,9 +283,7 @@ function WrongAnswersPage() {
 
   const trackingStats = useMemo(() => {
     const scope = allWrong;
-    const bucket = <K extends string>(
-      keyOf: (w: WrongItem) => { id: K; label: string },
-    ) => {
+    const bucket = <K extends string>(keyOf: (w: WrongItem) => { id: K; label: string }) => {
       const map = new Map<
         K,
         { id: K; label: string; total: number; reviewed: number; repeated: number }
@@ -385,12 +378,10 @@ function WrongAnswersPage() {
     if (levelId && !levelOptions.find((l) => l.id === levelId)) setLevelId("");
   }, [levelOptions, levelId]);
   useEffect(() => {
-    if (subjectId && !subjectOptions.find((s) => s.id === subjectId))
-      setSubjectId("");
+    if (subjectId && !subjectOptions.find((s) => s.id === subjectId)) setSubjectId("");
   }, [subjectOptions, subjectId]);
   useEffect(() => {
-    if (chapterId && !chapterOptions.find((c) => c.id === chapterId))
-      setChapterId("");
+    if (chapterId && !chapterOptions.find((c) => c.id === chapterId)) setChapterId("");
   }, [chapterOptions, chapterId]);
 
   /* ----------------------- filtered rows ------------------------- */
@@ -477,10 +468,7 @@ function WrongAnswersPage() {
     return () => io.disconnect();
   }, [filtered.length]);
 
-  const visibleRows = useMemo(
-    () => filtered.slice(0, visibleCount),
-    [filtered, visibleCount],
-  );
+  const visibleRows = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
 
   /* --------------------- retry handler --------------------------- */
 
@@ -542,28 +530,61 @@ function WrongAnswersPage() {
               Learn from every mistake
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Every incorrect answer from MCQ Practice, Question Bank, and
-              Custom Exam lands here automatically. Retry them, bookmark the
-              tricky ones, and clear them as you master each one.
+              Every incorrect answer from MCQ Practice, Question Bank, and Custom Exam lands here
+              automatically. Retry them, bookmark the tricky ones, and clear them as you master each
+              one.
             </p>
           </div>
         </div>
 
         <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <SummaryCard icon={XCircle} label="Total Wrong Questions" value={summary.total} tone="from-rose-500/20 via-rose-500/5 to-transparent" accent="text-rose-500" />
-          <SummaryCard icon={ListChecks} label="MCQ Practice Wrong" value={summary.mcqCount} tone="from-indigo-500/20 via-indigo-500/5 to-transparent" accent="text-indigo-500" />
-          <SummaryCard icon={Database} label="Question Bank Wrong" value={summary.qbankCount} tone="from-fuchsia-500/20 via-fuchsia-500/5 to-transparent" accent="text-fuchsia-500" />
-          <SummaryCard icon={CalendarDays} label="Today's Wrong Answers" value={summary.today} tone="from-amber-500/20 via-amber-500/5 to-transparent" accent="text-amber-500" />
-          <SummaryCard icon={CheckCircle2} label="Cleared" value={summary.reviewed} tone="from-emerald-500/20 via-emerald-500/5 to-transparent" accent="text-emerald-500" />
-          <SummaryCard icon={Hourglass} label="Pending" value={summary.pending} tone="from-sky-500/20 via-sky-500/5 to-transparent" accent="text-sky-500" />
+          <SummaryCard
+            icon={XCircle}
+            label="Total Wrong Questions"
+            value={summary.total}
+            tone="from-rose-500/20 via-rose-500/5 to-transparent"
+            accent="text-rose-500"
+          />
+          <SummaryCard
+            icon={ListChecks}
+            label="MCQ Practice Wrong"
+            value={summary.mcqCount}
+            tone="from-indigo-500/20 via-indigo-500/5 to-transparent"
+            accent="text-indigo-500"
+          />
+          <SummaryCard
+            icon={Database}
+            label="Question Bank Wrong"
+            value={summary.qbankCount}
+            tone="from-fuchsia-500/20 via-fuchsia-500/5 to-transparent"
+            accent="text-fuchsia-500"
+          />
+          <SummaryCard
+            icon={CalendarDays}
+            label="Today's Wrong Answers"
+            value={summary.today}
+            tone="from-amber-500/20 via-amber-500/5 to-transparent"
+            accent="text-amber-500"
+          />
+          <SummaryCard
+            icon={CheckCircle2}
+            label="Cleared"
+            value={summary.reviewed}
+            tone="from-emerald-500/20 via-emerald-500/5 to-transparent"
+            accent="text-emerald-500"
+          />
+          <SummaryCard
+            icon={Hourglass}
+            label="Pending"
+            value={summary.pending}
+            tone="from-sky-500/20 via-sky-500/5 to-transparent"
+            accent="text-sky-500"
+          />
         </section>
 
         <ProgressIndicators summary={summary} />
 
-        <TrackingSection
-          summary={summary}
-          stats={trackingStats}
-        />
+        <TrackingSection summary={summary} stats={trackingStats} />
 
         <section className="mb-4 rounded-2xl border border-border/60 bg-card/60 p-4 shadow-sm backdrop-blur-xl sm:p-5">
           <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -743,11 +764,7 @@ function WrongAnswersPage() {
               <span className="normal-case tracking-normal">
                 Sorted by{" "}
                 <span className="font-semibold text-foreground">
-                  {sort === "newest"
-                    ? "Newest"
-                    : sort === "oldest"
-                      ? "Oldest"
-                      : "Most repeated"}
+                  {sort === "newest" ? "Newest" : sort === "oldest" ? "Oldest" : "Most repeated"}
                 </span>
               </span>
             </div>
@@ -785,25 +802,17 @@ function WrongAnswersPage() {
                 ))}
               </div>
               {visibleCount < filtered.length && (
-                <div
-                  ref={sentinelRef}
-                  className="mt-6 flex flex-col items-center gap-3"
-                >
+                <div ref={sentinelRef} className="mt-6 flex flex-col items-center gap-3">
                   <div className="flex w-full max-w-md items-center gap-3 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                     <div className="h-px flex-1 bg-border/60" />
                     <span className="tabular-nums">
-                      Showing {visibleCount.toLocaleString()} of{" "}
-                      {filtered.length.toLocaleString()}
+                      Showing {visibleCount.toLocaleString()} of {filtered.length.toLocaleString()}
                     </span>
                     <div className="h-px flex-1 bg-border/60" />
                   </div>
                   <button
                     type="button"
-                    onClick={() =>
-                      setVisibleCount((c) =>
-                        Math.min(c + PAGE_SIZE, filtered.length),
-                      )
-                    }
+                    onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length))}
                     className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 bg-card/70 px-4 py-2 text-xs font-semibold text-foreground shadow-sm backdrop-blur transition hover:-translate-y-[1px] hover:border-rose-300/70 hover:shadow-md hover:shadow-rose-500/10"
                   >
                     Load more
@@ -829,8 +838,7 @@ function WrongAnswersPage() {
           reviewCount={reviewCounts[reviewingItem.key] ?? 0}
           onClose={() => setReviewingKey(null)}
           onPrev={() => {
-            if (reviewingIndex > 0)
-              setReviewingKey(filtered[reviewingIndex - 1].key);
+            if (reviewingIndex > 0) setReviewingKey(filtered[reviewingIndex - 1].key);
           }}
           onNext={() => {
             if (reviewingIndex >= 0 && reviewingIndex < filtered.length - 1)
@@ -865,9 +873,13 @@ function SummaryCard({
   accent: string;
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br ${tone} p-4 shadow-sm backdrop-blur-xl`}>
+    <div
+      className={`relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br ${tone} p-4 shadow-sm backdrop-blur-xl`}
+    >
       <div className="flex items-center gap-2">
-        <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl bg-background/60 ring-1 ring-inset ring-border/60 ${accent}`}>
+        <span
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-xl bg-background/60 ring-1 ring-inset ring-border/60 ${accent}`}
+        >
           <Icon className="h-4 w-4" />
         </span>
         <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
@@ -1037,7 +1049,6 @@ function WrongCard({
         <span>{item.question}</span>
       </h3>
 
-
       {/* Selected wrong / correct answer summary */}
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <div className="rounded-xl border border-rose-400/40 bg-rose-500/5 p-3">
@@ -1046,8 +1057,8 @@ function WrongCard({
           </div>
           <p className="text-sm text-muted-foreground">
             Your specific choice isn't stored during practice. Use{" "}
-            <span className="font-medium text-foreground">Review Again</span> to
-            retry this question and see where you go wrong.
+            <span className="font-medium text-foreground">Review Again</span> to retry this question
+            and see where you go wrong.
           </p>
         </div>
         <div className="rounded-xl border border-emerald-400/40 bg-emerald-500/5 p-3">
@@ -1155,15 +1166,7 @@ function WrongCard({
   );
 }
 
-function StatChip({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: string;
-  accent?: string;
-}) {
+function StatChip({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
     <div className="rounded-lg border border-border/60 bg-background/50 px-3 py-2">
       <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
@@ -1264,16 +1267,13 @@ function ReviewModal({
     }
   };
 
-
   const tryAgain = () => {
     setChosen(null);
     setSubmitted(false);
   };
 
   const correctOption = item.options.find((o) => o.key === item.correctKey);
-  const previousOption = sessionPrev
-    ? item.options.find((o) => o.key === sessionPrev)
-    : null;
+  const previousOption = sessionPrev ? item.options.find((o) => o.key === sessionPrev) : null;
   const chosenOption = chosen ? item.options.find((o) => o.key === chosen) : null;
   const sourceLabel = item.source === "mcq" ? "MCQ Practice" : "Question Bank";
 
@@ -1319,9 +1319,7 @@ function ReviewModal({
                 </span>
               )}
             </div>
-            <h2 className="mt-1 truncate text-base font-semibold sm:text-lg">
-              {item.chapterName}
-            </h2>
+            <h2 className="mt-1 truncate text-base font-semibold sm:text-lg">{item.chapterName}</h2>
             <div className="mt-1 flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
               <span>{item.levelName}</span>
               <span aria-hidden>·</span>
@@ -1442,9 +1440,7 @@ function ReviewModal({
                       {showCorrect && (
                         <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
                       )}
-                      {showWrong && (
-                        <XCircle className="h-5 w-5 shrink-0 text-rose-500" />
-                      )}
+                      {showWrong && <XCircle className="h-5 w-5 shrink-0 text-rose-500" />}
                     </motion.button>
                   );
                 })}
@@ -1639,14 +1635,34 @@ function ReviewModal({
 
 function ChevronLeftIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <polyline points="15 18 9 12 15 6" />
     </svg>
   );
 }
 function ChevronRightIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <polyline points="9 18 15 12 9 6" />
     </svg>
   );
@@ -1693,12 +1709,16 @@ function AnswerPill({
           };
   return (
     <div className={`rounded-2xl border ${styles.border} ${styles.bg} p-4 ${className ?? ""}`}>
-      <div className={`mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] ${styles.label}`}>
+      <div
+        className={`mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] ${styles.label}`}
+      >
         <Icon className={`h-3.5 w-3.5 ${styles.iconColor}`} />
         {label}
       </div>
       <div className="flex items-start gap-2 text-sm text-foreground">
-        <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[11px] font-bold ${styles.badge}`}>
+        <span
+          className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[11px] font-bold ${styles.badge}`}
+        >
           {optionKey}
         </span>
         <span className="pt-0.5 leading-relaxed">{text}</span>
@@ -1706,7 +1726,6 @@ function AnswerPill({
     </div>
   );
 }
-
 
 /* ------------------------------------------------------------------ */
 /* Tracking / charts                                                   */
@@ -1753,8 +1772,7 @@ function TrackingSection({
   };
   stats: TrackingStats;
 }) {
-  const completion =
-    summary.total > 0 ? Math.round((summary.reviewed / summary.total) * 100) : 0;
+  const completion = summary.total > 0 ? Math.round((summary.reviewed / summary.total) * 100) : 0;
   const hasData = summary.total > 0;
 
   return (
@@ -1810,11 +1828,27 @@ function TrackingSection({
           empty={stats.bySubject.length === 0}
         >
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={stats.bySubject.slice(0, 8)} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+            <BarChart
+              data={stats.bySubject.slice(0, 8)}
+              margin={{ top: 8, right: 8, left: -12, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-15} textAnchor="end" height={50} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "hsl(var(--accent))", opacity: 0.25 }} />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                interval={0}
+                angle={-15}
+                textAnchor="end"
+                height={50}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+              />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                cursor={{ fill: "hsl(var(--accent))", opacity: 0.25 }}
+              />
               <Bar dataKey="total" radius={[8, 8, 0, 0]}>
                 {stats.bySubject.slice(0, 8).map((_, i) => (
                   <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />
@@ -1835,10 +1869,27 @@ function TrackingSection({
               layout="vertical"
               margin={{ top: 4, right: 12, left: 8, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} horizontal={false} />
-              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis type="category" dataKey="label" width={120} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "hsl(var(--accent))", opacity: 0.25 }} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--border))"
+                opacity={0.4}
+                horizontal={false}
+              />
+              <XAxis
+                type="number"
+                allowDecimals={false}
+                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+              />
+              <YAxis
+                type="category"
+                dataKey="label"
+                width={120}
+                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+              />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                cursor={{ fill: "hsl(var(--accent))", opacity: 0.25 }}
+              />
               <Bar dataKey="total" radius={[0, 8, 8, 0]} fill="#8b5cf6" />
             </BarChart>
           </ResponsiveContainer>
@@ -1852,29 +1903,57 @@ function TrackingSection({
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={stats.overTime} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+              />
               <Tooltip contentStyle={tooltipStyle} />
-              <Line type="monotone" dataKey="wrong" stroke="#f43f5e" strokeWidth={2.5} dot={{ r: 3, fill: "#f43f5e" }} activeDot={{ r: 5 }} name="Wrong" />
-              <Line type="monotone" dataKey="reviewed" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3, fill: "#10b981" }} activeDot={{ r: 5 }} name="Reviewed" />
+              <Line
+                type="monotone"
+                dataKey="wrong"
+                stroke="#f43f5e"
+                strokeWidth={2.5}
+                dot={{ r: 3, fill: "#f43f5e" }}
+                activeDot={{ r: 5 }}
+                name="Wrong"
+              />
+              <Line
+                type="monotone"
+                dataKey="reviewed"
+                stroke="#10b981"
+                strokeWidth={2.5}
+                dot={{ r: 3, fill: "#10b981" }}
+                activeDot={{ r: 5 }}
+                name="Reviewed"
+              />
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
 
         <ChartCard
           title="Review Completion"
-          subtitle={hasData ? `${summary.reviewed} of ${summary.total} reviewed` : "No wrong answers yet"}
+          subtitle={
+            hasData ? `${summary.reviewed} of ${summary.total} reviewed` : "No wrong answers yet"
+          }
           empty={!hasData}
         >
           <div className="flex h-[240px] flex-col items-center justify-center gap-4">
             <CompletionRing percent={completion} />
             <div className="grid w-full grid-cols-2 gap-2 text-center">
               <div className="rounded-xl border border-emerald-400/40 bg-emerald-500/5 p-3">
-                <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-emerald-600 dark:text-emerald-400">Reviewed</div>
+                <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-emerald-600 dark:text-emerald-400">
+                  Reviewed
+                </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums">{summary.reviewed}</div>
               </div>
               <div className="rounded-xl border border-sky-400/40 bg-sky-500/5 p-3">
-                <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-sky-600 dark:text-sky-400">Pending</div>
+                <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-sky-600 dark:text-sky-400">
+                  Pending
+                </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums">{summary.pending}</div>
               </div>
             </div>
@@ -1910,9 +1989,13 @@ function TrackerStat({
   accent: string;
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br ${tone} p-4 shadow-sm backdrop-blur-xl`}>
+    <div
+      className={`relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br ${tone} p-4 shadow-sm backdrop-blur-xl`}
+    >
       <div className="flex items-center gap-2">
-        <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl bg-background/60 ring-1 ring-inset ring-border/60 ${accent}`}>
+        <span
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-xl bg-background/60 ring-1 ring-inset ring-border/60 ${accent}`}
+        >
           <Icon className="h-4 w-4" />
         </span>
         <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
@@ -2021,7 +2104,15 @@ function CompletionRing({ percent }: { percent: number }) {
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="hsl(var(--border))" strokeWidth={stroke} fill="none" opacity={0.4} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="hsl(var(--border))"
+          strokeWidth={stroke}
+          fill="none"
+          opacity={0.4}
+        />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -2043,7 +2134,9 @@ function CompletionRing({ percent }: { percent: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div className="text-2xl font-semibold tabular-nums tracking-tight">{percent}%</div>
-        <div className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Reviewed</div>
+        <div className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          Reviewed
+        </div>
       </div>
     </div>
   );
@@ -2055,8 +2148,7 @@ function CompletionRing({ percent }: { percent: number }) {
 
 function AttemptBadge({ attempts }: { attempts: number }) {
   const n = Math.max(1, attempts);
-  const label =
-    n === 1 ? "Wrong 1 Time" : n === 2 ? "Wrong 2 Times" : "Wrong 3+ Times";
+  const label = n === 1 ? "Wrong 1 Time" : n === 2 ? "Wrong 2 Times" : "Wrong 3+ Times";
   const tone =
     n >= 3
       ? "border-amber-400/60 bg-gradient-to-r from-amber-500/15 to-rose-500/15 text-amber-700 dark:text-amber-300"
@@ -2150,9 +2242,7 @@ function ProgressBar({
         <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           {label}
         </span>
-        <span className={`text-xs font-semibold tabular-nums ${tone}`}>
-          {percent}%
-        </span>
+        <span className={`text-xs font-semibold tabular-nums ${tone}`}>{percent}%</span>
       </div>
       <div className="relative h-2.5 overflow-hidden rounded-full bg-background/70 ring-1 ring-inset ring-border/40">
         <div

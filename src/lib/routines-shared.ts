@@ -9,10 +9,7 @@ import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyAssignedRoutines, type TrackerRoutine } from "@/lib/routine-tracker.functions";
-import {
-  getRoutineTasksFromCache,
-  setRoutineTasksCache,
-} from "@/lib/routine-tasks-cache";
+import { getRoutineTasksFromCache, setRoutineTasksCache } from "@/lib/routine-tasks-cache";
 
 export type SharedRoutineStatus = "active" | "inactive";
 export type SharedRoutineType = "daily" | "weekly" | "monthly" | "custom";

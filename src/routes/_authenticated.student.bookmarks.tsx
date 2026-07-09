@@ -132,7 +132,6 @@ function exportBookmarksToCsv(rows: BookmarkRecord[]) {
   URL.revokeObjectURL(url);
 }
 
-
 function BookmarksPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -230,16 +229,13 @@ function BookmarksPage() {
     if (changed) setSelected(next);
   }, [records, selected]);
 
-
   // Keyboard shortcut: "/" or "Cmd/Ctrl+K" focuses the search input.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       const typing =
         target &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.isContentEditable);
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
       if (typing) return;
       if (e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) {
         e.preventDefault();
@@ -254,9 +250,7 @@ function BookmarksPage() {
   useEffect(() => {
     if (
       subjectId &&
-      !subjectOptions.some(
-        (s) => s.id === subjectId && (!levelId || s.levelId === levelId),
-      )
+      !subjectOptions.some((s) => s.id === subjectId && (!levelId || s.levelId === levelId))
     ) {
       setSubjectId("");
     }
@@ -264,9 +258,7 @@ function BookmarksPage() {
   useEffect(() => {
     if (
       chapterId &&
-      !chapterOptions.some(
-        (c) => c.id === chapterId && (!subjectId || c.subjectId === subjectId),
-      )
+      !chapterOptions.some((c) => c.id === chapterId && (!subjectId || c.subjectId === subjectId))
     ) {
       setChapterId("");
     }
@@ -338,10 +330,7 @@ function BookmarksPage() {
     return () => io.disconnect();
   }, [visibleCount, filtered.length]);
 
-  const visibleRecords = useMemo(
-    () => filtered.slice(0, visibleCount),
-    [filtered, visibleCount],
-  );
+  const visibleRecords = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
 
   const visibleSubjects = levelId
     ? subjectOptions.filter((s) => s.levelId === levelId)
@@ -408,11 +397,9 @@ function BookmarksPage() {
   };
 
   const doExportCsv = () => {
-    const chosen =
-      selected.size > 0 ? filtered.filter((r) => selected.has(r.key)) : filtered;
+    const chosen = selected.size > 0 ? filtered.filter((r) => selected.has(r.key)) : filtered;
     exportBookmarksToCsv(chosen);
   };
-
 
   // ------------------ REVIEW MODE ------------------
   if (reviewingKey) {
@@ -445,7 +432,6 @@ function BookmarksPage() {
         setReviewingKey(filtered[reviewIdx + 1].key);
       }
     };
-
 
     const confirmingHere = confirmRemoveKey === current.key;
     const correctText = current.options.find((o) => o.key === current.answer)?.text ?? "";
@@ -499,9 +485,21 @@ function BookmarksPage() {
           <ExplanationCard text={current.explanation} />
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <MetaBadge tone="amber" icon={<Layers className="h-3 w-3" />} label={current.levelName} />
-            <MetaBadge tone="sky" icon={<FileText className="h-3 w-3" />} label={current.subjectName} />
-            <MetaBadge tone="violet" icon={<Database className="h-3 w-3" />} label={current.chapterName} />
+            <MetaBadge
+              tone="amber"
+              icon={<Layers className="h-3 w-3" />}
+              label={current.levelName}
+            />
+            <MetaBadge
+              tone="sky"
+              icon={<FileText className="h-3 w-3" />}
+              label={current.subjectName}
+            />
+            <MetaBadge
+              tone="violet"
+              icon={<Database className="h-3 w-3" />}
+              label={current.chapterName}
+            />
           </div>
         </div>
 
@@ -548,7 +546,6 @@ function BookmarksPage() {
               <ArrowLeft className="h-3.5 w-3.5" /> Back to Bookmarks
             </button>
           </div>
-
         </div>
 
         <ConfirmDialog
@@ -582,40 +579,45 @@ function BookmarksPage() {
       </div>
 
       {/* Continue review banner — jumps straight into the most recent bookmark. */}
-      {hydrated && records.length > 0 && (() => {
-        // Prefer most recently added; falls back to most recently reviewed.
-        const resume = [...records].sort(
-          (a, b) => Math.max(b.addedAt, b.reviewedAt ?? 0) - Math.max(a.addedAt, a.reviewedAt ?? 0),
-        )[0];
-        if (!resume) return null;
-        return (
-          <button
-            type="button"
-            onClick={() => openReview(resume)}
-            className="group mb-6 flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-r from-indigo-500/10 via-fuchsia-500/5 to-transparent p-4 text-left shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-indigo-300/60 hover:shadow-lg hover:shadow-indigo-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 sm:p-5"
-          >
-            <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white shadow-lg shadow-indigo-500/30">
-              <Eye className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-500">
-                Continue reviewing
-                <span className="text-muted-foreground/70">· {formatBookmarkDate(Math.max(resume.reviewedAt ?? 0, resume.addedAt))}</span>
+      {hydrated &&
+        records.length > 0 &&
+        (() => {
+          // Prefer most recently added; falls back to most recently reviewed.
+          const resume = [...records].sort(
+            (a, b) =>
+              Math.max(b.addedAt, b.reviewedAt ?? 0) - Math.max(a.addedAt, a.reviewedAt ?? 0),
+          )[0];
+          if (!resume) return null;
+          return (
+            <button
+              type="button"
+              onClick={() => openReview(resume)}
+              className="group mb-6 flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-r from-indigo-500/10 via-fuchsia-500/5 to-transparent p-4 text-left shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-indigo-300/60 hover:shadow-lg hover:shadow-indigo-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 sm:p-5"
+            >
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white shadow-lg shadow-indigo-500/30">
+                <Eye className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-500">
+                  Continue reviewing
+                  <span className="text-muted-foreground/70">
+                    · {formatBookmarkDate(Math.max(resume.reviewedAt ?? 0, resume.addedAt))}
+                  </span>
+                </div>
+                <p className="mt-0.5 truncate text-sm font-medium text-foreground">
+                  {resume.question}
+                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <SourceBadge source={resume.source} label={resume.sourceLabel} />
+                  <span className="hidden text-[11px] text-muted-foreground sm:inline">
+                    {resume.subjectName} · {resume.chapterName}
+                  </span>
+                </div>
               </div>
-              <p className="mt-0.5 truncate text-sm font-medium text-foreground">
-                {resume.question}
-              </p>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                <SourceBadge source={resume.source} label={resume.sourceLabel} />
-                <span className="hidden text-[11px] text-muted-foreground sm:inline">
-                  {resume.subjectName} · {resume.chapterName}
-                </span>
-              </div>
-            </div>
-            <ChevronRight className="hidden h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground sm:block" />
-          </button>
-        );
-      })()}
+              <ChevronRight className="hidden h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground sm:block" />
+            </button>
+          );
+        })()}
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -656,10 +658,8 @@ function BookmarksPage() {
         />
       </div>
 
-
       {/* Filters — sticky on scroll so long lists stay quick to refine. */}
       <div className="sticky top-2 z-20 mt-8 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-card/60 sm:top-4">
-
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <SelectField
             icon={<Layers className="h-3.5 w-3.5" />}
@@ -793,7 +793,10 @@ function BookmarksPage() {
               </span>{" "}
               {filtered.length === 1 ? "bookmark" : "bookmarks"}
               {filtered.length !== records.length && (
-                <span className="text-muted-foreground/80"> · of {records.length.toLocaleString()}</span>
+                <span className="text-muted-foreground/80">
+                  {" "}
+                  · of {records.length.toLocaleString()}
+                </span>
               )}
               {selected.size > 0 && (
                 <span className="ml-2 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[11px] font-medium text-indigo-600 ring-1 ring-indigo-500/20">
@@ -802,7 +805,9 @@ function BookmarksPage() {
               )}
             </>
           ) : (
-            <span className="inline-flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Loading your bookmarks…</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Loader2 className="h-3 w-3 animate-spin" /> Loading your bookmarks…
+            </span>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -842,7 +847,6 @@ function BookmarksPage() {
         </div>
       </div>
 
-
       {/* Cards */}
       <div className="mt-3">
         {!hydrated ? (
@@ -876,7 +880,6 @@ function BookmarksPage() {
           </>
         )}
       </div>
-
 
       <ConfirmDialog
         open={confirmRemoveKey !== null}
@@ -924,7 +927,9 @@ function SummaryCard({
   const iconColor = tint.split(" ").pop();
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-4 shadow-sm backdrop-blur transition hover:border-border">
-      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br opacity-60 ${gradient}`} />
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br opacity-60 ${gradient}`}
+      />
       <div className="relative flex items-start justify-between gap-2">
         <div>
           <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -1029,15 +1034,22 @@ function BookmarkListCard({
           )}
         </div>
 
-
         <p className="line-clamp-4 text-[15px] font-medium leading-relaxed tracking-tight text-foreground">
           {record.question}
         </p>
 
         <div className="flex flex-wrap gap-1.5 pt-1">
           <MetaBadge tone="amber" icon={<Layers className="h-3 w-3" />} label={record.levelName} />
-          <MetaBadge tone="sky" icon={<FileText className="h-3 w-3" />} label={record.subjectName} />
-          <MetaBadge tone="violet" icon={<Database className="h-3 w-3" />} label={record.chapterName} />
+          <MetaBadge
+            tone="sky"
+            icon={<FileText className="h-3 w-3" />}
+            label={record.subjectName}
+          />
+          <MetaBadge
+            tone="violet"
+            icon={<Database className="h-3 w-3" />}
+            label={record.chapterName}
+          />
         </div>
 
         <div className="mt-auto flex items-center gap-1.5 text-[11px] text-muted-foreground">
@@ -1071,7 +1083,6 @@ function BookmarkListCard({
           <BookmarkX className="h-3.5 w-3.5" />
         </button>
       </div>
-
     </article>
   );
 }
@@ -1109,14 +1120,7 @@ function BookmarkGridSkeleton() {
   );
 }
 
-
-function SourceBadge({
-  source,
-  label,
-}: {
-  source: "mcq" | "qbank";
-  label: string;
-}) {
+function SourceBadge({ source, label }: { source: "mcq" | "qbank"; label: string }) {
   const cls =
     source === "mcq"
       ? "bg-sky-500/10 text-sky-600 ring-sky-500/20"
@@ -1157,7 +1161,6 @@ function MetaBadge({
     </span>
   );
 }
-
 
 function EmptyState({ hasAny }: { hasAny: boolean }) {
   return (

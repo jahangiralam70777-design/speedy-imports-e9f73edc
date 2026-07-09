@@ -318,7 +318,9 @@ function FloatingCard({
         transition={{ duration, repeat: Infinity, ease: "easeInOut", delay }}
         className="glass shadow-soft flex items-center gap-3 rounded-2xl border border-border px-3.5 py-3 min-w-[180px]"
       >
-        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${accent} text-white shadow-glow`}>
+        <div
+          className={`flex h-9 w-9 items-center justify-center rounded-xl ${accent} text-white shadow-glow`}
+        >
           {icon}
         </div>
         <div className="leading-tight">
@@ -373,7 +375,9 @@ function DashboardPreview({ mouseX, mouseY }: { mouseX: number; mouseY: number }
               <div
                 key={s.l}
                 className={`rounded-lg px-2.5 py-2 text-[11px] font-medium ${
-                  s.a ? "bg-brand-gradient text-white shadow-glow" : "text-muted-foreground hover:bg-secondary"
+                  s.a
+                    ? "bg-brand-gradient text-white shadow-glow"
+                    : "text-muted-foreground hover:bg-secondary"
                 }`}
               >
                 {s.l}
@@ -426,7 +430,11 @@ function DashboardPreview({ mouseX, mouseY }: { mouseX: number; mouseY: number }
                 <div className="text-[10px] text-muted-foreground">3 items</div>
               </div>
               <div className="space-y-1.5">
-                {["Audit & Assurance · Ch. 5 · 20 MCQs", "Financial Accounting · Timed Quiz · 6pm", "Mock Exam · Certificate Level"].map((t, i) => (
+                {[
+                  "Audit & Assurance · Ch. 5 · 20 MCQs",
+                  "Financial Accounting · Timed Quiz · 6pm",
+                  "Mock Exam · Certificate Level",
+                ].map((t, i) => (
                   <div
                     key={t}
                     className="flex items-center justify-between rounded-lg bg-secondary/60 px-2.5 py-1.5 text-[10px]"
@@ -549,9 +557,7 @@ function Hero() {
             >
               Master Your ICAB CA
               <br />
-              <span className="text-gradient animate-gradient">
-                Journey with Confidence.
-              </span>
+              <span className="text-gradient animate-gradient">Journey with Confidence.</span>
             </motion.h1>
 
             <motion.p
@@ -561,8 +567,8 @@ function Hero() {
               className="mx-auto lg:mx-0 mt-7 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
             >
               Chapter-wise MCQ practice, timed quizzes, mock examinations, question bank and
-              performance analytics — thoughtfully designed for ICAB Certificate, Professional
-              and Advanced Level students across Bangladesh.
+              performance analytics — thoughtfully designed for ICAB Certificate, Professional and
+              Advanced Level students across Bangladesh.
             </motion.p>
 
             <motion.div
@@ -591,13 +597,24 @@ function Hero() {
               {[
                 { icon: <ShieldCheck className="h-3.5 w-3.5 text-success" />, l: "ICAB Focused" },
                 { icon: <Users className="h-3.5 w-3.5 text-accent" />, l: "Growing CA Community" },
-                { icon: <Star className="h-3.5 w-3.5 fill-warning text-warning" />, l: "4.9 Student Rating" },
-                { icon: <Landmark className="h-3.5 w-3.5 text-warning" />, l: "Made in Bangladesh" },
+                {
+                  icon: <Star className="h-3.5 w-3.5 fill-warning text-warning" />,
+                  l: "4.9 Student Rating",
+                },
+                {
+                  icon: <Landmark className="h-3.5 w-3.5 text-warning" />,
+                  l: "Made in Bangladesh",
+                },
               ].map((b, i) => (
                 <motion.div
                   key={b.l}
                   animate={{ y: [0, -3, 0] }}
-                  transition={{ duration: 3 + i * 0.4, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+                  transition={{
+                    duration: 3 + i * 0.4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: i * 0.2,
+                  }}
                   className="glass inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 font-medium"
                 >
                   {b.icon} {b.l}

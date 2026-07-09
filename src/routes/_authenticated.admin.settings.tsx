@@ -36,11 +36,7 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
-import {
-  getAdminSettings,
-  saveAdminSettings,
-  getSystemStats,
-} from "@/lib/settings.functions";
+import { getAdminSettings, saveAdminSettings, getSystemStats } from "@/lib/settings.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   head: () => ({
@@ -162,16 +158,16 @@ const STORAGE_KEY = "cl-aspire:admin-settings:v1";
 /* ------------------------------------------------------------------ */
 
 const SECTIONS = [
-  { id: "general",       label: "General",           icon: Building2 },
-  { id: "platform",      label: "Platform",          icon: ServerCog },
-  { id: "authentication",label: "Authentication",    icon: Fingerprint },
-  { id: "email",         label: "Email",             icon: Mail },
-  { id: "notifications", label: "Notifications",     icon: Bell },
-  { id: "security",      label: "Security",          icon: ShieldCheck },
-  { id: "appearance",    label: "Appearance",        icon: Palette },
-  { id: "academic",      label: "Academic",          icon: GraduationCap },
-  { id: "backup",        label: "Backup",            icon: DownloadCloud },
-  { id: "system",        label: "System Information",icon: Braces },
+  { id: "general", label: "General", icon: Building2 },
+  { id: "platform", label: "Platform", icon: ServerCog },
+  { id: "authentication", label: "Authentication", icon: Fingerprint },
+  { id: "email", label: "Email", icon: Mail },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "security", label: "Security", icon: ShieldCheck },
+  { id: "appearance", label: "Appearance", icon: Palette },
+  { id: "academic", label: "Academic", icon: GraduationCap },
+  { id: "backup", label: "Backup", icon: DownloadCloud },
+  { id: "system", label: "System Information", icon: Braces },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
 
@@ -207,9 +203,7 @@ function AdminSettingsPage() {
   const [draft, setDraft] = useState<Settings>(() => DEFAULTS);
   const [initialized, setInitialized] = useState(false);
   const [active, setActive] = useState<SectionId>("general");
-  const [toast, setToast] = useState<{ kind: "ok" | "err"; msg: string } | null>(
-    null,
-  );
+  const [toast, setToast] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
   const { resolved: theme, setTheme } = useTheme();
 
@@ -228,13 +222,15 @@ function AdminSettingsPage() {
   }, [toast]);
 
   const saveMutation = useMutation({
-    mutationFn: (next: Settings) =>
-      persistSettings({ data: { settings: next as never } }),
+    mutationFn: (next: Settings) => persistSettings({ data: { settings: next as never } }),
     onSuccess: (_res, vars) => {
-      qc.setQueryData(["admin-settings"], (prev: { settings: unknown; updatedAt: string | null } | undefined) => ({
-        settings: vars,
-        updatedAt: new Date().toISOString(),
-      }));
+      qc.setQueryData(
+        ["admin-settings"],
+        (prev: { settings: unknown; updatedAt: string | null } | undefined) => ({
+          settings: vars,
+          updatedAt: new Date().toISOString(),
+        }),
+      );
       setTheme(vars.appearance.theme);
       setToast({ kind: "ok", msg: "Settings saved" });
     },
@@ -282,7 +278,7 @@ function AdminSettingsPage() {
 
   const resetSection = () => {
     const key = active === "platform" || active === "system" ? "general" : active;
-    setDraft((d) => ({ ...d, [key]: (DEFAULTS as Record<string, unknown>)[key] } as Settings));
+    setDraft((d) => ({ ...d, [key]: (DEFAULTS as Record<string, unknown>)[key] }) as Settings);
     setToast({ kind: "ok", msg: `${labelFor(active)} reset to defaults` });
   };
 
@@ -292,7 +288,10 @@ function AdminSettingsPage() {
     setToast({ kind: "ok", msg: "All settings reset to defaults" });
   };
 
-  const discard = () => { setDraft(saved); setToast({ kind: "ok", msg: "Changes discarded" }); };
+  const discard = () => {
+    setDraft(saved);
+    setToast({ kind: "ok", msg: "Changes discarded" });
+  };
 
   const exportBackup = () => {
     const blob = new Blob([JSON.stringify(draft, null, 2)], { type: "application/json" });
@@ -316,7 +315,6 @@ function AdminSettingsPage() {
       setToast({ kind: "err", msg: "Invalid settings file" });
     }
   };
-
 
   return (
     <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
@@ -346,7 +344,9 @@ function AdminSettingsPage() {
                         isActive ? "opacity-100" : "opacity-0"
                       }`}
                     />
-                    <Icon className={`h-4 w-4 shrink-0 transition ${isActive ? "text-primary" : "group-hover:text-foreground"}`} />
+                    <Icon
+                      className={`h-4 w-4 shrink-0 transition ${isActive ? "text-primary" : "group-hover:text-foreground"}`}
+                    />
                     <span className="truncate">{s.label}</span>
                   </button>
                 </li>
@@ -358,12 +358,7 @@ function AdminSettingsPage() {
 
       {/* ---------------- Panel ---------------- */}
       <div className="space-y-6">
-        <SectionSwitch
-          active={active}
-          draft={draft}
-          update={update}
-          theme={theme}
-        />
+        <SectionSwitch active={active} draft={draft} update={update} theme={theme} />
 
         {/* Sticky action bar */}
         <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/85 p-3 shadow-xl backdrop-blur-2xl">
@@ -467,7 +462,10 @@ function labelFor(id: SectionId) {
 /* ------------------------------------------------------------------ */
 
 function SectionSwitch({
-  active, draft, update, theme,
+  active,
+  draft,
+  update,
+  theme,
 }: {
   active: SectionId;
   draft: Settings;
@@ -490,7 +488,9 @@ function SectionSwitch({
         {active === "email" && <EmailSection draft={draft} update={update} />}
         {active === "notifications" && <NotificationsSection draft={draft} update={update} />}
         {active === "security" && <SecuritySection draft={draft} update={update} />}
-        {active === "appearance" && <AppearanceSection draft={draft} update={update} theme={theme} />}
+        {active === "appearance" && (
+          <AppearanceSection draft={draft} update={update} theme={theme} />
+        )}
         {active === "academic" && <AcademicSection draft={draft} update={update} />}
         {active === "backup" && <BackupSection draft={draft} update={update} />}
         {active === "system" && <SystemSection />}
@@ -518,9 +518,24 @@ function GeneralSection({ draft, update }: SectionProps) {
       icon={Building2}
     >
       <Grid>
-        <TextField label="Platform name" value={g.platformName} onChange={(v) => update("general", { platformName: v })} />
-        <TextField label="Support email" type="email" value={g.supportEmail} onChange={(v) => update("general", { supportEmail: v })} icon={Mail} />
-        <TextField label="Contact number" value={g.contactNumber} onChange={(v) => update("general", { contactNumber: v })} icon={Phone} />
+        <TextField
+          label="Platform name"
+          value={g.platformName}
+          onChange={(v) => update("general", { platformName: v })}
+        />
+        <TextField
+          label="Support email"
+          type="email"
+          value={g.supportEmail}
+          onChange={(v) => update("general", { supportEmail: v })}
+          icon={Mail}
+        />
+        <TextField
+          label="Contact number"
+          value={g.contactNumber}
+          onChange={(v) => update("general", { contactNumber: v })}
+          icon={Phone}
+        />
         <SelectField
           label="Timezone"
           value={g.timezone}
@@ -557,7 +572,9 @@ function GeneralSection({ draft, update }: SectionProps) {
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-xs text-muted-foreground">PNG, JPG or SVG. Recommended 512×512.</div>
+              <div className="text-xs text-muted-foreground">
+                PNG, JPG or SVG. Recommended 512×512.
+              </div>
               <div className="mt-1.5 flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -601,7 +618,9 @@ function PlatformSection({ draft, update }: SectionProps) {
         label="Maintenance mode"
         hint="Show a maintenance page to non-admin users."
         enabled={false}
-        onToggle={() => { /* placeholder wired to draft in future */ }}
+        onToggle={() => {
+          /* placeholder wired to draft in future */
+        }}
       />
       <SelectField
         label="Region"
@@ -644,9 +663,9 @@ function AuthSection({ draft, update }: SectionProps) {
         onChange={(v) => update("auth", { passwordPolicy: v as PasswordPolicy })}
         icon={KeyRound}
         options={[
-          ["basic",    "Basic · 6+ characters"],
+          ["basic", "Basic · 6+ characters"],
           ["standard", "Standard · 8+ chars, mixed case & number"],
-          ["strict",   "Strict · 12+ chars, symbol required"],
+          ["strict", "Strict · 12+ chars, symbol required"],
         ]}
       />
     </Card>
@@ -660,9 +679,23 @@ function EmailSection({ draft, update }: SectionProps) {
   return (
     <Card title="Email" hint="Outbound email delivery configuration." icon={Mail}>
       <Grid>
-        <TextField label="From name"  value={e.fromName}  onChange={(v) => update("email", { fromName: v })} />
-        <TextField label="From email" type="email" value={e.fromEmail} onChange={(v) => update("email", { fromEmail: v })} icon={Mail} />
-        <TextField label="SMTP host"  value={e.smtpHost}  onChange={(v) => update("email", { smtpHost: v })} />
+        <TextField
+          label="From name"
+          value={e.fromName}
+          onChange={(v) => update("email", { fromName: v })}
+        />
+        <TextField
+          label="From email"
+          type="email"
+          value={e.fromEmail}
+          onChange={(v) => update("email", { fromEmail: v })}
+          icon={Mail}
+        />
+        <TextField
+          label="SMTP host"
+          value={e.smtpHost}
+          onChange={(v) => update("email", { smtpHost: v })}
+        />
         <TextField
           label="SMTP port"
           type="number"
@@ -680,14 +713,34 @@ function NotificationsSection({ draft, update }: SectionProps) {
   const n = draft.notifications;
   return (
     <Card title="Notifications" hint="Who gets pinged, and by which channel." icon={Bell}>
-      <SwitchRow icon={Mail}  label="Email notifications" hint="Send transactional email for account events."
-        enabled={n.email}  onToggle={() => update("notifications", { email: !n.email })} />
-      <SwitchRow icon={GraduationCap} label="Student notifications" hint="Notify students about new content and reminders."
-        enabled={n.student} onToggle={() => update("notifications", { student: !n.student })} />
-      <SwitchRow icon={ShieldCheck} label="Admin notifications" hint="Notify admins about security & platform events."
-        enabled={n.admin}   onToggle={() => update("notifications", { admin: !n.admin })} />
-      <SwitchRow icon={Bell}  label="Weekly digest" hint="Summarize activity every Monday morning."
-        enabled={n.weeklyDigest} onToggle={() => update("notifications", { weeklyDigest: !n.weeklyDigest })} />
+      <SwitchRow
+        icon={Mail}
+        label="Email notifications"
+        hint="Send transactional email for account events."
+        enabled={n.email}
+        onToggle={() => update("notifications", { email: !n.email })}
+      />
+      <SwitchRow
+        icon={GraduationCap}
+        label="Student notifications"
+        hint="Notify students about new content and reminders."
+        enabled={n.student}
+        onToggle={() => update("notifications", { student: !n.student })}
+      />
+      <SwitchRow
+        icon={ShieldCheck}
+        label="Admin notifications"
+        hint="Notify admins about security & platform events."
+        enabled={n.admin}
+        onToggle={() => update("notifications", { admin: !n.admin })}
+      />
+      <SwitchRow
+        icon={Bell}
+        label="Weekly digest"
+        hint="Summarize activity every Monday morning."
+        enabled={n.weeklyDigest}
+        onToggle={() => update("notifications", { weeklyDigest: !n.weeklyDigest })}
+      />
     </Card>
   );
 }
@@ -727,11 +780,18 @@ function SecuritySection({ draft, update }: SectionProps) {
 
 /* ---------- Appearance ---------- */
 
-const PALETTE = ["#6D5EF8", "#22C55E", "#0EA5E9", "#F97316", "#EF4444", "#A855F7", "#EAB308", "#14B8A6"];
+const PALETTE = [
+  "#6D5EF8",
+  "#22C55E",
+  "#0EA5E9",
+  "#F97316",
+  "#EF4444",
+  "#A855F7",
+  "#EAB308",
+  "#14B8A6",
+];
 
-function AppearanceSection({
-  draft, update, theme,
-}: SectionProps & { theme: "light" | "dark" }) {
+function AppearanceSection({ draft, update, theme }: SectionProps & { theme: "light" | "dark" }) {
   const a = draft.appearance;
   return (
     <Card title="Appearance" hint="How CL Aspire looks for you." icon={Palette}>
@@ -771,7 +831,9 @@ function AppearanceSection({
               key={c}
               onClick={() => update("appearance", { primaryColor: c })}
               className={`h-8 w-8 rounded-full border-2 transition ${
-                a.primaryColor === c ? "border-foreground scale-110" : "border-border/60 hover:scale-105"
+                a.primaryColor === c
+                  ? "border-foreground scale-110"
+                  : "border-border/60 hover:scale-105"
               }`}
               style={{ background: c }}
               aria-label={`Set primary color ${c}`}
@@ -796,7 +858,7 @@ function AppearanceSection({
         onChange={(v) => update("appearance", { sidebarStyle: v as SidebarStyle })}
         options={[
           ["expanded", "Expanded"],
-          ["compact",  "Compact"],
+          ["compact", "Compact"],
           ["floating", "Floating"],
         ]}
       />
@@ -809,13 +871,32 @@ function AppearanceSection({
 function AcademicSection({ draft, update }: SectionProps) {
   const a = draft.academic;
   return (
-    <Card title="Academic" hint="Which curriculum layers are exposed to students." icon={GraduationCap}>
-      <SwitchRow icon={Layers}         label="Enable levels"   hint="Class/level segmentation (HSC, SSC, etc.)."
-        enabled={a.enableLevels}   onToggle={() => update("academic", { enableLevels: !a.enableLevels })} />
-      <SwitchRow icon={GraduationCap}  label="Enable subjects" hint="Subject grouping under each level."
-        enabled={a.enableSubjects} onToggle={() => update("academic", { enableSubjects: !a.enableSubjects })} />
-      <SwitchRow icon={Braces}         label="Enable chapters" hint="Fine-grained chapter breakdown per subject."
-        enabled={a.enableChapters} onToggle={() => update("academic", { enableChapters: !a.enableChapters })} />
+    <Card
+      title="Academic"
+      hint="Which curriculum layers are exposed to students."
+      icon={GraduationCap}
+    >
+      <SwitchRow
+        icon={Layers}
+        label="Enable levels"
+        hint="Class/level segmentation (HSC, SSC, etc.)."
+        enabled={a.enableLevels}
+        onToggle={() => update("academic", { enableLevels: !a.enableLevels })}
+      />
+      <SwitchRow
+        icon={GraduationCap}
+        label="Enable subjects"
+        hint="Subject grouping under each level."
+        enabled={a.enableSubjects}
+        onToggle={() => update("academic", { enableSubjects: !a.enableSubjects })}
+      />
+      <SwitchRow
+        icon={Braces}
+        label="Enable chapters"
+        hint="Fine-grained chapter breakdown per subject."
+        enabled={a.enableChapters}
+        onToggle={() => update("academic", { enableChapters: !a.enableChapters })}
+      />
     </Card>
   );
 }
@@ -825,10 +906,18 @@ function AcademicSection({ draft, update }: SectionProps) {
 function BackupSection({ draft, update }: SectionProps) {
   const b = draft.backup;
   return (
-    <Card title="Backup" hint="Automated exports of the current configuration." icon={DownloadCloud}>
-      <SwitchRow icon={Cloud} label="Automatic backups"
+    <Card
+      title="Backup"
+      hint="Automated exports of the current configuration."
+      icon={DownloadCloud}
+    >
+      <SwitchRow
+        icon={Cloud}
+        label="Automatic backups"
         hint="Persist a settings snapshot on the configured schedule."
-        enabled={b.autoBackup} onToggle={() => update("backup", { autoBackup: !b.autoBackup })} />
+        enabled={b.autoBackup}
+        onToggle={() => update("backup", { autoBackup: !b.autoBackup })}
+      />
       <SelectField
         label="Frequency"
         value={b.frequency}
@@ -859,14 +948,16 @@ function SystemSection() {
     staleTime: 60_000,
   });
   const s = statsQuery.data;
-  const fmt = (n: number | undefined) =>
-    typeof n === "number" ? n.toLocaleString() : "—";
+  const fmt = (n: number | undefined) => (typeof n === "number" ? n.toLocaleString() : "—");
 
   const rows: [string, string][] = [
     ["Application version", s?.appVersion ?? "—"],
     ["Runtime", s?.runtime ?? "—"],
     ["Environment", s?.environment ?? "—"],
-    ["Settings updated", s?.settingsUpdatedAt ? new Date(s.settingsUpdatedAt).toLocaleString() : "—"],
+    [
+      "Settings updated",
+      s?.settingsUpdatedAt ? new Date(s.settingsUpdatedAt).toLocaleString() : "—",
+    ],
     ["Users (profiles)", fmt(s?.counts.profiles)],
     ["MCQ questions", fmt(s?.counts.mcq_questions)],
     ["Qns bank questions", fmt(s?.counts.qbank_questions)],
@@ -893,7 +984,9 @@ function SystemSection() {
       <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {rows.map(([k, v]) => (
           <div key={k} className="rounded-xl border border-border/60 bg-background/50 px-3 py-2.5">
-            <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{k}</dt>
+            <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              {k}
+            </dt>
             <dd className="mt-0.5 truncate text-sm font-medium text-foreground">{v}</dd>
           </div>
         ))}
@@ -912,9 +1005,13 @@ type SectionProps = {
 };
 
 function Card({
-  title, hint, icon: Icon, children,
+  title,
+  hint,
+  icon: Icon,
+  children,
 }: {
-  title: string; hint?: string;
+  title: string;
+  hint?: string;
   icon: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
 }) {
@@ -950,10 +1047,17 @@ const inputCls =
   "h-10 w-full rounded-xl border border-border/70 bg-background/70 px-3 text-sm text-foreground outline-none transition focus:border-primary/50 focus:ring-4 focus:ring-primary/15";
 
 function TextField({
-  label, value, onChange, type = "text", icon: Icon,
+  label,
+  value,
+  onChange,
+  type = "text",
+  icon: Icon,
 }: {
-  label: string; value: string; onChange: (v: string) => void;
-  type?: string; icon?: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
     <label className="block">
@@ -974,8 +1078,16 @@ function TextField({
 }
 
 function NumberField({
-  label, value, onChange, suffix,
-}: { label: string; value: number; onChange: (v: number) => void; suffix?: string }) {
+  label,
+  value,
+  onChange,
+  suffix,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  suffix?: string;
+}) {
   return (
     <label className="block">
       <Label>{label}</Label>
@@ -997,10 +1109,17 @@ function NumberField({
 }
 
 function SelectField({
-  label, value, onChange, options, icon: Icon,
+  label,
+  value,
+  onChange,
+  options,
+  icon: Icon,
 }: {
-  label: string; value: string; onChange: (v: string) => void;
-  options: [string, string][]; icon?: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: [string, string][];
+  icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
     <label className="block">
@@ -1014,7 +1133,11 @@ function SelectField({
           onChange={(e) => onChange(e.target.value)}
           className={`${inputCls} appearance-none pr-9 ${Icon ? "pl-9" : ""}`}
         >
-          {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          {options.map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
         </select>
         <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       </div>
@@ -1023,15 +1146,24 @@ function SelectField({
 }
 
 function SwitchRow({
-  icon: Icon, label, hint, enabled, onToggle,
+  icon: Icon,
+  label,
+  hint,
+  enabled,
+  onToggle,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  label: string; hint: string; enabled: boolean; onToggle: () => void;
+  label: string;
+  hint: string;
+  enabled: boolean;
+  onToggle: () => void;
 }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/40 px-3 py-3 transition hover:bg-secondary/40">
       <div className="flex min-w-0 items-center gap-3">
-        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border/60 ${enabled ? "bg-primary/10 text-primary" : "bg-background/60 text-muted-foreground"}`}>
+        <span
+          className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border/60 ${enabled ? "bg-primary/10 text-primary" : "bg-background/60 text-muted-foreground"}`}
+        >
           <Icon className="h-4 w-4" />
         </span>
         <div className="min-w-0">

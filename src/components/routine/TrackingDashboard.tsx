@@ -61,10 +61,13 @@ export function TrackingDashboard({ routines }: { routines: TrackedRoutine[] }) 
   }, [students, subject]);
 
   const windowMs =
-    dateWindow === "24h" ? 86400000
-    : dateWindow === "7d" ? 7 * 86400000
-    : dateWindow === "30d" ? 30 * 86400000
-    : Infinity;
+    dateWindow === "24h"
+      ? 86400000
+      : dateWindow === "7d"
+        ? 7 * 86400000
+        : dateWindow === "30d"
+          ? 30 * 86400000
+          : Infinity;
 
   const filtered = useMemo(() => {
     const q = debouncedQuery.trim().toLowerCase();
@@ -76,12 +79,17 @@ export function TrackingDashboard({ routines }: { routines: TrackedRoutine[] }) 
       if (subject !== "all" && !s.subjects.includes(subject)) continue;
       if (chapter !== "all") {
         let ok = false;
-        for (const c of s.chapters) if (c.name === chapter) { ok = true; break; }
+        for (const c of s.chapters)
+          if (c.name === chapter) {
+            ok = true;
+            break;
+          }
         if (!ok) continue;
       }
       if (routineId !== "all" && s.routineId !== routineId) continue;
       if (windowMs !== Infinity && s.lastActivityAt.getTime() < cutoff) continue;
-      if (q && !s.name.toLowerCase().includes(q) && !s.routineTitle.toLowerCase().includes(q)) continue;
+      if (q && !s.name.toLowerCase().includes(q) && !s.routineTitle.toLowerCase().includes(q))
+        continue;
       out.push(s);
     }
     return out;
@@ -91,7 +99,11 @@ export function TrackingDashboard({ routines }: { routines: TrackedRoutine[] }) 
   const isPending = deferredFiltered !== filtered || debouncedQuery !== query;
 
   const summary = useMemo(() => {
-    let following = 0, notStarted = 0, behind = 0, completed = 0, progSum = 0;
+    let following = 0,
+      notStarted = 0,
+      behind = 0,
+      completed = 0,
+      progSum = 0;
     for (const s of deferredFiltered) {
       if (s.status !== "inactive") following++;
       if (s.progress === 0) notStarted++;
@@ -111,12 +123,20 @@ export function TrackingDashboard({ routines }: { routines: TrackedRoutine[] }) 
   }, [deferredFiltered]);
 
   const anyFilter =
-    level !== "all" || subject !== "all" || chapter !== "all" ||
-    routineId !== "all" || dateWindow !== "7d" || query !== "";
+    level !== "all" ||
+    subject !== "all" ||
+    chapter !== "all" ||
+    routineId !== "all" ||
+    dateWindow !== "7d" ||
+    query !== "";
 
   const clearFilters = useCallback(() => {
-    setLevel("all"); setSubject("all"); setChapter("all");
-    setRoutineId("all"); setDateWindow("7d"); setQuery("");
+    setLevel("all");
+    setSubject("all");
+    setChapter("all");
+    setRoutineId("all");
+    setDateWindow("7d");
+    setQuery("");
   }, []);
 
   return (
@@ -127,7 +147,10 @@ export function TrackingDashboard({ routines }: { routines: TrackedRoutine[] }) 
       aria-labelledby="tracking-title"
       className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/60 p-5 backdrop-blur-2xl sm:p-7 lg:p-8"
     >
-      <div aria-hidden className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-gradient-to-br from-primary/20 via-accent/15 to-transparent blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-gradient-to-br from-primary/20 via-accent/15 to-transparent blur-3xl"
+      />
 
       {/* Header */}
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -143,14 +166,18 @@ export function TrackingDashboard({ routines }: { routines: TrackedRoutine[] }) 
             Adherence &amp; progress dashboard
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Every learner across every published routine — filter, drill down and intervene before momentum stalls.
+            Every learner across every published routine — filter, drill down and intervene before
+            momentum stalls.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <label className="relative block">
             <span className="sr-only">Search students or routines</span>
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -161,7 +188,10 @@ export function TrackingDashboard({ routines }: { routines: TrackedRoutine[] }) 
               className="h-10 w-full min-w-[220px] rounded-2xl border border-border/70 bg-card/60 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground shadow-sm backdrop-blur-md outline-none transition focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-ring/60 sm:w-64"
             />
             {isPending && (
-              <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" aria-hidden />
+              <Loader2
+                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground"
+                aria-hidden
+              />
             )}
           </label>
         </div>
@@ -170,22 +200,64 @@ export function TrackingDashboard({ routines }: { routines: TrackedRoutine[] }) 
       {/* Summary KPIs */}
       <div className="relative mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <SummaryCard icon={Users} label="Total Assigned" value={summary.total} tone="primary" />
-        <SummaryCard icon={CheckCircle2} label="Following" value={summary.following} tone="emerald" />
+        <SummaryCard
+          icon={CheckCircle2}
+          label="Following"
+          value={summary.following}
+          tone="emerald"
+        />
         <SummaryCard icon={Clock} label="Not Started" value={summary.notStarted} tone="slate" />
         <SummaryCard icon={Flame} label="Behind Schedule" value={summary.behind} tone="amber" />
-        <SummaryCard icon={GraduationCap} label="Completed" value={summary.completed} tone="violet" />
-        <SummaryCard icon={TrendingUp} label="Avg Completion" value={summary.avg} suffix="%" tone="teal" />
+        <SummaryCard
+          icon={GraduationCap}
+          label="Completed"
+          value={summary.completed}
+          tone="violet"
+        />
+        <SummaryCard
+          icon={TrendingUp}
+          label="Avg Completion"
+          value={summary.avg}
+          suffix="%"
+          tone="teal"
+        />
       </div>
 
       {/* Filters */}
-      <div className="relative mt-6 flex flex-wrap items-center gap-2" role="toolbar" aria-label="Student filters">
+      <div
+        className="relative mt-6 flex flex-wrap items-center gap-2"
+        role="toolbar"
+        aria-label="Student filters"
+      >
         <div className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-secondary/40 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
           <Filter className="h-3 w-3" aria-hidden />
           Filter
         </div>
-        <FilterSelect icon={Layers} label="Level" value={level} onChange={setLevel} options={levels} />
-        <FilterSelect icon={BookOpen} label="Subject" value={subject} onChange={(v) => { setSubject(v); setChapter("all"); }} options={subjects} />
-        <FilterSelect icon={ListChecks} label="Chapter" value={chapter} onChange={setChapter} options={chapters} disabled={chapters.length === 0} />
+        <FilterSelect
+          icon={Layers}
+          label="Level"
+          value={level}
+          onChange={setLevel}
+          options={levels}
+        />
+        <FilterSelect
+          icon={BookOpen}
+          label="Subject"
+          value={subject}
+          onChange={(v) => {
+            setSubject(v);
+            setChapter("all");
+          }}
+          options={subjects}
+        />
+        <FilterSelect
+          icon={ListChecks}
+          label="Chapter"
+          value={chapter}
+          onChange={setChapter}
+          options={chapters}
+          disabled={chapters.length === 0}
+        />
         <FilterSelect
           icon={CalendarDays}
           label="Routine"
@@ -236,7 +308,12 @@ const OVERSCAN = 8;
 const COLS = "minmax(220px,2.4fr) 100px minmax(180px,1.6fr) 180px 84px 78px 84px 118px 128px";
 
 function VirtualStudentTable({
-  students, onSelect, selectedId, isPending, hasFilters, onClearFilters,
+  students,
+  onSelect,
+  selectedId,
+  isPending,
+  hasFilters,
+  onClearFilters,
 }: {
   students: Student[];
   onSelect: (s: Student) => void;
@@ -258,7 +335,12 @@ function VirtualStudentTable({
     });
   }, []);
 
-  useEffect(() => () => { if (rafRef.current != null) cancelAnimationFrame(rafRef.current); }, []);
+  useEffect(
+    () => () => {
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    },
+    [],
+  );
 
   // Reset scroll when the underlying data set changes shape (filters cleared etc.)
   useEffect(() => {
@@ -285,9 +367,15 @@ function VirtualStudentTable({
         <div role="columnheader">Level</div>
         <div role="columnheader">Routine</div>
         <div role="columnheader">Progress</div>
-        <div role="columnheader" className="text-right">Today</div>
-        <div role="columnheader" className="text-right">Streak</div>
-        <div role="columnheader" className="text-right">Missed</div>
+        <div role="columnheader" className="text-right">
+          Today
+        </div>
+        <div role="columnheader" className="text-right">
+          Streak
+        </div>
+        <div role="columnheader" className="text-right">
+          Missed
+        </div>
         <div role="columnheader">Last Activity</div>
         <div role="columnheader">Status</div>
       </div>
@@ -337,7 +425,10 @@ function VirtualStudentTable({
 
 /* Single row — memoized so scrolling doesn't re-render off-screen rows */
 const StudentRow = memo(function StudentRow({
-  student, top, selected, onSelect,
+  student,
+  top,
+  selected,
+  onSelect,
 }: {
   student: Student;
   top: number;
@@ -353,7 +444,10 @@ const StudentRow = memo(function StudentRow({
       aria-label={`Open ${student.name}, ${student.progress}% complete, status ${student.status}`}
       onClick={handleActivate}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleActivate(); }
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleActivate();
+        }
       }}
       className={`absolute inset-x-0 grid items-center gap-0 border-b border-border/50 px-4 text-sm outline-none transition-colors hover:bg-secondary/40 focus-visible:bg-secondary/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/60 ${selected ? "bg-primary/5" : ""}`}
       style={{ top, height: ROW_H, gridTemplateColumns: COLS }}
@@ -365,14 +459,20 @@ const StudentRow = memo(function StudentRow({
           </div>
           <div className="min-w-0">
             <div className="truncate font-medium text-foreground">{student.name}</div>
-            <div className="truncate text-[11px] text-muted-foreground">{student.subjects.join(" · ")}</div>
+            <div className="truncate text-[11px] text-muted-foreground">
+              {student.subjects.join(" · ")}
+            </div>
           </div>
         </div>
       </div>
       <div className="truncate text-muted-foreground">{student.level}</div>
       <div className="truncate text-muted-foreground">{student.routineTitle}</div>
-      <div className="pr-4"><StaticProgressBar value={student.progress} /></div>
-      <div className="text-right tabular-nums text-foreground">{student.todayHours.toFixed(1)}h</div>
+      <div className="pr-4">
+        <StaticProgressBar value={student.progress} />
+      </div>
+      <div className="text-right tabular-nums text-foreground">
+        {student.todayHours.toFixed(1)}h
+      </div>
       <div className="text-right">
         <span className="inline-flex items-center gap-1 tabular-nums text-foreground">
           <Flame className="h-3.5 w-3.5 text-amber-500" aria-hidden /> {student.streak}
@@ -380,12 +480,20 @@ const StudentRow = memo(function StudentRow({
       </div>
       <div className="text-right tabular-nums text-muted-foreground">{student.missedDays}</div>
       <div className="truncate text-muted-foreground">{student.lastActivity}</div>
-      <div><StatusBadge status={student.status} /></div>
+      <div>
+        <StatusBadge status={student.status} />
+      </div>
     </div>
   );
 });
 
-function EmptyState({ hasFilters, onClearFilters }: { hasFilters: boolean; onClearFilters: () => void }) {
+function EmptyState({
+  hasFilters,
+  onClearFilters,
+}: {
+  hasFilters: boolean;
+  onClearFilters: () => void;
+}) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
       <div className="grid h-14 w-14 place-items-center rounded-2xl border border-border/70 bg-secondary/40 text-muted-foreground">
@@ -426,7 +534,11 @@ const TONES = {
 } as const;
 
 const SummaryCard = memo(function SummaryCard({
-  icon: Icon, label, value, suffix, tone,
+  icon: Icon,
+  label,
+  value,
+  suffix,
+  tone,
 }: {
   icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
   label: string;
@@ -437,10 +549,15 @@ const SummaryCard = memo(function SummaryCard({
   const iconTone = TONES[tone].split(" ").pop() ?? "text-foreground";
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card/60 p-4 shadow-sm backdrop-blur-2xl transition-transform hover:-translate-y-0.5 hover:border-primary/40">
-      <div aria-hidden className={`pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-gradient-to-br ${TONES[tone]} blur-2xl opacity-70`} />
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-gradient-to-br ${TONES[tone]} blur-2xl opacity-70`}
+      />
       <div className="relative flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{label}</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            {label}
+          </div>
           <div className="mt-1.5 flex items-baseline gap-1">
             <span className="bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-2xl font-semibold tracking-tight text-transparent tabular-nums">
               {value.toLocaleString()}
@@ -448,7 +565,9 @@ const SummaryCard = memo(function SummaryCard({
             {suffix && <span className="text-xs text-muted-foreground">{suffix}</span>}
           </div>
         </div>
-        <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border/70 bg-secondary/60 ${iconTone}`}>
+        <div
+          className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border/70 bg-secondary/60 ${iconTone}`}
+        >
           <Icon className="h-4 w-4" aria-hidden />
         </div>
       </div>
@@ -457,7 +576,13 @@ const SummaryCard = memo(function SummaryCard({
 });
 
 function FilterSelect({
-  icon: Icon, label, value, onChange, options, labelFor, disabled,
+  icon: Icon,
+  label,
+  value,
+  onChange,
+  options,
+  labelFor,
+  disabled,
 }: {
   icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
   label: string;
@@ -469,9 +594,13 @@ function FilterSelect({
 }) {
   const id = `filter-${label.toLowerCase()}`;
   return (
-    <div className={`group inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 pl-3 pr-1 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-md transition focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-ring/40 ${disabled ? "opacity-50" : "hover:border-primary/40"}`}>
+    <div
+      className={`group inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 pl-3 pr-1 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-md transition focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-ring/40 ${disabled ? "opacity-50" : "hover:border-primary/40"}`}
+    >
       <Icon className="h-3.5 w-3.5" aria-hidden />
-      <label htmlFor={id} className="uppercase tracking-[0.18em] text-[10px]">{label}</label>
+      <label htmlFor={id} className="uppercase tracking-[0.18em] text-[10px]">
+        {label}
+      </label>
       <select
         id={id}
         aria-label={`Filter by ${label.toLowerCase()}`}
@@ -482,14 +611,22 @@ function FilterSelect({
       >
         <option value="all">All</option>
         {options.map((o) => (
-          <option key={o} value={o}>{labelFor ? labelFor(o) : o}</option>
+          <option key={o} value={o}>
+            {labelFor ? labelFor(o) : o}
+          </option>
         ))}
       </select>
     </div>
   );
 }
 
-function DateFilter({ value, onChange }: { value: "24h" | "7d" | "30d" | "all"; onChange: (v: "24h" | "7d" | "30d" | "all") => void }) {
+function DateFilter({
+  value,
+  onChange,
+}: {
+  value: "24h" | "7d" | "30d" | "all";
+  onChange: (v: "24h" | "7d" | "30d" | "all") => void;
+}) {
   const opts: Array<{ v: "24h" | "7d" | "30d" | "all"; label: string; aria: string }> = [
     { v: "24h", label: "24h", aria: "Last 24 hours" },
     { v: "7d", label: "7d", aria: "Last 7 days" },
@@ -497,7 +634,11 @@ function DateFilter({ value, onChange }: { value: "24h" | "7d" | "30d" | "all"; 
     { v: "all", label: "All", aria: "All time" },
   ];
   return (
-    <div role="radiogroup" aria-label="Activity window" className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/60 p-1 text-xs shadow-sm backdrop-blur-md">
+    <div
+      role="radiogroup"
+      aria-label="Activity window"
+      className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/60 p-1 text-xs shadow-sm backdrop-blur-md"
+    >
       <CalendarDays className="ml-1.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
       {opts.map((o) => (
         <button
@@ -508,7 +649,9 @@ function DateFilter({ value, onChange }: { value: "24h" | "7d" | "30d" | "all"; 
           aria-label={o.aria}
           onClick={() => onChange(o.v)}
           className={`rounded-full px-2.5 py-1 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 ${
-            value === o.v ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+            value === o.v
+              ? "bg-primary text-primary-foreground shadow"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {o.label}
@@ -521,30 +664,56 @@ function DateFilter({ value, onChange }: { value: "24h" | "7d" | "30d" | "all"; 
 /* Non-animated progress bar for virtualized rows (cheap re-render) */
 function StaticProgressBar({ value }: { value: number }) {
   const tone =
-    value >= 90 ? "from-emerald-500 to-teal-500"
-    : value >= 60 ? "from-primary to-accent"
-    : value >= 30 ? "from-amber-500 to-orange-500"
-    : "from-rose-500 to-red-500";
+    value >= 90
+      ? "from-emerald-500 to-teal-500"
+      : value >= 60
+        ? "from-primary to-accent"
+        : value >= 30
+          ? "from-amber-500 to-orange-500"
+          : "from-rose-500 to-red-500";
   return (
     <div className="flex items-center gap-2" aria-hidden>
       <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-secondary/70">
-        <div className={`h-full rounded-full bg-gradient-to-r ${tone}`} style={{ width: `${value}%` }} />
+        <div
+          className={`h-full rounded-full bg-gradient-to-r ${tone}`}
+          style={{ width: `${value}%` }}
+        />
       </div>
-      <span className="w-10 text-right text-xs font-semibold tabular-nums text-foreground">{value}%</span>
+      <span className="w-10 text-right text-xs font-semibold tabular-nums text-foreground">
+        {value}%
+      </span>
     </div>
   );
 }
 
 const StatusBadge = memo(function StatusBadge({ status }: { status: StudentStatus }) {
   const map: Record<StudentStatus, { label: string; cls: string; dot: string }> = {
-    "on-track": { label: "On Track", cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
-    "behind": { label: "Behind", cls: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400", dot: "bg-amber-500" },
-    "completed": { label: "Completed", cls: "border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300", dot: "bg-violet-500" },
-    "inactive": { label: "Inactive", cls: "border-slate-500/30 bg-slate-500/10 text-slate-500 dark:text-slate-400", dot: "bg-slate-400" },
+    "on-track": {
+      label: "On Track",
+      cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      dot: "bg-emerald-500",
+    },
+    behind: {
+      label: "Behind",
+      cls: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+      dot: "bg-amber-500",
+    },
+    completed: {
+      label: "Completed",
+      cls: "border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300",
+      dot: "bg-violet-500",
+    },
+    inactive: {
+      label: "Inactive",
+      cls: "border-slate-500/30 bg-slate-500/10 text-slate-500 dark:text-slate-400",
+      dot: "bg-slate-400",
+    },
   };
   const s = map[status];
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${s.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${s.cls}`}
+    >
       <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} aria-hidden />
       {s.label}
     </span>
@@ -555,11 +724,19 @@ const StatusBadge = memo(function StatusBadge({ status }: { status: StudentStatu
 /* Detail sheet                                                        */
 /* ------------------------------------------------------------------ */
 
-function StudentDetailSheet({ student, onClose }: { student: Student | null; onClose: () => void }) {
+function StudentDetailSheet({
+  student,
+  onClose,
+}: {
+  student: Student | null;
+  onClose: () => void;
+}) {
   // Escape to close + focus trap entry
   useEffect(() => {
     if (!student) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [student, onClose]);
@@ -590,15 +767,25 @@ function StudentDetailSheet({ student, onClose }: { student: Student | null; onC
           >
             {/* Header */}
             <div className="relative overflow-hidden border-b border-border/60 p-5 sm:p-6">
-              <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-primary/25 via-accent/20 to-transparent blur-2xl" />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-primary/25 via-accent/20 to-transparent blur-2xl"
+              />
               <div className="relative flex items-start justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
                   <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-accent/30 text-lg font-semibold text-foreground">
                     {student.initials}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Student profile</div>
-                    <h3 id="student-detail-title" className="mt-1 truncate text-xl font-semibold tracking-tight text-foreground">{student.name}</h3>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                      Student profile
+                    </div>
+                    <h3
+                      id="student-detail-title"
+                      className="mt-1 truncate text-xl font-semibold tracking-tight text-foreground"
+                    >
+                      {student.name}
+                    </h3>
                     <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                       <span>{student.level}</span>
                       <ChevronRight className="h-3 w-3 opacity-60" aria-hidden />
@@ -618,9 +805,15 @@ function StudentDetailSheet({ student, onClose }: { student: Student | null; onC
 
               <div className="relative mt-4 flex flex-wrap items-center gap-2">
                 <StatusBadge status={student.status} />
-                <Chip icon={Flame} tone="amber">{student.streak} day streak</Chip>
-                <Chip icon={Clock} tone="teal">{student.todayHours.toFixed(1)}h today</Chip>
-                <Chip icon={TrendingUp} tone="primary">{student.progress}% complete</Chip>
+                <Chip icon={Flame} tone="amber">
+                  {student.streak} day streak
+                </Chip>
+                <Chip icon={Clock} tone="teal">
+                  {student.todayHours.toFixed(1)}h today
+                </Chip>
+                <Chip icon={TrendingUp} tone="primary">
+                  {student.progress}% complete
+                </Chip>
               </div>
             </div>
 
@@ -635,7 +828,10 @@ function StudentDetailSheet({ student, onClose }: { student: Student | null; onC
               <SectionTitle icon={ListChecks}>Chapters</SectionTitle>
               <div className="grid grid-cols-2 gap-2">
                 <MiniStat label="Completed" value={student.chapters.filter((c) => c.done).length} />
-                <MiniStat label="Remaining" value={student.chapters.filter((c) => !c.done).length} />
+                <MiniStat
+                  label="Remaining"
+                  value={student.chapters.filter((c) => !c.done).length}
+                />
               </div>
               <ul className="mt-3 space-y-1.5">
                 {student.chapters.map((c) => (
@@ -644,9 +840,14 @@ function StudentDetailSheet({ student, onClose }: { student: Student | null; onC
                     className={`flex items-center justify-between rounded-xl border border-border/60 bg-background/40 px-3 py-2 text-sm ${c.done ? "text-muted-foreground line-through" : "text-foreground"}`}
                   >
                     <span className="truncate">{c.name}</span>
-                    {c.done
-                      ? <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-label="Completed" />
-                      : <span className="h-3.5 w-3.5 rounded-full border border-border" aria-label="Pending" />}
+                    {c.done ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-label="Completed" />
+                    ) : (
+                      <span
+                        className="h-3.5 w-3.5 rounded-full border border-border"
+                        aria-label="Pending"
+                      />
+                    )}
                   </li>
                 ))}
               </ul>
@@ -654,14 +855,29 @@ function StudentDetailSheet({ student, onClose }: { student: Student | null; onC
               <SectionTitle icon={BookOpen}>Study output</SectionTitle>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <MiniStat label="Study Hours" value={student.studyHoursTotal} suffix="h" />
-                <MiniStat label="MCQs" value={student.mcqsCompleted} suffix={`/${student.mcqsTotal}`} />
-                <MiniStat label="Quizzes" value={student.quizCompleted} suffix={`/${student.quizTotal}`} />
-                <MiniStat label="Mocks" value={student.mockCompleted} suffix={`/${student.mockTotal}`} />
+                <MiniStat
+                  label="MCQs"
+                  value={student.mcqsCompleted}
+                  suffix={`/${student.mcqsTotal}`}
+                />
+                <MiniStat
+                  label="Quizzes"
+                  value={student.quizCompleted}
+                  suffix={`/${student.quizTotal}`}
+                />
+                <MiniStat
+                  label="Mocks"
+                  value={student.mockCompleted}
+                  suffix={`/${student.mockTotal}`}
+                />
               </div>
 
               <SectionTitle icon={CalendarDays}>Attendance timeline</SectionTitle>
               <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
-                <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
+                <div
+                  className="grid gap-1"
+                  style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}
+                >
                   {student.attendance.map((d, i) => {
                     const intensity = d.present ? Math.max(0.25, Math.min(1, d.hours / 6)) : 0;
                     return (
@@ -681,7 +897,8 @@ function StudentDetailSheet({ student, onClose }: { student: Student | null; onC
                 <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
                   <span>Last 14 days</span>
                   <span className="tabular-nums">
-                    {student.attendance.filter((d) => d.present).length}/14 present · {student.missedDays} missed
+                    {student.attendance.filter((d) => d.present).length}/14 present ·{" "}
+                    {student.missedDays} missed
                   </span>
                 </div>
               </div>
@@ -693,7 +910,13 @@ function StudentDetailSheet({ student, onClose }: { student: Student | null; onC
   );
 }
 
-function SectionTitle({ icon: Icon, children }: { icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>; children: React.ReactNode }) {
+function SectionTitle({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  children: React.ReactNode;
+}) {
   return (
     <div className="mb-3 mt-6 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
       <Icon className="h-3.5 w-3.5" aria-hidden />
@@ -705,23 +928,37 @@ function SectionTitle({ icon: Icon, children }: { icon: React.ComponentType<{ cl
 function MiniStat({ label, value, suffix }: { label: string; value: number; suffix?: string }) {
   return (
     <div className="rounded-xl border border-border/60 bg-background/40 p-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{label}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        {label}
+      </div>
       <div className="mt-1 text-lg font-semibold tabular-nums text-foreground">
         {value.toLocaleString()}
-        {suffix && <span className="ml-0.5 text-xs font-medium text-muted-foreground">{suffix}</span>}
+        {suffix && (
+          <span className="ml-0.5 text-xs font-medium text-muted-foreground">{suffix}</span>
+        )}
       </div>
     </div>
   );
 }
 
-function Chip({ icon: Icon, tone, children }: { icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>; tone: "amber" | "teal" | "primary"; children: React.ReactNode }) {
+function Chip({
+  icon: Icon,
+  tone,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  tone: "amber" | "teal" | "primary";
+  children: React.ReactNode;
+}) {
   const map = {
     amber: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
     teal: "border-teal-500/30 bg-teal-500/10 text-teal-600 dark:text-teal-400",
     primary: "border-primary/30 bg-primary/10 text-primary",
   } as const;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${map[tone]}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${map[tone]}`}
+    >
       <Icon className="h-3 w-3" aria-hidden />
       {children}
     </span>
@@ -735,7 +972,10 @@ function ProgressPanel({ label, data, unit }: { label: string; data: number[]; u
     <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
       <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
         <span>{label}</span>
-        <span className="text-foreground tabular-nums">{avg}{unit}</span>
+        <span className="text-foreground tabular-nums">
+          {avg}
+          {unit}
+        </span>
       </div>
       <div className="mt-2 flex h-16 items-end gap-1">
         {data.map((v, i) => (

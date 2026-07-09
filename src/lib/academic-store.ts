@@ -87,10 +87,7 @@ export function emptyChapterProgress(): ChapterProgress {
   };
 }
 
-export function ensureChapterProgress(
-  progress: ProgressMap,
-  chapterId: string,
-): ChapterProgress {
+export function ensureChapterProgress(progress: ProgressMap, chapterId: string): ChapterProgress {
   const raw = progress[chapterId];
   if (!raw) return emptyChapterProgress();
   return {
@@ -101,9 +98,7 @@ export function ensureChapterProgress(
     reports: Array.isArray(raw.reports) ? raw.reports : [],
     timeSpent: typeof raw.timeSpent === "number" && raw.timeSpent > 0 ? raw.timeSpent : 0,
     lastPracticedAt:
-      typeof raw.lastPracticedAt === "number" && raw.lastPracticedAt > 0
-        ? raw.lastPracticedAt
-        : 0,
+      typeof raw.lastPracticedAt === "number" && raw.lastPracticedAt > 0 ? raw.lastPracticedAt : 0,
   };
 }
 
@@ -197,10 +192,7 @@ export function formatRelativeTime(ts: number): string {
 
 /** Estimated time to finish a chapter based on the student's own pace,
  *  falling back to 45s / question when there isn't enough history yet. */
-export function estimateChapterTimeLeft(
-  progress: ProgressMap,
-  chapterId: string,
-): number {
+export function estimateChapterTimeLeft(progress: ProgressMap, chapterId: string): number {
   const total = chapterMcqTotal(chapterId);
   const cp = progress[chapterId];
   const done = Math.min(total, cp?.completed ?? 0);

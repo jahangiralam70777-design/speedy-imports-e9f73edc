@@ -5,12 +5,7 @@
 // status}` and re-render only when those change.
 
 import { useSyncExternalStore } from "react";
-import {
-  getAuthSnapshot,
-  initAuth,
-  subscribeAuth,
-  type AuthSnapshot,
-} from "@/lib/auth";
+import { getAuthSnapshot, initAuth, subscribeAuth, type AuthSnapshot } from "@/lib/auth";
 
 const serverSnapshot: AuthSnapshot = {
   user: null,
@@ -20,11 +15,7 @@ const serverSnapshot: AuthSnapshot = {
 };
 
 export function useAuth(): AuthSnapshot {
-  return useSyncExternalStore(
-    subscribeAuth,
-    getAuthSnapshot,
-    () => serverSnapshot,
-  );
+  return useSyncExternalStore(subscribeAuth, getAuthSnapshot, () => serverSnapshot);
 }
 
 export { initAuth };
