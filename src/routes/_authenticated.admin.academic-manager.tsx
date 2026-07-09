@@ -841,6 +841,24 @@ function AcademicManagerPage() {
           setSelectedChapters(new Set());
         }}
         onAdd={() => setEditor({ mode: "create", kind: "level", parent: null })}
+        onEdit={(lvl) =>
+          setEditor({
+            mode: "edit",
+            kind: "level",
+            target: { kind: "level", levelId: lvl.id },
+            initial: { name: lvl.name, code: lvl.code, description: lvl.description },
+          })
+        }
+        onDuplicate={(lvl) => duplicateNode({ kind: "level", levelId: lvl.id })}
+        onDelete={(lvl) => {
+          const nested = lvl.subjects.length + lvl.subjects.reduce((n, s) => n + s.chapters.length, 0);
+          setDel({
+            kind: "single",
+            target: { kind: "level", levelId: lvl.id },
+            label: lvl.name,
+            nested,
+          });
+        }}
       />
 
       {/* ================ Action bar ================ */}
