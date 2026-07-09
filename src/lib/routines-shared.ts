@@ -68,7 +68,7 @@ export function useMyRoutines() {
     staleTime: 60_000,
   });
 
-  const data = query.data ?? [];
+  const data = useMemo(() => query.data ?? [], [query.data]);
 
   // Populate the task cache so tasksForRoutine() below returns real DB tasks.
   useEffect(() => {
