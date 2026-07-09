@@ -235,7 +235,7 @@ function McqManagerPage() {
     staleTime: 60_000,
   });
 
-  const tree: ApiLevel[] = treeQuery.data ?? [];
+  const tree: ApiLevel[] = useMemo(() => treeQuery.data ?? [], [treeQuery.data]);
 
   const listParams = useMemo(
     () => ({
