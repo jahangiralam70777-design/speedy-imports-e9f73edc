@@ -34,7 +34,9 @@ function readStoredTheme(): Theme {
   try {
     const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
     if (raw === "light" || raw === "dark" || raw === "system") return raw;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return "system";
 }
 
@@ -61,7 +63,9 @@ function setInternal(next: Theme, persist: boolean) {
   if (persist && typeof window !== "undefined") {
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
   emit();
 }

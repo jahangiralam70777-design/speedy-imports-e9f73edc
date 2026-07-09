@@ -194,10 +194,7 @@ function McqPracticePage() {
 
   const [query, setQuery] = useState("");
 
-  const levels: PracticeLevel[] = useMemo(
-    () => taxonomyQ.data?.levels ?? [],
-    [taxonomyQ.data],
-  );
+  const levels: PracticeLevel[] = useMemo(() => taxonomyQ.data?.levels ?? [], [taxonomyQ.data]);
   const activeLevel = useMemo(
     () => (levelId ? (levels.find((l) => l.id === levelId) ?? null) : null),
     [levels, levelId],
