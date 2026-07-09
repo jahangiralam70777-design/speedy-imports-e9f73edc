@@ -1415,11 +1415,17 @@ function LevelPills({
   activeId,
   onSelect,
   onAdd,
+  onEdit,
+  onDuplicate,
+  onDelete,
 }: {
   levels: Level[];
   activeId: string | null;
   onSelect: (id: string) => void;
   onAdd: () => void;
+  onEdit: (lvl: Level) => void;
+  onDuplicate: (lvl: Level) => void;
+  onDelete: (lvl: Level) => void;
 }) {
   return (
     <div className="flex items-center gap-2">
@@ -1430,37 +1436,48 @@ function LevelPills({
         {levels.map((lvl) => {
           const active = lvl.id === activeId;
           return (
-            <button
-              key={lvl.id}
-              onClick={() => onSelect(lvl.id)}
-              className={`relative shrink-0 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
-                active
-                  ? "text-primary-foreground"
-                  : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-              }`}
-              aria-pressed={active}
-            >
-              {active && (
-                <motion.span
-                  layoutId="lvl-active"
-                  className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary via-primary/90 to-accent shadow-[0_10px_28px_-10px_color-mix(in_oklab,var(--primary)_60%,transparent)]"
-                  transition={{ type: "spring", stiffness: 400, damping: 34 }}
+            <div key={lvl.id} className="group relative flex shrink-0 items-center">
+              <button
+                onClick={() => onSelect(lvl.id)}
+                className={`relative shrink-0 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+                  active
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                }`}
+                aria-pressed={active}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="lvl-active"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary via-primary/90 to-accent shadow-[0_10px_28px_-10px_color-mix(in_oklab,var(--primary)_60%,transparent)]"
+                    transition={{ type: "spring", stiffness: 400, damping: 34 }}
+                  />
+                )}
+                <span className="relative flex items-center gap-2">
+                  <span className="grid h-5 min-w-[36px] place-items-center rounded-md bg-background/25 px-1.5 font-mono text-[10px] font-bold uppercase tracking-wider">
+                    {lvl.code || "—"}
+                  </span>
+                  <span className="whitespace-nowrap">{lvl.name}</span>
+                  <span
+                    className={`rounded-full px-1.5 text-[10px] tabular-nums ${
+                      active ? "bg-white/20" : "bg-secondary/70 text-foreground/70"
+                    }`}
+                  >
+                    {lvl.subjects.length}
+                  </span>
+                </span>
+              </button>
+              <span
+                onClick={(e) => e.stopPropagation()}
+                className="ml-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+              >
+                <RowMenu
+                  onEdit={() => onEdit(lvl)}
+                  onDuplicate={() => onDuplicate(lvl)}
+                  onDelete={() => onDelete(lvl)}
                 />
-              )}
-              <span className="relative flex items-center gap-2">
-                <span className="grid h-5 min-w-[36px] place-items-center rounded-md bg-background/25 px-1.5 font-mono text-[10px] font-bold uppercase tracking-wider">
-                  {lvl.code || "—"}
-                </span>
-                <span className="whitespace-nowrap">{lvl.name}</span>
-                <span
-                  className={`rounded-full px-1.5 text-[10px] tabular-nums ${
-                    active ? "bg-white/20" : "bg-secondary/70 text-foreground/70"
-                  }`}
-                >
-                  {lvl.subjects.length}
-                </span>
               </span>
-            </button>
+            </div>
           );
         })}
         <button
@@ -1477,6 +1494,7 @@ function LevelPills({
     </div>
   );
 }
+
 
 /* ---------------- Subjects Panel ---------------- */
 
