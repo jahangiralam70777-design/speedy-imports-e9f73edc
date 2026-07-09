@@ -1496,7 +1496,3 @@ function ConfirmDialog({
     </ModalShell>
   );
 }
-
-// Silence the unused-hook lint for a placeholder — useMutation import kept in case
-// this file later moves to a mutations-based pattern.
-export const _keepMutation = useMutation;
