@@ -1,394 +1,83 @@
--- =========================================================================
--- Enums
--- =========================================================================
-create type public.app_role as enum ('admin', 'student');
-create type public.question_source as enum ('mcq', 'qbank');
+-- ============================================================================
+-- CL Aspire Production Schema
+-- Generated from audited live schema and repository migrations.
+-- Run on a clean database after the platform auth schemas are available.
+-- No sample data is included.
+-- ============================================================================
 
-create or replace function public.tg_set_updated_at()
-returns trigger language plpgsql set search_path = public as $$
-begin new.updated_at = now(); return new; end;
-$$;
+--
+-- PostgreSQL database dump
+--
 
-create table public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  email text, full_name text, phone text, institution text, photo_url text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+\restrict wL1HvaJ3FZgzQdlSwsWaUczKnMqRGBFK7J6qzFnTcDPP6HbhxFhnb4RD6phK7dt
+
+-- Dumped from database version 17.6
+-- Dumped by pg_dump version 17.9
+
+SET escape_string_warning = off;
+
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA public;
+
+
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON SCHEMA public IS 'standard public schema';
+
+
+--
+-- Name: app_role; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.app_role AS ENUM (
+    'admin',
+    'student'
 );
-grant select, insert, update, delete on public.profiles to authenticated;
-grant all on public.profiles to service_role;
-alter table public.profiles enable row level security;
-create policy "profiles self select" on public.profiles for select to authenticated using (id = auth.uid());
-create policy "profiles self update" on public.profiles for update to authenticated using (id = auth.uid()) with check (id = auth.uid());
-create policy "profiles self insert" on public.profiles for insert to authenticated with check (id = auth.uid());
-create trigger profiles_updated_at before update on public.profiles for each row execute function public.tg_set_updated_at();
 
-create table public.user_roles (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  role public.app_role not null,
-  created_at timestamptz not null default now(),
-  unique (user_id, role)
+
+--
+-- Name: question_source; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.question_source AS ENUM (
+    'mcq',
+    'qbank'
 );
-grant select on public.user_roles to authenticated;
-grant all on public.user_roles to service_role;
-alter table public.user_roles enable row level security;
-create policy "user_roles self select" on public.user_roles for select to authenticated using (user_id = auth.uid());
 
-create or replace function public.has_role(_user_id uuid, _role public.app_role)
-returns boolean language sql stable security definer set search_path = public as $$
-  select exists (select 1 from public.user_roles where user_id = _user_id and role = _role)
-$$;
 
-create policy "user_roles admin select all" on public.user_roles for select to authenticated using (public.has_role(auth.uid(), 'admin'));
+--
+-- Name: admin_get_user(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
 
-create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer set search_path = public as $$
+CREATE FUNCTION public.admin_get_user(p_user_id uuid) RETURNS TABLE(id uuid, email text, full_name text, phone text, photo_url text, institution text, role text, created_at timestamp with time zone, last_sign_in_at timestamp with time zone, email_confirmed_at timestamp with time zone, banned_until timestamp with time zone)
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'auth'
+    AS $$
 begin
-  insert into public.profiles (id, email, full_name)
-  values (new.id, new.email, coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)))
-  on conflict (id) do nothing;
-  insert into public.user_roles (user_id, role) values (new.id, 'student') on conflict (user_id, role) do nothing;
-  return new;
-end;
-$$;
-create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user();
+  if not public.has_role(auth.uid(), 'admin') then raise exception 'Forbidden: admin role required'; end if;
+  return query
+  select u.id, u.email::text, coalesce(p.full_name, ''), coalesce(p.phone, ''),
+    p.photo_url, p.institution,
+    coalesce((select r.role::text from public.user_roles r where r.user_id = u.id
+      order by case when r.role::text = 'admin' then 0 else 1 end limit 1), 'student'),
+    u.created_at, u.last_sign_in_at, u.email_confirmed_at, u.banned_until
+  from auth.users u left join public.profiles p on p.id = u.id where u.id = p_user_id;
+end; $$;
 
-create table public.academic_levels (
-  id uuid primary key default gen_random_uuid(),
-  name text not null, slug text unique, position int not null default 0,
-  description text not null default '',
-  created_at timestamptz not null default now(), updated_at timestamptz not null default now()
-);
-create index on public.academic_levels (position);
-grant select on public.academic_levels to authenticated;
-grant all on public.academic_levels to service_role;
-alter table public.academic_levels enable row level security;
-create policy "academic_levels read auth" on public.academic_levels for select to authenticated using (true);
-create policy "academic_levels admin write" on public.academic_levels for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create trigger academic_levels_updated_at before update on public.academic_levels for each row execute function public.tg_set_updated_at();
 
-create table public.academic_subjects (
-  id uuid primary key default gen_random_uuid(),
-  level_id uuid not null references public.academic_levels(id) on delete cascade,
-  name text not null, slug text, position int not null default 0,
-  description text not null default '',
-  created_at timestamptz not null default now(), updated_at timestamptz not null default now()
-);
-create index on public.academic_subjects (level_id, position);
-grant select on public.academic_subjects to authenticated;
-grant all on public.academic_subjects to service_role;
-alter table public.academic_subjects enable row level security;
-create policy "academic_subjects read auth" on public.academic_subjects for select to authenticated using (true);
-create policy "academic_subjects admin write" on public.academic_subjects for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create trigger academic_subjects_updated_at before update on public.academic_subjects for each row execute function public.tg_set_updated_at();
+--
+-- Name: admin_list_users(text, text, text, text, timestamp with time zone, timestamp with time zone, text, integer, integer); Type: FUNCTION; Schema: public; Owner: -
+--
 
-create table public.academic_chapters (
-  id uuid primary key default gen_random_uuid(),
-  subject_id uuid not null references public.academic_subjects(id) on delete cascade,
-  name text not null, slug text, position int not null default 0,
-  description text not null default '',
-  created_at timestamptz not null default now(), updated_at timestamptz not null default now()
-);
-create index on public.academic_chapters (subject_id, position);
-grant select on public.academic_chapters to authenticated;
-grant all on public.academic_chapters to service_role;
-alter table public.academic_chapters enable row level security;
-create policy "academic_chapters read auth" on public.academic_chapters for select to authenticated using (true);
-create policy "academic_chapters admin write" on public.academic_chapters for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create trigger academic_chapters_updated_at before update on public.academic_chapters for each row execute function public.tg_set_updated_at();
-
-create table public.mcq_questions (
-  id uuid primary key default gen_random_uuid(),
-  chapter_id uuid not null references public.academic_chapters(id) on delete cascade,
-  position int not null default 0,
-  question text not null,
-  options jsonb not null default '[]'::jsonb,
-  correct_index int not null default 0,
-  explanation text,
-  tags text[] not null default '{}',
-  status text,
-  batch_id uuid,
-  created_by uuid,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-create index on public.mcq_questions (chapter_id, position);
-create index mcq_questions_chapter_status_position_idx on public.mcq_questions (chapter_id, status, position);
-grant select, insert, update, delete on public.mcq_questions to authenticated;
-grant all on public.mcq_questions to service_role;
-alter table public.mcq_questions enable row level security;
-create policy "mcq_questions read auth" on public.mcq_questions for select to authenticated using (true);
-create policy "mcq_questions admin write" on public.mcq_questions for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create trigger mcq_questions_updated_at before update on public.mcq_questions for each row execute function public.tg_set_updated_at();
-
-create table public.qbank_questions (
-  id uuid primary key default gen_random_uuid(),
-  chapter_id uuid not null references public.academic_chapters(id) on delete cascade,
-  position int not null default 0,
-  question text,
-  prompt text,
-  options jsonb not null default '[]'::jsonb,
-  correct_index int not null default 0,
-  answer text,
-  explanation text,
-  tags text[] not null default '{}',
-  status text,
-  batch_id uuid,
-  created_by uuid,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-create index on public.qbank_questions (chapter_id, position);
-grant select, insert, update, delete on public.qbank_questions to authenticated;
-grant all on public.qbank_questions to service_role;
-alter table public.qbank_questions enable row level security;
-create policy "qbank_questions read auth" on public.qbank_questions for select to authenticated using (true);
-create policy "qbank_questions admin write" on public.qbank_questions for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create trigger qbank_questions_updated_at before update on public.qbank_questions for each row execute function public.tg_set_updated_at();
-
-create table public.mcq_attempts (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  question_id uuid not null references public.mcq_questions(id) on delete cascade,
-  chapter_id uuid references public.academic_chapters(id) on delete set null,
-  selected_index int, is_correct boolean not null, time_spent_ms int, session_id uuid,
-  created_at timestamptz not null default now(),
-  constraint mcq_attempts_user_question_key unique (user_id, question_id)
-);
-create index on public.mcq_attempts (user_id, created_at desc);
-create index mcq_attempts_user_chapter_idx on public.mcq_attempts (user_id, chapter_id);
-grant select, insert, update, delete on public.mcq_attempts to authenticated;
-grant all on public.mcq_attempts to service_role;
-alter table public.mcq_attempts enable row level security;
-create policy "mcq_attempts self all" on public.mcq_attempts for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "mcq_attempts admin select" on public.mcq_attempts for select to authenticated using (public.has_role(auth.uid(), 'admin'));
-
-create table public.qbank_attempts (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  question_id uuid not null references public.qbank_questions(id) on delete cascade,
-  chapter_id uuid references public.academic_chapters(id) on delete set null,
-  answer text, selected_index int, is_correct boolean not null, time_spent_ms int, session_id uuid,
-  created_at timestamptz not null default now(),
-  constraint qbank_attempts_user_question_unique unique (user_id, question_id)
-);
-create index on public.qbank_attempts (user_id, created_at desc);
-create index qbank_attempts_user_chapter_idx on public.qbank_attempts (user_id, chapter_id);
-grant select, insert, update, delete on public.qbank_attempts to authenticated;
-grant all on public.qbank_attempts to service_role;
-alter table public.qbank_attempts enable row level security;
-create policy "qbank_attempts self all" on public.qbank_attempts for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "qbank_attempts admin select" on public.qbank_attempts for select to authenticated using (public.has_role(auth.uid(), 'admin'));
-
-create table public.bookmarks (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  source public.question_source not null,
-  question_id uuid not null,
-  note text,
-  created_at timestamptz not null default now(),
-  unique (user_id, source, question_id)
-);
-create index on public.bookmarks (user_id, created_at desc);
-grant select, insert, update, delete on public.bookmarks to authenticated;
-grant all on public.bookmarks to service_role;
-alter table public.bookmarks enable row level security;
-create policy "bookmarks self all" on public.bookmarks for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-
-create table public.wrong_answer_bookmarks (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  source public.question_source not null,
-  question_id uuid not null,
-  wrong_count int not null default 1,
-  last_wrong_at timestamptz not null default now(),
-  cleared_at timestamptz,
-  created_at timestamptz not null default now(),
-  unique (user_id, source, question_id)
-);
-create index on public.wrong_answer_bookmarks (user_id, last_wrong_at desc);
-grant select, insert, update, delete on public.wrong_answer_bookmarks to authenticated;
-grant all on public.wrong_answer_bookmarks to service_role;
-alter table public.wrong_answer_bookmarks enable row level security;
-create policy "wrong_answer_bookmarks self all" on public.wrong_answer_bookmarks for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-
-create table public.custom_exam_sessions (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  title text, config jsonb not null default '{}'::jsonb,
-  started_at timestamptz not null default now(),
-  finished_at timestamptz, score numeric,
-  total_questions int not null default 0,
-  correct_count int not null default 0,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-create index on public.custom_exam_sessions (user_id, created_at desc);
-create index custom_exam_sessions_user_active_idx on public.custom_exam_sessions (user_id, finished_at, created_at DESC);
-grant select, insert, update, delete on public.custom_exam_sessions to authenticated;
-grant all on public.custom_exam_sessions to service_role;
-alter table public.custom_exam_sessions enable row level security;
-create policy "custom_exam_sessions self all" on public.custom_exam_sessions for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create trigger custom_exam_sessions_updated_at before update on public.custom_exam_sessions for each row execute function public.tg_set_updated_at();
-
-create table public.custom_exam_answers (
-  id uuid primary key default gen_random_uuid(),
-  session_id uuid not null references public.custom_exam_sessions(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  source public.question_source not null,
-  question_id uuid not null,
-  selected_index int, answer text, is_correct boolean, time_spent_ms int,
-  created_at timestamptz not null default now(),
-  constraint custom_exam_answers_session_question_unique unique (session_id, question_id, source)
-);
-create index custom_exam_answers_session_idx on public.custom_exam_answers (session_id);
-create index on public.custom_exam_answers (user_id, created_at desc);
-grant select, insert, update, delete on public.custom_exam_answers to authenticated;
-grant all on public.custom_exam_answers to service_role;
-alter table public.custom_exam_answers enable row level security;
-create policy "custom_exam_answers self all" on public.custom_exam_answers for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-
-create table public.routines (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  title text not null, description text, config jsonb not null default '{}'::jsonb,
-  is_active boolean not null default true,
-  level text, subject text, chapter text,
-  routine_type text NOT NULL DEFAULT 'daily',
-  hours_per_day numeric NOT NULL DEFAULT 1,
-  starts_on date, ends_on date,
-  is_archived boolean NOT NULL DEFAULT false,
-  accent text, target_mcqs integer, target_chapters integer,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-create index on public.routines (user_id, created_at desc);
-create index idx_routines_level_status on public.routines (level, is_archived);
-create index idx_routines_created_at on public.routines (created_at DESC);
-create index idx_routines_ends_on on public.routines (ends_on);
-grant select, insert, update, delete on public.routines to authenticated;
-grant all on public.routines to service_role;
-alter table public.routines enable row level security;
-create policy "routines self all" on public.routines for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "routines admin all" on public.routines for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "routines auth read" on public.routines for select to authenticated using (true);
-create trigger routines_updated_at before update on public.routines for each row execute function public.tg_set_updated_at();
-
-create table public.routine_days (
-  id uuid primary key default gen_random_uuid(),
-  routine_id uuid not null references public.routines(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  day_of_week int not null check (day_of_week between 0 and 6),
-  label text, position int not null default 0,
-  created_at timestamptz not null default now()
-);
-create index on public.routine_days (routine_id, position);
-grant select, insert, update, delete on public.routine_days to authenticated;
-grant all on public.routine_days to service_role;
-alter table public.routine_days enable row level security;
-create policy "routine_days self all" on public.routine_days for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "routine_days admin all" on public.routine_days for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "routine_days auth read" on public.routine_days for select to authenticated using (true);
-
-create table public.routine_tasks (
-  id uuid primary key default gen_random_uuid(),
-  routine_id uuid not null references public.routines(id) on delete cascade,
-  day_id uuid references public.routine_days(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  title text not null, details jsonb not null default '{}'::jsonb,
-  start_time time, end_time time, position int not null default 0,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-create index on public.routine_tasks (routine_id, position);
-create index on public.routine_tasks (day_id, position);
-grant select, insert, update, delete on public.routine_tasks to authenticated;
-grant all on public.routine_tasks to service_role;
-alter table public.routine_tasks enable row level security;
-create policy "routine_tasks self all" on public.routine_tasks for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "routine_tasks admin all" on public.routine_tasks for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "routine_tasks auth read" on public.routine_tasks for select to authenticated using (true);
-create trigger routine_tasks_updated_at before update on public.routine_tasks for each row execute function public.tg_set_updated_at();
-
-create table public.routine_task_completions (
-  id uuid primary key default gen_random_uuid(),
-  task_id uuid not null references public.routine_tasks(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  completed_on date not null,
-  status text not null default 'not_started',
-  study_hours numeric not null default 0,
-  completed_at timestamptz,
-  note text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (task_id, completed_on)
-);
-create index on public.routine_task_completions (user_id, completed_on desc);
-create index routine_task_completions_user_task_idx on public.routine_task_completions (user_id, task_id);
-grant select, insert, update, delete on public.routine_task_completions to authenticated;
-grant all on public.routine_task_completions to service_role;
-alter table public.routine_task_completions enable row level security;
-create policy "routine_task_completions self all" on public.routine_task_completions for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "routine_task_completions admin select" on public.routine_task_completions for select to authenticated using (public.has_role(auth.uid(), 'admin'));
-create trigger routine_task_completions_updated_at before update on public.routine_task_completions for each row execute function public.tg_set_updated_at();
-
-create table public.routine_assignments (
-  id uuid not null default gen_random_uuid() primary key,
-  routine_id uuid not null references public.routines(id) on delete cascade,
-  target_type text not null check (target_type in ('level','subject','user')),
-  target_value text, target_user_id uuid, created_by uuid,
-  created_at timestamptz not null default now()
-);
-create index idx_routine_assignments_routine on public.routine_assignments (routine_id);
-create index idx_routine_assignments_user on public.routine_assignments (target_user_id);
-grant select, insert, update, delete on public.routine_assignments to authenticated;
-grant all on public.routine_assignments to service_role;
-alter table public.routine_assignments enable row level security;
-create policy "routine_assignments admin all" on public.routine_assignments for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "routine_assignments auth read" on public.routine_assignments for select to authenticated using (true);
-
-create table public.student_preferences (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  preferences jsonb not null default '{}'::jsonb,
-  updated_at timestamptz not null default now()
-);
-grant select, insert, update, delete on public.student_preferences to authenticated;
-grant all on public.student_preferences to service_role;
-alter table public.student_preferences enable row level security;
-create policy "student_preferences self all" on public.student_preferences for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create trigger student_preferences_updated_at before update on public.student_preferences for each row execute function public.tg_set_updated_at();
-
-create table public.admin_settings (
-  id uuid primary key default gen_random_uuid(),
-  settings jsonb not null default '{}'::jsonb,
-  singleton boolean not null default true,
-  updated_at timestamptz not null default now(),
-  unique (singleton)
-);
-grant select on public.admin_settings to authenticated;
-grant all on public.admin_settings to service_role;
-alter table public.admin_settings enable row level security;
-create policy "admin_settings read auth" on public.admin_settings for select to authenticated using (true);
-create policy "admin_settings admin write" on public.admin_settings for all to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create trigger admin_settings_updated_at before update on public.admin_settings for each row execute function public.tg_set_updated_at();
-insert into public.admin_settings (settings) values ('{}'::jsonb) on conflict (singleton) do nothing;
-
-create policy "profiles admin select all" on public.profiles for select to authenticated using (public.has_role(auth.uid(), 'admin'));
-create policy "profiles admin update all" on public.profiles for update to authenticated using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-
--- ============================================================
--- Admin RPCs
--- ============================================================
-create or replace function public.admin_list_users(
-  p_search text default null, p_role text default null, p_status text default null,
-  p_verified text default null, p_from timestamptz default null, p_to timestamptz default null,
-  p_sort text default 'created_desc', p_limit int default 50, p_offset int default 0
-) returns table (
-  id uuid, email text, full_name text, phone text, photo_url text, role text,
-  created_at timestamptz, last_sign_in_at timestamptz, email_confirmed_at timestamptz,
-  banned_until timestamptz, total_count bigint
-) language plpgsql security definer set search_path = public, auth as $$
+CREATE FUNCTION public.admin_list_users(p_search text DEFAULT NULL::text, p_role text DEFAULT NULL::text, p_status text DEFAULT NULL::text, p_verified text DEFAULT NULL::text, p_from timestamp with time zone DEFAULT NULL::timestamp with time zone, p_to timestamp with time zone DEFAULT NULL::timestamp with time zone, p_sort text DEFAULT 'created_desc'::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0) RETURNS TABLE(id uuid, email text, full_name text, phone text, photo_url text, role text, created_at timestamp with time zone, last_sign_in_at timestamp with time zone, email_confirmed_at timestamp with time zone, banned_until timestamp with time zone, total_count bigint)
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'auth'
+    AS $$
 begin
   if not public.has_role(auth.uid(), 'admin') then raise exception 'Forbidden: admin role required'; end if;
   return query
@@ -422,25 +111,15 @@ begin
   limit greatest(p_limit, 1) offset greatest(p_offset, 0);
 end; $$;
 
-create or replace function public.admin_get_user(p_user_id uuid)
-returns table (id uuid, email text, full_name text, phone text, photo_url text,
-  institution text, role text, created_at timestamptz, last_sign_in_at timestamptz,
-  email_confirmed_at timestamptz, banned_until timestamptz)
-language plpgsql security definer set search_path = public, auth as $$
-begin
-  if not public.has_role(auth.uid(), 'admin') then raise exception 'Forbidden: admin role required'; end if;
-  return query
-  select u.id, u.email::text, coalesce(p.full_name, ''), coalesce(p.phone, ''),
-    p.photo_url, p.institution,
-    coalesce((select r.role::text from public.user_roles r where r.user_id = u.id
-      order by case when r.role::text = 'admin' then 0 else 1 end limit 1), 'student'),
-    u.created_at, u.last_sign_in_at, u.email_confirmed_at, u.banned_until
-  from auth.users u left join public.profiles p on p.id = u.id where u.id = p_user_id;
-end; $$;
 
-create or replace function public.admin_user_stats()
-returns table (total bigint, students bigint, admins bigint, active_today bigint, verified bigint, new_last_7_days bigint)
-language plpgsql security definer set search_path = public, auth as $$
+--
+-- Name: admin_user_stats(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.admin_user_stats() RETURNS TABLE(total bigint, students bigint, admins bigint, active_today bigint, verified bigint, new_last_7_days bigint)
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'auth'
+    AS $$
 begin
   if not public.has_role(auth.uid(), 'admin') then raise exception 'Forbidden: admin role required'; end if;
   return query
@@ -452,25 +131,45 @@ begin
     (select count(*) from auth.users where created_at >= now() - interval '7 days')::bigint;
 end; $$;
 
-revoke all on function public.admin_list_users(text,text,text,text,timestamptz,timestamptz,text,int,int) from public, anon;
-revoke all on function public.admin_get_user(uuid) from public, anon;
-revoke all on function public.admin_user_stats() from public, anon;
-grant execute on function public.admin_list_users(text,text,text,text,timestamptz,timestamptz,text,int,int) to authenticated;
-grant execute on function public.admin_get_user(uuid) to authenticated;
-grant execute on function public.admin_user_stats() to authenticated;
 
--- ============================================================
--- Practice taxonomy RPCs
--- ============================================================
-create or replace function public.mcq_practice_taxonomy()
-returns table(
-  level_id uuid, level_name text, level_slug text, level_description text, level_position int,
-  subject_id uuid, subject_name text, subject_slug text, subject_description text, subject_position int,
-  chapter_id uuid, chapter_name text, chapter_slug text, chapter_description text, chapter_position int,
-  total_mcqs bigint, done bigint, correct bigint, wrong bigint,
-  time_spent_ms bigint, bookmarks bigint,
-  last_practiced_at timestamptz
-) language sql stable security invoker set search_path = public as $$
+--
+-- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.handle_new_user() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+begin
+  insert into public.profiles (id, email, full_name)
+  values (new.id, new.email, coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)))
+  on conflict (id) do nothing;
+  insert into public.user_roles (user_id, role) values (new.id, 'student') on conflict (user_id, role) do nothing;
+  return new;
+end;
+$$;
+
+
+--
+-- Name: has_role(uuid, public.app_role); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.has_role(_user_id uuid, _role public.app_role) RETURNS boolean
+    LANGUAGE sql STABLE SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+  select exists (select 1 from public.user_roles where user_id = _user_id and role = _role)
+$$;
+
+
+--
+-- Name: mcq_practice_taxonomy(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.mcq_practice_taxonomy() RETURNS TABLE(level_id uuid, level_name text, level_slug text, level_description text, level_position integer, subject_id uuid, subject_name text, subject_slug text, subject_description text, subject_position integer, chapter_id uuid, chapter_name text, chapter_slug text, chapter_description text, chapter_position integer, total_mcqs bigint, done bigint, correct bigint, wrong bigint, time_spent_ms bigint, bookmarks bigint, last_practiced_at timestamp with time zone)
+    LANGUAGE sql STABLE
+    SET search_path TO 'public'
+    AS $$
   select
     l.id, l.name, l.slug, l.description, l.position,
     s.id, s.name, s.slug, s.description, s.position,
@@ -494,18 +193,16 @@ returns table(
     where bm.user_id = auth.uid() and bm.source = 'mcq' and mq2.chapter_id = c.id) b on true
   order by l.position, s.position, c.position;
 $$;
-revoke all on function public.mcq_practice_taxonomy() from public;
-grant execute on function public.mcq_practice_taxonomy() to authenticated;
 
-create or replace function public.qbank_practice_taxonomy()
-returns table(
-  level_id uuid, level_name text, level_slug text, level_description text, level_position int,
-  subject_id uuid, subject_name text, subject_slug text, subject_description text, subject_position int,
-  chapter_id uuid, chapter_name text, chapter_slug text, chapter_description text, chapter_position int,
-  total_mcqs bigint, done bigint, correct bigint, wrong bigint,
-  time_spent_ms bigint, bookmarks bigint,
-  last_practiced_at timestamptz
-) language sql stable security invoker set search_path = public as $$
+
+--
+-- Name: qbank_practice_taxonomy(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.qbank_practice_taxonomy() RETURNS TABLE(level_id uuid, level_name text, level_slug text, level_description text, level_position integer, subject_id uuid, subject_name text, subject_slug text, subject_description text, subject_position integer, chapter_id uuid, chapter_name text, chapter_slug text, chapter_description text, chapter_position integer, total_mcqs bigint, done bigint, correct bigint, wrong bigint, time_spent_ms bigint, bookmarks bigint, last_practiced_at timestamp with time zone)
+    LANGUAGE sql STABLE
+    SET search_path TO 'public'
+    AS $$
   select
     l.id, l.name, l.slug, l.description, l.position,
     s.id, s.name, s.slug, s.description, s.position,
@@ -529,12 +226,1817 @@ returns table(
     where bm.user_id = auth.uid() and bm.source = 'qbank' and qq2.chapter_id = c.id) b on true
   order by l.position, s.position, c.position;
 $$;
-revoke all on function public.qbank_practice_taxonomy() from public;
-grant execute on function public.qbank_practice_taxonomy() to authenticated;
 
--- has_role must be callable by authenticated users: server functions invoke it
--- via PostgREST RPC to gate admin operations. It is SECURITY DEFINER with a
--- locked search_path and only returns a boolean, so exposing EXECUTE is safe.
-revoke execute on function public.has_role(uuid, public.app_role) from public, anon;
-grant execute on function public.has_role(uuid, public.app_role) to authenticated;
-revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
+--
+-- Name: tg_set_updated_at(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.tg_set_updated_at() RETURNS trigger
+    LANGUAGE plpgsql
+    SET search_path TO 'public'
+    AS $$
+begin new.updated_at = now(); return new; end;
+$$;
+
+
+
+
+--
+-- Name: academic_chapters; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.academic_chapters (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    subject_id uuid NOT NULL,
+    name text NOT NULL,
+    slug text,
+    "position" integer DEFAULT 0 NOT NULL,
+    description text DEFAULT ''::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: academic_levels; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.academic_levels (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    slug text,
+    "position" integer DEFAULT 0 NOT NULL,
+    description text DEFAULT ''::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: academic_subjects; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.academic_subjects (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    level_id uuid NOT NULL,
+    name text NOT NULL,
+    slug text,
+    "position" integer DEFAULT 0 NOT NULL,
+    description text DEFAULT ''::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: admin_settings; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.admin_settings (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    settings jsonb DEFAULT '{}'::jsonb NOT NULL,
+    singleton boolean DEFAULT true NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: bookmarks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.bookmarks (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    source public.question_source NOT NULL,
+    question_id uuid NOT NULL,
+    note text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: custom_exam_answers; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.custom_exam_answers (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    session_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    source public.question_source NOT NULL,
+    question_id uuid NOT NULL,
+    selected_index integer,
+    answer text,
+    is_correct boolean,
+    time_spent_ms integer,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: custom_exam_sessions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.custom_exam_sessions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    title text,
+    config jsonb DEFAULT '{}'::jsonb NOT NULL,
+    started_at timestamp with time zone DEFAULT now() NOT NULL,
+    finished_at timestamp with time zone,
+    score numeric,
+    total_questions integer DEFAULT 0 NOT NULL,
+    correct_count integer DEFAULT 0 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: mcq_attempts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.mcq_attempts (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    question_id uuid NOT NULL,
+    chapter_id uuid,
+    selected_index integer,
+    is_correct boolean NOT NULL,
+    time_spent_ms integer,
+    session_id uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: mcq_questions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.mcq_questions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    chapter_id uuid NOT NULL,
+    "position" integer DEFAULT 0 NOT NULL,
+    question text NOT NULL,
+    options jsonb DEFAULT '[]'::jsonb NOT NULL,
+    correct_index integer DEFAULT 0 NOT NULL,
+    explanation text,
+    tags text[] DEFAULT '{}'::text[] NOT NULL,
+    status text,
+    batch_id uuid,
+    created_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: profiles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.profiles (
+    id uuid NOT NULL,
+    email text,
+    full_name text,
+    phone text,
+    institution text,
+    photo_url text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: qbank_attempts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.qbank_attempts (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    question_id uuid NOT NULL,
+    chapter_id uuid,
+    answer text,
+    selected_index integer,
+    is_correct boolean NOT NULL,
+    time_spent_ms integer,
+    session_id uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: qbank_questions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.qbank_questions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    chapter_id uuid NOT NULL,
+    "position" integer DEFAULT 0 NOT NULL,
+    question text,
+    prompt text,
+    options jsonb DEFAULT '[]'::jsonb NOT NULL,
+    correct_index integer DEFAULT 0 NOT NULL,
+    answer text,
+    explanation text,
+    tags text[] DEFAULT '{}'::text[] NOT NULL,
+    status text,
+    batch_id uuid,
+    created_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: routine_assignments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.routine_assignments (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    routine_id uuid NOT NULL,
+    target_type text NOT NULL,
+    target_value text,
+    target_user_id uuid,
+    created_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT routine_assignments_target_type_check CHECK ((target_type = ANY (ARRAY['level'::text, 'subject'::text, 'user'::text])))
+);
+
+
+--
+-- Name: routine_days; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.routine_days (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    routine_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    day_of_week integer NOT NULL,
+    label text,
+    "position" integer DEFAULT 0 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT routine_days_day_of_week_check CHECK (((day_of_week >= 0) AND (day_of_week <= 6)))
+);
+
+
+--
+-- Name: routine_task_completions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.routine_task_completions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    task_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    completed_on date NOT NULL,
+    status text DEFAULT 'not_started'::text NOT NULL,
+    study_hours numeric DEFAULT 0 NOT NULL,
+    completed_at timestamp with time zone,
+    note text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: routine_tasks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.routine_tasks (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    routine_id uuid NOT NULL,
+    day_id uuid,
+    user_id uuid NOT NULL,
+    title text NOT NULL,
+    details jsonb DEFAULT '{}'::jsonb NOT NULL,
+    start_time time without time zone,
+    end_time time without time zone,
+    "position" integer DEFAULT 0 NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: routines; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.routines (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    title text NOT NULL,
+    description text,
+    config jsonb DEFAULT '{}'::jsonb NOT NULL,
+    is_active boolean DEFAULT true NOT NULL,
+    level text,
+    subject text,
+    chapter text,
+    routine_type text DEFAULT 'daily'::text NOT NULL,
+    hours_per_day numeric DEFAULT 1 NOT NULL,
+    starts_on date,
+    ends_on date,
+    is_archived boolean DEFAULT false NOT NULL,
+    accent text,
+    target_mcqs integer,
+    target_chapters integer,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: student_preferences; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.student_preferences (
+    user_id uuid NOT NULL,
+    preferences jsonb DEFAULT '{}'::jsonb NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: user_roles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.user_roles (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    role public.app_role NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: wrong_answer_bookmarks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.wrong_answer_bookmarks (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    source public.question_source NOT NULL,
+    question_id uuid NOT NULL,
+    wrong_count integer DEFAULT 1 NOT NULL,
+    last_wrong_at timestamp with time zone DEFAULT now() NOT NULL,
+    cleared_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: academic_chapters academic_chapters_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.academic_chapters
+    ADD CONSTRAINT academic_chapters_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: academic_levels academic_levels_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.academic_levels
+    ADD CONSTRAINT academic_levels_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: academic_levels academic_levels_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.academic_levels
+    ADD CONSTRAINT academic_levels_slug_key UNIQUE (slug);
+
+
+--
+-- Name: academic_subjects academic_subjects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.academic_subjects
+    ADD CONSTRAINT academic_subjects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: admin_settings admin_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admin_settings
+    ADD CONSTRAINT admin_settings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: admin_settings admin_settings_singleton_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admin_settings
+    ADD CONSTRAINT admin_settings_singleton_key UNIQUE (singleton);
+
+
+--
+-- Name: bookmarks bookmarks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bookmarks
+    ADD CONSTRAINT bookmarks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: bookmarks bookmarks_user_id_source_question_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bookmarks
+    ADD CONSTRAINT bookmarks_user_id_source_question_id_key UNIQUE (user_id, source, question_id);
+
+
+--
+-- Name: custom_exam_answers custom_exam_answers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.custom_exam_answers
+    ADD CONSTRAINT custom_exam_answers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: custom_exam_answers custom_exam_answers_session_question_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.custom_exam_answers
+    ADD CONSTRAINT custom_exam_answers_session_question_unique UNIQUE (session_id, question_id, source);
+
+
+--
+-- Name: custom_exam_sessions custom_exam_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.custom_exam_sessions
+    ADD CONSTRAINT custom_exam_sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: mcq_attempts mcq_attempts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mcq_attempts
+    ADD CONSTRAINT mcq_attempts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: mcq_attempts mcq_attempts_user_question_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mcq_attempts
+    ADD CONSTRAINT mcq_attempts_user_question_key UNIQUE (user_id, question_id);
+
+
+--
+-- Name: mcq_questions mcq_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mcq_questions
+    ADD CONSTRAINT mcq_questions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: profiles profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.profiles
+    ADD CONSTRAINT profiles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: qbank_attempts qbank_attempts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.qbank_attempts
+    ADD CONSTRAINT qbank_attempts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: qbank_attempts qbank_attempts_user_question_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.qbank_attempts
+    ADD CONSTRAINT qbank_attempts_user_question_unique UNIQUE (user_id, question_id);
+
+
+--
+-- Name: qbank_questions qbank_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.qbank_questions
+    ADD CONSTRAINT qbank_questions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: routine_assignments routine_assignments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_assignments
+    ADD CONSTRAINT routine_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: routine_days routine_days_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_days
+    ADD CONSTRAINT routine_days_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: routine_task_completions routine_task_completions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_task_completions
+    ADD CONSTRAINT routine_task_completions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: routine_task_completions routine_task_completions_task_id_completed_on_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_task_completions
+    ADD CONSTRAINT routine_task_completions_task_id_completed_on_key UNIQUE (task_id, completed_on);
+
+
+--
+-- Name: routine_tasks routine_tasks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_tasks
+    ADD CONSTRAINT routine_tasks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: routines routines_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routines
+    ADD CONSTRAINT routines_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: student_preferences student_preferences_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.student_preferences
+    ADD CONSTRAINT student_preferences_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: user_roles user_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_roles
+    ADD CONSTRAINT user_roles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_roles user_roles_user_id_role_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_roles
+    ADD CONSTRAINT user_roles_user_id_role_key UNIQUE (user_id, role);
+
+
+--
+-- Name: wrong_answer_bookmarks wrong_answer_bookmarks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wrong_answer_bookmarks
+    ADD CONSTRAINT wrong_answer_bookmarks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: wrong_answer_bookmarks wrong_answer_bookmarks_user_id_source_question_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wrong_answer_bookmarks
+    ADD CONSTRAINT wrong_answer_bookmarks_user_id_source_question_id_key UNIQUE (user_id, source, question_id);
+
+
+--
+-- Name: academic_chapters_subject_id_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX academic_chapters_subject_id_position_idx ON public.academic_chapters USING btree (subject_id, "position");
+
+
+--
+-- Name: academic_levels_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX academic_levels_position_idx ON public.academic_levels USING btree ("position");
+
+
+--
+-- Name: academic_subjects_level_id_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX academic_subjects_level_id_position_idx ON public.academic_subjects USING btree (level_id, "position");
+
+
+--
+-- Name: bookmarks_user_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX bookmarks_user_id_created_at_idx ON public.bookmarks USING btree (user_id, created_at DESC);
+
+
+--
+-- Name: custom_exam_answers_session_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX custom_exam_answers_session_idx ON public.custom_exam_answers USING btree (session_id);
+
+
+--
+-- Name: custom_exam_answers_user_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX custom_exam_answers_user_id_created_at_idx ON public.custom_exam_answers USING btree (user_id, created_at DESC);
+
+
+--
+-- Name: custom_exam_sessions_user_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX custom_exam_sessions_user_active_idx ON public.custom_exam_sessions USING btree (user_id, finished_at, created_at DESC);
+
+
+--
+-- Name: custom_exam_sessions_user_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX custom_exam_sessions_user_id_created_at_idx ON public.custom_exam_sessions USING btree (user_id, created_at DESC);
+
+
+--
+-- Name: idx_routine_assignments_routine; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_routine_assignments_routine ON public.routine_assignments USING btree (routine_id);
+
+
+--
+-- Name: idx_routine_assignments_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_routine_assignments_user ON public.routine_assignments USING btree (target_user_id);
+
+
+--
+-- Name: idx_routines_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_routines_created_at ON public.routines USING btree (created_at DESC);
+
+
+--
+-- Name: idx_routines_ends_on; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_routines_ends_on ON public.routines USING btree (ends_on);
+
+
+--
+-- Name: idx_routines_level_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_routines_level_status ON public.routines USING btree (level, is_archived);
+
+
+--
+-- Name: mcq_attempts_user_chapter_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX mcq_attempts_user_chapter_idx ON public.mcq_attempts USING btree (user_id, chapter_id);
+
+
+--
+-- Name: mcq_attempts_user_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX mcq_attempts_user_id_created_at_idx ON public.mcq_attempts USING btree (user_id, created_at DESC);
+
+
+--
+-- Name: mcq_questions_chapter_id_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX mcq_questions_chapter_id_position_idx ON public.mcq_questions USING btree (chapter_id, "position");
+
+
+--
+-- Name: mcq_questions_chapter_status_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX mcq_questions_chapter_status_position_idx ON public.mcq_questions USING btree (chapter_id, status, "position");
+
+
+--
+-- Name: qbank_attempts_user_chapter_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX qbank_attempts_user_chapter_idx ON public.qbank_attempts USING btree (user_id, chapter_id);
+
+
+--
+-- Name: qbank_attempts_user_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX qbank_attempts_user_id_created_at_idx ON public.qbank_attempts USING btree (user_id, created_at DESC);
+
+
+--
+-- Name: qbank_questions_chapter_id_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX qbank_questions_chapter_id_position_idx ON public.qbank_questions USING btree (chapter_id, "position");
+
+
+--
+-- Name: routine_days_routine_id_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX routine_days_routine_id_position_idx ON public.routine_days USING btree (routine_id, "position");
+
+
+--
+-- Name: routine_task_completions_user_id_completed_on_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX routine_task_completions_user_id_completed_on_idx ON public.routine_task_completions USING btree (user_id, completed_on DESC);
+
+
+--
+-- Name: routine_task_completions_user_task_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX routine_task_completions_user_task_idx ON public.routine_task_completions USING btree (user_id, task_id);
+
+
+--
+-- Name: routine_tasks_day_id_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX routine_tasks_day_id_position_idx ON public.routine_tasks USING btree (day_id, "position");
+
+
+--
+-- Name: routine_tasks_routine_id_position_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX routine_tasks_routine_id_position_idx ON public.routine_tasks USING btree (routine_id, "position");
+
+
+--
+-- Name: routines_user_id_created_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX routines_user_id_created_at_idx ON public.routines USING btree (user_id, created_at DESC);
+
+
+--
+-- Name: wrong_answer_bookmarks_user_id_last_wrong_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX wrong_answer_bookmarks_user_id_last_wrong_at_idx ON public.wrong_answer_bookmarks USING btree (user_id, last_wrong_at DESC);
+
+
+--
+-- Name: academic_chapters academic_chapters_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER academic_chapters_updated_at BEFORE UPDATE ON public.academic_chapters FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: academic_levels academic_levels_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER academic_levels_updated_at BEFORE UPDATE ON public.academic_levels FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: academic_subjects academic_subjects_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER academic_subjects_updated_at BEFORE UPDATE ON public.academic_subjects FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: admin_settings admin_settings_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER admin_settings_updated_at BEFORE UPDATE ON public.admin_settings FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: custom_exam_sessions custom_exam_sessions_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER custom_exam_sessions_updated_at BEFORE UPDATE ON public.custom_exam_sessions FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: mcq_questions mcq_questions_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER mcq_questions_updated_at BEFORE UPDATE ON public.mcq_questions FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: profiles profiles_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: qbank_questions qbank_questions_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER qbank_questions_updated_at BEFORE UPDATE ON public.qbank_questions FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: routine_task_completions routine_task_completions_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER routine_task_completions_updated_at BEFORE UPDATE ON public.routine_task_completions FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: routine_tasks routine_tasks_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER routine_tasks_updated_at BEFORE UPDATE ON public.routine_tasks FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: routines routines_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER routines_updated_at BEFORE UPDATE ON public.routines FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: student_preferences student_preferences_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER student_preferences_updated_at BEFORE UPDATE ON public.student_preferences FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+
+
+--
+-- Name: academic_chapters academic_chapters_subject_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.academic_chapters
+    ADD CONSTRAINT academic_chapters_subject_id_fkey FOREIGN KEY (subject_id) REFERENCES public.academic_subjects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: academic_subjects academic_subjects_level_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.academic_subjects
+    ADD CONSTRAINT academic_subjects_level_id_fkey FOREIGN KEY (level_id) REFERENCES public.academic_levels(id) ON DELETE CASCADE;
+
+
+--
+-- Name: bookmarks bookmarks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bookmarks
+    ADD CONSTRAINT bookmarks_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: custom_exam_answers custom_exam_answers_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.custom_exam_answers
+    ADD CONSTRAINT custom_exam_answers_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.custom_exam_sessions(id) ON DELETE CASCADE;
+
+
+--
+-- Name: custom_exam_answers custom_exam_answers_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.custom_exam_answers
+    ADD CONSTRAINT custom_exam_answers_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: custom_exam_sessions custom_exam_sessions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.custom_exam_sessions
+    ADD CONSTRAINT custom_exam_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: mcq_attempts mcq_attempts_chapter_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mcq_attempts
+    ADD CONSTRAINT mcq_attempts_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES public.academic_chapters(id) ON DELETE SET NULL;
+
+
+--
+-- Name: mcq_attempts mcq_attempts_question_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mcq_attempts
+    ADD CONSTRAINT mcq_attempts_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.mcq_questions(id) ON DELETE CASCADE;
+
+
+--
+-- Name: mcq_attempts mcq_attempts_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mcq_attempts
+    ADD CONSTRAINT mcq_attempts_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: mcq_questions mcq_questions_chapter_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mcq_questions
+    ADD CONSTRAINT mcq_questions_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES public.academic_chapters(id) ON DELETE CASCADE;
+
+
+--
+-- Name: profiles profiles_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.profiles
+    ADD CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: qbank_attempts qbank_attempts_chapter_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.qbank_attempts
+    ADD CONSTRAINT qbank_attempts_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES public.academic_chapters(id) ON DELETE SET NULL;
+
+
+--
+-- Name: qbank_attempts qbank_attempts_question_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.qbank_attempts
+    ADD CONSTRAINT qbank_attempts_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.qbank_questions(id) ON DELETE CASCADE;
+
+
+--
+-- Name: qbank_attempts qbank_attempts_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.qbank_attempts
+    ADD CONSTRAINT qbank_attempts_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: qbank_questions qbank_questions_chapter_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.qbank_questions
+    ADD CONSTRAINT qbank_questions_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES public.academic_chapters(id) ON DELETE CASCADE;
+
+
+--
+-- Name: routine_assignments routine_assignments_routine_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_assignments
+    ADD CONSTRAINT routine_assignments_routine_id_fkey FOREIGN KEY (routine_id) REFERENCES public.routines(id) ON DELETE CASCADE;
+
+
+--
+-- Name: routine_days routine_days_routine_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_days
+    ADD CONSTRAINT routine_days_routine_id_fkey FOREIGN KEY (routine_id) REFERENCES public.routines(id) ON DELETE CASCADE;
+
+
+--
+-- Name: routine_days routine_days_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_days
+    ADD CONSTRAINT routine_days_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: routine_task_completions routine_task_completions_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_task_completions
+    ADD CONSTRAINT routine_task_completions_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.routine_tasks(id) ON DELETE CASCADE;
+
+
+--
+-- Name: routine_task_completions routine_task_completions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_task_completions
+    ADD CONSTRAINT routine_task_completions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: routine_tasks routine_tasks_day_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_tasks
+    ADD CONSTRAINT routine_tasks_day_id_fkey FOREIGN KEY (day_id) REFERENCES public.routine_days(id) ON DELETE CASCADE;
+
+
+--
+-- Name: routine_tasks routine_tasks_routine_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_tasks
+    ADD CONSTRAINT routine_tasks_routine_id_fkey FOREIGN KEY (routine_id) REFERENCES public.routines(id) ON DELETE CASCADE;
+
+
+--
+-- Name: routine_tasks routine_tasks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routine_tasks
+    ADD CONSTRAINT routine_tasks_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: routines routines_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.routines
+    ADD CONSTRAINT routines_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: student_preferences student_preferences_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.student_preferences
+    ADD CONSTRAINT student_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_roles user_roles_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_roles
+    ADD CONSTRAINT user_roles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: wrong_answer_bookmarks wrong_answer_bookmarks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.wrong_answer_bookmarks
+    ADD CONSTRAINT wrong_answer_bookmarks_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: academic_chapters; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.academic_chapters ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: academic_chapters academic_chapters admin write; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "academic_chapters admin write" ON public.academic_chapters TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: academic_chapters academic_chapters read auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "academic_chapters read auth" ON public.academic_chapters FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: academic_levels; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.academic_levels ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: academic_levels academic_levels admin write; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "academic_levels admin write" ON public.academic_levels TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: academic_levels academic_levels read auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "academic_levels read auth" ON public.academic_levels FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: academic_subjects; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.academic_subjects ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: academic_subjects academic_subjects admin write; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "academic_subjects admin write" ON public.academic_subjects TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: academic_subjects academic_subjects read auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "academic_subjects read auth" ON public.academic_subjects FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: admin_settings; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.admin_settings ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: admin_settings admin_settings admin write; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "admin_settings admin write" ON public.admin_settings TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: admin_settings admin_settings read auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "admin_settings read auth" ON public.admin_settings FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: bookmarks; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.bookmarks ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: bookmarks bookmarks self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "bookmarks self all" ON public.bookmarks TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: custom_exam_answers; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.custom_exam_answers ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: custom_exam_answers custom_exam_answers self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "custom_exam_answers self all" ON public.custom_exam_answers TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: custom_exam_sessions; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.custom_exam_sessions ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: custom_exam_sessions custom_exam_sessions self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "custom_exam_sessions self all" ON public.custom_exam_sessions TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: mcq_attempts; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.mcq_attempts ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: mcq_attempts mcq_attempts admin select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "mcq_attempts admin select" ON public.mcq_attempts FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: mcq_attempts mcq_attempts self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "mcq_attempts self all" ON public.mcq_attempts TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: mcq_questions; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.mcq_questions ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: mcq_questions mcq_questions admin write; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "mcq_questions admin write" ON public.mcq_questions TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: mcq_questions mcq_questions read auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "mcq_questions read auth" ON public.mcq_questions FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: profiles; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: profiles profiles admin select all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "profiles admin select all" ON public.profiles FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: profiles profiles admin update all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "profiles admin update all" ON public.profiles FOR UPDATE TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: profiles profiles self insert; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "profiles self insert" ON public.profiles FOR INSERT TO authenticated WITH CHECK ((id = auth.uid()));
+
+
+--
+-- Name: profiles profiles self select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "profiles self select" ON public.profiles FOR SELECT TO authenticated USING ((id = auth.uid()));
+
+
+--
+-- Name: profiles profiles self update; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "profiles self update" ON public.profiles FOR UPDATE TO authenticated USING ((id = auth.uid())) WITH CHECK ((id = auth.uid()));
+
+
+--
+-- Name: qbank_attempts; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.qbank_attempts ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: qbank_attempts qbank_attempts admin select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "qbank_attempts admin select" ON public.qbank_attempts FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: qbank_attempts qbank_attempts self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "qbank_attempts self all" ON public.qbank_attempts TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: qbank_questions; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.qbank_questions ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: qbank_questions qbank_questions admin write; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "qbank_questions admin write" ON public.qbank_questions TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: qbank_questions qbank_questions read auth; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "qbank_questions read auth" ON public.qbank_questions FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: routine_assignments; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.routine_assignments ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: routine_assignments routine_assignments admin all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_assignments admin all" ON public.routine_assignments TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: routine_assignments routine_assignments auth read; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_assignments auth read" ON public.routine_assignments FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: routine_days; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.routine_days ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: routine_days routine_days admin all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_days admin all" ON public.routine_days TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: routine_days routine_days auth read; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_days auth read" ON public.routine_days FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: routine_days routine_days self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_days self all" ON public.routine_days TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: routine_task_completions; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.routine_task_completions ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: routine_task_completions routine_task_completions admin select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_task_completions admin select" ON public.routine_task_completions FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: routine_task_completions routine_task_completions self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_task_completions self all" ON public.routine_task_completions TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: routine_tasks; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.routine_tasks ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: routine_tasks routine_tasks admin all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_tasks admin all" ON public.routine_tasks TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: routine_tasks routine_tasks auth read; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_tasks auth read" ON public.routine_tasks FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: routine_tasks routine_tasks self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routine_tasks self all" ON public.routine_tasks TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: routines; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.routines ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: routines routines admin all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routines admin all" ON public.routines TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: routines routines auth read; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routines auth read" ON public.routines FOR SELECT TO authenticated USING (true);
+
+
+--
+-- Name: routines routines self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "routines self all" ON public.routines TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: student_preferences; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.student_preferences ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: student_preferences student_preferences self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "student_preferences self all" ON public.student_preferences TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: user_roles; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: user_roles user_roles admin select all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "user_roles admin select all" ON public.user_roles FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role));
+
+
+--
+-- Name: user_roles user_roles self select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "user_roles self select" ON public.user_roles FOR SELECT TO authenticated USING ((user_id = auth.uid()));
+
+
+--
+-- Name: wrong_answer_bookmarks; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.wrong_answer_bookmarks ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: wrong_answer_bookmarks wrong_answer_bookmarks self all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "wrong_answer_bookmarks self all" ON public.wrong_answer_bookmarks TO authenticated USING ((user_id = auth.uid())) WITH CHECK ((user_id = auth.uid()));
+
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
+--
+
+GRANT USAGE ON SCHEMA public TO postgres;
+GRANT USAGE ON SCHEMA public TO anon;
+GRANT USAGE ON SCHEMA public TO authenticated;
+GRANT USAGE ON SCHEMA public TO service_role;
+
+
+--
+-- Name: FUNCTION admin_get_user(p_user_id uuid); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.admin_get_user(p_user_id uuid) FROM PUBLIC;
+GRANT ALL ON FUNCTION public.admin_get_user(p_user_id uuid) TO authenticated;
+GRANT ALL ON FUNCTION public.admin_get_user(p_user_id uuid) TO service_role;
+
+
+--
+-- Name: FUNCTION admin_list_users(p_search text, p_role text, p_status text, p_verified text, p_from timestamp with time zone, p_to timestamp with time zone, p_sort text, p_limit integer, p_offset integer); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.admin_list_users(p_search text, p_role text, p_status text, p_verified text, p_from timestamp with time zone, p_to timestamp with time zone, p_sort text, p_limit integer, p_offset integer) FROM PUBLIC;
+GRANT ALL ON FUNCTION public.admin_list_users(p_search text, p_role text, p_status text, p_verified text, p_from timestamp with time zone, p_to timestamp with time zone, p_sort text, p_limit integer, p_offset integer) TO authenticated;
+GRANT ALL ON FUNCTION public.admin_list_users(p_search text, p_role text, p_status text, p_verified text, p_from timestamp with time zone, p_to timestamp with time zone, p_sort text, p_limit integer, p_offset integer) TO service_role;
+
+
+--
+-- Name: FUNCTION admin_user_stats(); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.admin_user_stats() FROM PUBLIC;
+GRANT ALL ON FUNCTION public.admin_user_stats() TO authenticated;
+GRANT ALL ON FUNCTION public.admin_user_stats() TO service_role;
+
+
+--
+-- Name: FUNCTION handle_new_user(); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC;
+GRANT ALL ON FUNCTION public.handle_new_user() TO service_role;
+
+
+--
+-- Name: FUNCTION has_role(_user_id uuid, _role public.app_role); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.has_role(_user_id uuid, _role public.app_role) FROM PUBLIC;
+GRANT ALL ON FUNCTION public.has_role(_user_id uuid, _role public.app_role) TO service_role;
+GRANT ALL ON FUNCTION public.has_role(_user_id uuid, _role public.app_role) TO authenticated;
+
+
+--
+-- Name: FUNCTION mcq_practice_taxonomy(); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.mcq_practice_taxonomy() FROM PUBLIC;
+GRANT ALL ON FUNCTION public.mcq_practice_taxonomy() TO anon;
+GRANT ALL ON FUNCTION public.mcq_practice_taxonomy() TO authenticated;
+GRANT ALL ON FUNCTION public.mcq_practice_taxonomy() TO service_role;
+
+
+--
+-- Name: FUNCTION qbank_practice_taxonomy(); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.qbank_practice_taxonomy() FROM PUBLIC;
+GRANT ALL ON FUNCTION public.qbank_practice_taxonomy() TO anon;
+GRANT ALL ON FUNCTION public.qbank_practice_taxonomy() TO authenticated;
+GRANT ALL ON FUNCTION public.qbank_practice_taxonomy() TO service_role;
+
+
+--
+-- Name: FUNCTION tg_set_updated_at(); Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON FUNCTION public.tg_set_updated_at() TO anon;
+GRANT ALL ON FUNCTION public.tg_set_updated_at() TO authenticated;
+GRANT ALL ON FUNCTION public.tg_set_updated_at() TO service_role;
+
+
+--
+-- Name: TABLE academic_chapters; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.academic_chapters TO anon;
+GRANT ALL ON TABLE public.academic_chapters TO authenticated;
+GRANT ALL ON TABLE public.academic_chapters TO service_role;
+
+
+--
+-- Name: TABLE academic_levels; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.academic_levels TO anon;
+GRANT ALL ON TABLE public.academic_levels TO authenticated;
+GRANT ALL ON TABLE public.academic_levels TO service_role;
+
+
+--
+-- Name: TABLE academic_subjects; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.academic_subjects TO anon;
+GRANT ALL ON TABLE public.academic_subjects TO authenticated;
+GRANT ALL ON TABLE public.academic_subjects TO service_role;
+
+
+--
+-- Name: TABLE admin_settings; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.admin_settings TO anon;
+GRANT ALL ON TABLE public.admin_settings TO authenticated;
+GRANT ALL ON TABLE public.admin_settings TO service_role;
+
+
+--
+-- Name: TABLE bookmarks; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.bookmarks TO anon;
+GRANT ALL ON TABLE public.bookmarks TO authenticated;
+GRANT ALL ON TABLE public.bookmarks TO service_role;
+
+
+--
+-- Name: TABLE custom_exam_answers; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.custom_exam_answers TO anon;
+GRANT ALL ON TABLE public.custom_exam_answers TO authenticated;
+GRANT ALL ON TABLE public.custom_exam_answers TO service_role;
+
+
+--
+-- Name: TABLE custom_exam_sessions; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.custom_exam_sessions TO anon;
+GRANT ALL ON TABLE public.custom_exam_sessions TO authenticated;
+GRANT ALL ON TABLE public.custom_exam_sessions TO service_role;
+
+
+--
+-- Name: TABLE mcq_attempts; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.mcq_attempts TO anon;
+GRANT ALL ON TABLE public.mcq_attempts TO authenticated;
+GRANT ALL ON TABLE public.mcq_attempts TO service_role;
+
+
+--
+-- Name: TABLE mcq_questions; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.mcq_questions TO anon;
+GRANT ALL ON TABLE public.mcq_questions TO authenticated;
+GRANT ALL ON TABLE public.mcq_questions TO service_role;
+
+
+--
+-- Name: TABLE profiles; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.profiles TO anon;
+GRANT ALL ON TABLE public.profiles TO authenticated;
+GRANT ALL ON TABLE public.profiles TO service_role;
+
+
+--
+-- Name: TABLE qbank_attempts; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.qbank_attempts TO anon;
+GRANT ALL ON TABLE public.qbank_attempts TO authenticated;
+GRANT ALL ON TABLE public.qbank_attempts TO service_role;
+
+
+--
+-- Name: TABLE qbank_questions; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.qbank_questions TO anon;
+GRANT ALL ON TABLE public.qbank_questions TO authenticated;
+GRANT ALL ON TABLE public.qbank_questions TO service_role;
+
+
+--
+-- Name: TABLE routine_assignments; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.routine_assignments TO anon;
+GRANT ALL ON TABLE public.routine_assignments TO authenticated;
+GRANT ALL ON TABLE public.routine_assignments TO service_role;
+
+
+--
+-- Name: TABLE routine_days; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.routine_days TO anon;
+GRANT ALL ON TABLE public.routine_days TO authenticated;
+GRANT ALL ON TABLE public.routine_days TO service_role;
+
+
+--
+-- Name: TABLE routine_task_completions; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.routine_task_completions TO anon;
+GRANT ALL ON TABLE public.routine_task_completions TO authenticated;
+GRANT ALL ON TABLE public.routine_task_completions TO service_role;
+
+
+--
+-- Name: TABLE routine_tasks; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.routine_tasks TO anon;
+GRANT ALL ON TABLE public.routine_tasks TO authenticated;
+GRANT ALL ON TABLE public.routine_tasks TO service_role;
+
+
+--
+-- Name: TABLE routines; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.routines TO anon;
+GRANT ALL ON TABLE public.routines TO authenticated;
+GRANT ALL ON TABLE public.routines TO service_role;
+
+
+--
+-- Name: TABLE student_preferences; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.student_preferences TO anon;
+GRANT ALL ON TABLE public.student_preferences TO authenticated;
+GRANT ALL ON TABLE public.student_preferences TO service_role;
+
+
+--
+-- Name: TABLE user_roles; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.user_roles TO anon;
+GRANT ALL ON TABLE public.user_roles TO authenticated;
+GRANT ALL ON TABLE public.user_roles TO service_role;
+
+
+--
+-- Name: TABLE wrong_answer_bookmarks; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.wrong_answer_bookmarks TO anon;
+GRANT ALL ON TABLE public.wrong_answer_bookmarks TO authenticated;
+GRANT ALL ON TABLE public.wrong_answer_bookmarks TO service_role;
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: -
+--
+
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: -
+--
+
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: public; Owner: -
+--
+
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: public; Owner: -
+--
+
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: -
+--
+
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: -
+--
+
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict wL1HvaJ3FZgzQdlSwsWaUczKnMqRGBFK7J6qzFnTcDPP6HbhxFhnb4RD6phK7dt
+
+
+-- ============================================================================
+-- Required function permissions / hardening
+-- ============================================================================
+-- has_role is intentionally SECURITY DEFINER with a locked search_path so RLS
+-- policies and authenticated server functions can check roles without recursive
+-- user_roles policy failures.
+REVOKE ALL ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO service_role;
+
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.handle_new_user() TO service_role;
+
+REVOKE ALL ON FUNCTION public.admin_list_users(text, text, text, text, timestamp with time zone, timestamp with time zone, text, integer, integer) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.admin_get_user(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.admin_user_stats() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_list_users(text, text, text, text, timestamp with time zone, timestamp with time zone, text, integer, integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_get_user(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_user_stats() TO authenticated;
+
+REVOKE ALL ON FUNCTION public.mcq_practice_taxonomy() FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.qbank_practice_taxonomy() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.mcq_practice_taxonomy() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.qbank_practice_taxonomy() TO authenticated;
