@@ -595,7 +595,9 @@ function PastePanel(props: {
       await navigator.clipboard.writeText(SAMPLE_ONE);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   return (

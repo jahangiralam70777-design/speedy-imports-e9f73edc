@@ -157,7 +157,7 @@ function ProgressTrackerPage() {
     staleTime: 15_000,
   });
 
-  const levels: Level[] = data?.levels ?? [];
+  const levels: Level[] = useMemo(() => data?.levels ?? [], [data]);
   const hydrated = !isLoading;
 
   const [levelId, setLevelId] = useState("");

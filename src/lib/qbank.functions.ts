@@ -10,6 +10,9 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
+
+type QBankQuestionRow = Database["public"]["Tables"]["qbank_questions"]["Row"];
 
 // ---------------------------------------------------------------------------
 // Types
@@ -154,7 +157,7 @@ async function fetchCreatorNames(
 }
 
 function mapRow(
-  r: any,
+  r: QBankQuestionRow,
   chapters: Awaited<ReturnType<typeof loadAcademicIndex>>["chapters"],
   creators: Map<string, string>,
 ): QBankRow {
@@ -164,12 +167,12 @@ function mapRow(
   const chapter = chapters.get(r.chapter_id);
   return {
     id: r.id,
-    question: r.question,
+    question: r.question ?? r.prompt ?? "",
     options,
     answer: answerKey,
     correctIndex,
     explanation: r.explanation ?? "",
-    status: r.status,
+    status: (r.status ?? "draft") as QBankStatus,
     position: r.position,
     chapterId: r.chapter_id,
     chapterName: chapter?.name ?? "",

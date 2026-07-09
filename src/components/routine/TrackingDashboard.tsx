@@ -343,10 +343,11 @@ function VirtualStudentTable({
   );
 
   // Reset scroll when the underlying data set changes shape (filters cleared etc.)
+  const hasNoStudents = students.length === 0;
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
     setScrollTop(0);
-  }, [students.length === 0]);
+  }, [hasNoStudents]);
 
   const total = students.length;
   const totalHeight = total * ROW_H;

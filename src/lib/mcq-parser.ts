@@ -119,9 +119,9 @@ function splitBlocks(text: string): Block[] {
 /* Per-block parser                                                    */
 /* ------------------------------------------------------------------ */
 
-const OPT_RE = /^\s*([A-D])\s*[.):\-]\s*(.*)$/;
-const ANS_RE = /^\s*(?:Answer|Ans|Correct\s+Answer|Key)\s*[:\-]\s*(.*)$/i;
-const EXP_RE = /^\s*(?:Explanation|Explain|Solution|Reason)\s*[:\-]\s*(.*)$/i;
+const OPT_RE = /^\s*([A-D])\s*[.):-]\s*(.*)$/;
+const ANS_RE = /^\s*(?:Answer|Ans|Correct\s+Answer|Key)\s*[:-]\s*(.*)$/i;
+const EXP_RE = /^\s*(?:Explanation|Explain|Solution|Reason)\s*[:-]\s*(.*)$/i;
 
 function parseBlock(block: Block, serial: number): ParsedMcq {
   const issues: ParseIssue[] = [];
@@ -190,7 +190,7 @@ function parseBlock(block: Block, serial: number): ParsedMcq {
   let answer = "";
   let answerText = "";
   if (answerRaw) {
-    const letter = /^\(?\s*([A-D])\s*\)?\s*[.):\-]?\s*(.*)$/i.exec(answerRaw);
+    const letter = /^\(?\s*([A-D])\s*\)?\s*[.):-]?\s*(.*)$/i.exec(answerRaw);
     if (letter) {
       answer = letter[1].toUpperCase();
       answerText = letter[2].trim();

@@ -96,8 +96,11 @@ export function ReportsSection({
   progressMap: ProgressMap;
 }) {
   const [range, setRange] = useState<Range>("d30");
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
   const [customFrom, setCustomFrom] = useState<Date | undefined>(addDays(today, -14));
   const [customTo, setCustomTo] = useState<Date | undefined>(today);
 

@@ -323,7 +323,7 @@ export const getRoutineStats = createServerFn({ method: "POST" })
     const nonArchived = rows.filter((r: { is_archived: boolean }) => !r.is_archived);
 
     const active = nonArchived.filter(
-      (r: any) =>
+      (r: { is_active: boolean; starts_on: string | null; ends_on: string | null }) =>
         r.is_active && (!r.starts_on || r.starts_on <= now) && (!r.ends_on || r.ends_on >= now),
     ).length;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
