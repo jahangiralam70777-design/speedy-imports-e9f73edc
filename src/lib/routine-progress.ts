@@ -114,7 +114,7 @@ export function useRoutineProgress() {
     staleTime: 30_000,
   });
 
-  const completions = query.data ?? [];
+  const completions = useMemo(() => query.data ?? [], [query.data]);
   const map = useMemo(() => buildProgressMap(completions), [completions]);
   const hydrated = !query.isLoading;
 
