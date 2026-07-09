@@ -2,20 +2,67 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AnimatePresence, motion, useMotionValue, useTransform, animate as animateMV } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useTransform,
+  animate as animateMV,
+} from "motion/react";
 import { BulkUploadDialog, type BulkUploadPayload } from "@/components/mcq/BulkUploadDialog";
 import { toast } from "sonner";
 import {
-  ArrowUpDown, BookOpen, CalendarDays, CheckCircle2,
-  ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  ClipboardList, Copy, Database, Download, Eye, FileSpreadsheet, Filter,
-  Home, Inbox, Layers, ListChecks, MoreHorizontal, Move, Pencil, Search,
-  Shield, ShieldAlert, Sparkles, Trash2, TriangleAlert, Upload, X,
-  ArrowRightLeft, User, Clock, Package, RefreshCw, LayoutGrid, Rows3,
+  ArrowUpDown,
+  BookOpen,
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  ClipboardList,
+  Copy,
+  Database,
+  Download,
+  Eye,
+  FileSpreadsheet,
+  Filter,
+  Home,
+  Inbox,
+  Layers,
+  ListChecks,
+  MoreHorizontal,
+  Move,
+  Pencil,
+  Search,
+  Shield,
+  ShieldAlert,
+  Sparkles,
+  Trash2,
+  TriangleAlert,
+  Upload,
+  X,
+  ArrowRightLeft,
+  User,
+  Clock,
+  Package,
+  RefreshCw,
+  LayoutGrid,
+  Rows3,
 } from "lucide-react";
 import {
-  listQuestionBankQuestions, createQuestionBankQuestion, updateQuestionBankQuestion, deleteQuestionBankQuestions, changeQuestionBankStatus, moveQuestionBankQuestions, bulkImportQuestionBankQuestions, getQuestionBankStats,
-  type QBankRow, type QBankStatus, type QBankListResult,
+  listQuestionBankQuestions,
+  createQuestionBankQuestion,
+  updateQuestionBankQuestion,
+  deleteQuestionBankQuestions,
+  changeQuestionBankStatus,
+  moveQuestionBankQuestions,
+  bulkImportQuestionBankQuestions,
+  getQuestionBankStats,
+  type QBankRow,
+  type QBankStatus,
+  type QBankListResult,
 } from "@/lib/qbank.functions";
 import { getAcademicTree, type ApiLevel } from "@/lib/academic.functions";
 
@@ -46,8 +93,7 @@ const DATE_FILTERS: { key: DateFilter; label: string }[] = [
   { key: "30d", label: "Last 30 days" },
 ];
 
-type SortPreset =
-  | "newest" | "oldest" | "updated" | "position" | "question" | "chapter";
+type SortPreset = "newest" | "oldest" | "updated" | "position" | "question" | "chapter";
 
 const SORT_PRESETS: { key: SortPreset; label: string }[] = [
   { key: "newest", label: "Newest first" },
@@ -59,26 +105,37 @@ const SORT_PRESETS: { key: SortPreset; label: string }[] = [
 ];
 
 type PersistedFilters = {
-  levelId: string; subjectId: string; chapterId: string;
-  status: string; dateRange: DateFilter; batch: string; sortPreset: SortPreset;
+  levelId: string;
+  subjectId: string;
+  chapterId: string;
+  status: string;
+  dateRange: DateFilter;
+  batch: string;
+  sortPreset: SortPreset;
 };
 
 function readPersistedFilters(): Partial<PersistedFilters> {
   if (typeof window === "undefined") return {};
   try {
     const raw = window.sessionStorage.getItem(FILTERS_KEY);
-    return raw ? JSON.parse(raw) as Partial<PersistedFilters> : {};
-  } catch { return {}; }
+    return raw ? (JSON.parse(raw) as Partial<PersistedFilters>) : {};
+  } catch {
+    return {};
+  }
 }
 
 type Option = { id: string; name: string };
 
 function dateRangeToDays(v: DateFilter): number | null {
   switch (v) {
-    case "today": return 1;
-    case "7d": return 7;
-    case "30d": return 30;
-    default: return null;
+    case "today":
+      return 1;
+    case "7d":
+      return 7;
+    case "30d":
+      return 30;
+    default:
+      return null;
   }
 }
 
@@ -109,9 +166,18 @@ function QBankManagerPage() {
 
   useEffect(() => {
     try {
-      window.sessionStorage.setItem(FILTERS_KEY, JSON.stringify({
-        levelId, subjectId, chapterId, status, dateRange, batch, sortPreset,
-      }));
+      window.sessionStorage.setItem(
+        FILTERS_KEY,
+        JSON.stringify({
+          levelId,
+          subjectId,
+          chapterId,
+          status,
+          dateRange,
+          batch,
+          sortPreset,
+        }),
+      );
     } catch {}
   }, [levelId, subjectId, chapterId, status, dateRange, batch, sortPreset]);
 
@@ -122,11 +188,23 @@ function QBankManagerPage() {
     return (PAGE_SIZES as readonly number[]).includes(stored) ? stored : 100;
   });
   useEffect(() => {
-    try { window.localStorage.setItem(PAGE_SIZE_KEY, String(pageSize)); } catch {}
+    try {
+      window.localStorage.setItem(PAGE_SIZE_KEY, String(pageSize));
+    } catch {}
   }, [pageSize]);
 
-  useEffect(() => { setPage(1); }, [
-    levelId, subjectId, chapterId, status, batch, dateRange, debouncedQuery, sortPreset, pageSize,
+  useEffect(() => {
+    setPage(1);
+  }, [
+    levelId,
+    subjectId,
+    chapterId,
+    status,
+    batch,
+    dateRange,
+    debouncedQuery,
+    sortPreset,
+    pageSize,
   ]);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -159,17 +237,32 @@ function QBankManagerPage() {
 
   const tree: ApiLevel[] = treeQuery.data ?? [];
 
-  const listParams = useMemo(() => ({
-    page, pageSize,
-    levelId: levelId || null,
-    subjectId: subjectId || null,
-    chapterId: chapterId || null,
-    status: (status || null) as QBankStatus | null,
-    batchId: batch || null,
-    search: debouncedQuery || null,
-    sort: sortPreset === "position" ? "position" as const : sortPreset,
-    createdWithinDays: dateRangeToDays(dateRange),
-  }), [page, pageSize, levelId, subjectId, chapterId, status, batch, debouncedQuery, sortPreset, dateRange]);
+  const listParams = useMemo(
+    () => ({
+      page,
+      pageSize,
+      levelId: levelId || null,
+      subjectId: subjectId || null,
+      chapterId: chapterId || null,
+      status: (status || null) as QBankStatus | null,
+      batchId: batch || null,
+      search: debouncedQuery || null,
+      sort: sortPreset === "position" ? ("position" as const) : sortPreset,
+      createdWithinDays: dateRangeToDays(dateRange),
+    }),
+    [
+      page,
+      pageSize,
+      levelId,
+      subjectId,
+      chapterId,
+      status,
+      batch,
+      debouncedQuery,
+      sortPreset,
+      dateRange,
+    ],
+  );
 
   const listQuery = useQuery({
     queryKey: ["qbank-list", listParams],
@@ -184,7 +277,12 @@ function QBankManagerPage() {
   });
 
   const list: QBankListResult = listQuery.data ?? {
-    rows: [], total: 0, page, pageSize, totalPages: 1, batches: [],
+    rows: [],
+    total: 0,
+    page,
+    pageSize,
+    totalPages: 1,
+    batches: [],
   };
   const loading = listQuery.isLoading || treeQuery.isLoading;
 
@@ -197,7 +295,9 @@ function QBankManagerPage() {
 
   const subjectOptions: Option[] = useMemo(() => {
     if (!levelId) {
-      return tree.flatMap((l) => l.subjects.map((s) => ({ id: s.id, name: `${s.name} — ${l.name}` })));
+      return tree.flatMap((l) =>
+        l.subjects.map((s) => ({ id: s.id, name: `${s.name} — ${l.name}` })),
+      );
     }
     const lvl = tree.find((l) => l.id === levelId);
     return (lvl?.subjects ?? []).map((s) => ({ id: s.id, name: s.name }));
@@ -205,9 +305,10 @@ function QBankManagerPage() {
 
   const chapterOptions: Option[] = useMemo(() => {
     if (subjectId) {
-      for (const l of tree) for (const s of l.subjects) {
-        if (s.id === subjectId) return s.chapters.map((c) => ({ id: c.id, name: c.name }));
-      }
+      for (const l of tree)
+        for (const s of l.subjects) {
+          if (s.id === subjectId) return s.chapters.map((c) => ({ id: c.id, name: c.name }));
+        }
       return [];
     }
     if (levelId) {
@@ -216,17 +317,18 @@ function QBankManagerPage() {
         s.chapters.map((c) => ({ id: c.id, name: `${c.name} — ${s.name}` })),
       );
     }
-    return tree.flatMap((l) => l.subjects.flatMap((s) =>
-      s.chapters.map((c) => ({ id: c.id, name: `${c.name} — ${s.name}` })),
-    ));
+    return tree.flatMap((l) =>
+      l.subjects.flatMap((s) =>
+        s.chapters.map((c) => ({ id: c.id, name: `${c.name} — ${s.name}` })),
+      ),
+    );
   }, [tree, levelId, subjectId]);
 
   /* -------- Selection -------- */
 
   const pageRows = list.rows;
 
-  const allOnPageSelected =
-    pageRows.length > 0 && pageRows.every((r) => selected.has(r.id));
+  const allOnPageSelected = pageRows.length > 0 && pageRows.every((r) => selected.has(r.id));
 
   function togglePageSelect() {
     setSelected((prev) => {
@@ -239,11 +341,14 @@ function QBankManagerPage() {
   function toggleRow(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }
-  function clearSelection() { setSelected(new Set()); }
+  function clearSelection() {
+    setSelected(new Set());
+  }
   async function selectAllMatching() {
     try {
       const all = await listFn({ data: { ...listParams, page: 1, pageSize: 500 } });
@@ -268,8 +373,13 @@ function QBankManagerPage() {
   );
 
   function resetFilters() {
-    setLevelId(""); setSubjectId(""); setChapterId("");
-    setStatus(""); setBatch(""); setDateRange("any"); setQuery("");
+    setLevelId("");
+    setSubjectId("");
+    setChapterId("");
+    setStatus("");
+    setBatch("");
+    setDateRange("any");
+    setQuery("");
   }
 
   /* -------- Mutations -------- */
@@ -281,20 +391,34 @@ function QBankManagerPage() {
 
   const createMut = useMutation({
     mutationFn: (payload: {
-      chapterId: string; question: string; options: { key: string; text: string }[];
-      correctIndex: number; explanation: string; status: QBankStatus;
+      chapterId: string;
+      question: string;
+      options: { key: string; text: string }[];
+      correctIndex: number;
+      explanation: string;
+      status: QBankStatus;
     }) => createFn({ data: payload }),
-    onSuccess: () => { toast.success("Question created"); invalidateAll(); },
+    onSuccess: () => {
+      toast.success("Question created");
+      invalidateAll();
+    },
     onError: (e) => toast.error((e as Error).message),
   });
 
   const updateMut = useMutation({
     mutationFn: (payload: {
-      id: string; chapterId: string; question: string;
-      options: { key: string; text: string }[]; correctIndex: number;
-      explanation: string; status: QBankStatus;
+      id: string;
+      chapterId: string;
+      question: string;
+      options: { key: string; text: string }[];
+      correctIndex: number;
+      explanation: string;
+      status: QBankStatus;
     }) => updateFn({ data: payload }),
-    onSuccess: () => { toast.success("Question updated"); invalidateAll(); },
+    onSuccess: () => {
+      toast.success("Question updated");
+      invalidateAll();
+    },
     onError: (e) => toast.error((e as Error).message),
   });
 
@@ -310,35 +434,74 @@ function QBankManagerPage() {
 
   const statusMut = useMutation({
     mutationFn: (payload: { ids: string[]; status: QBankStatus }) => statusFn({ data: payload }),
-    onSuccess: (res) => { toast.success(`Updated status on ${res.updated}`); invalidateAll(); },
+    onSuccess: (res) => {
+      toast.success(`Updated status on ${res.updated}`);
+      invalidateAll();
+    },
     onError: (e) => toast.error((e as Error).message),
   });
 
   const moveMut = useMutation({
     mutationFn: (payload: { ids: string[]; chapterId: string }) => moveFn({ data: payload }),
-    onSuccess: (res) => { toast.success(`Moved ${res.moved}`); setSelected(new Set()); invalidateAll(); },
+    onSuccess: (res) => {
+      toast.success(`Moved ${res.moved}`);
+      setSelected(new Set());
+      invalidateAll();
+    },
     onError: (e) => toast.error((e as Error).message),
   });
 
   /* -------- Export -------- */
 
   const exportRows = useCallback((rows: QBankRow[]) => {
-    const header = ["id","question","A","B","C","D","answer","explanation","level","subject","chapter","status","createdBy","createdAt","updatedAt","batch"];
+    const header = [
+      "id",
+      "question",
+      "A",
+      "B",
+      "C",
+      "D",
+      "answer",
+      "explanation",
+      "level",
+      "subject",
+      "chapter",
+      "status",
+      "createdBy",
+      "createdAt",
+      "updatedAt",
+      "batch",
+    ];
     const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
     const lines = [header.join(",")].concat(
-      rows.map((r) => [
-        r.id, r.question,
-        r.options[0]?.text ?? "", r.options[1]?.text ?? "",
-        r.options[2]?.text ?? "", r.options[3]?.text ?? "",
-        r.answer, r.explanation, r.levelName, r.subjectName, r.chapterName,
-        r.status, r.createdByName, r.createdAt, r.updatedAt, r.batchId ?? "",
-      ].map((v) => esc(String(v))).join(",")),
+      rows.map((r) =>
+        [
+          r.id,
+          r.question,
+          r.options[0]?.text ?? "",
+          r.options[1]?.text ?? "",
+          r.options[2]?.text ?? "",
+          r.options[3]?.text ?? "",
+          r.answer,
+          r.explanation,
+          r.levelName,
+          r.subjectName,
+          r.chapterName,
+          r.status,
+          r.createdByName,
+          r.createdAt,
+          r.updatedAt,
+          r.batchId ?? "",
+        ]
+          .map((v) => esc(String(v)))
+          .join(","),
+      ),
     );
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `qbank-export-${new Date().toISOString().slice(0,10)}.csv`;
+    a.download = `qbank-export-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }, []);
@@ -362,18 +525,35 @@ function QBankManagerPage() {
       <KpiGrid kpis={kpis} />
 
       <FilterBar
-        levelId={levelId} setLevelId={(v) => { setLevelId(v); setSubjectId(""); setChapterId(""); }}
-        subjectId={subjectId} setSubjectId={(v) => { setSubjectId(v); setChapterId(""); }}
-        chapterId={chapterId} setChapterId={setChapterId}
+        levelId={levelId}
+        setLevelId={(v) => {
+          setLevelId(v);
+          setSubjectId("");
+          setChapterId("");
+        }}
+        subjectId={subjectId}
+        setSubjectId={(v) => {
+          setSubjectId(v);
+          setChapterId("");
+        }}
+        chapterId={chapterId}
+        setChapterId={setChapterId}
         levelOptions={levelOptions}
         subjectOptions={subjectOptions}
         chapterOptions={chapterOptions}
-        status={status} setStatus={setStatus}
-        batch={batch} setBatch={setBatch} batches={list.batches}
-        dateRange={dateRange} setDateRange={setDateRange}
-        query={query} setQuery={setQuery}
-        sortPreset={sortPreset} setSortPreset={setSortPreset}
-        viewMode={viewMode} setViewMode={setViewMode}
+        status={status}
+        setStatus={setStatus}
+        batch={batch}
+        setBatch={setBatch}
+        batches={list.batches}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        query={query}
+        setQuery={setQuery}
+        sortPreset={sortPreset}
+        setSortPreset={setSortPreset}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
         onReset={resetFilters}
         onBulkUpload={() => setUploadOpen(true)}
         onExportAll={() => exportRows(list.rows)}
@@ -400,9 +580,11 @@ function QBankManagerPage() {
           toggleRow={toggleRow}
           togglePageSelect={togglePageSelect}
           allOnPageSelected={allOnPageSelected}
-          page={list.page} setPage={setPage}
+          page={list.page}
+          setPage={setPage}
           totalPages={list.totalPages}
-          pageSize={list.pageSize} setPageSize={setPageSize}
+          pageSize={list.pageSize}
+          setPageSize={setPageSize}
           onView={setViewRow}
           onEdit={setEditRow}
           onMove={(r) => setMoveRowsSel([r])}
@@ -417,9 +599,11 @@ function QBankManagerPage() {
           totalRows={list.total}
           selected={selected}
           toggleRow={toggleRow}
-          page={list.page} setPage={setPage}
+          page={list.page}
+          setPage={setPage}
           totalPages={list.totalPages}
-          pageSize={list.pageSize} setPageSize={setPageSize}
+          pageSize={list.pageSize}
+          setPageSize={setPageSize}
           onView={setViewRow}
           onEdit={setEditRow}
           onMove={(r) => setMoveRowsSel([r])}
@@ -434,18 +618,29 @@ function QBankManagerPage() {
         onClose={() => setUploadOpen(false)}
         tree={tree}
         onImport={async (payload: BulkUploadPayload) => {
-          const res = await importFn({ data: {
-            chapterId: payload.chapterId,
-            status: "draft",
-            rows: payload.rows,
-          } });
+          const res = await importFn({
+            data: {
+              chapterId: payload.chapterId,
+              status: "draft",
+              rows: payload.rows,
+            },
+          });
           invalidateAll();
           return res;
         }}
       />
 
       <AnimatePresence>
-        {viewRow && <ViewModal row={viewRow} onClose={() => setViewRow(null)} onEdit={() => { setEditRow(viewRow); setViewRow(null); }} />}
+        {viewRow && (
+          <ViewModal
+            row={viewRow}
+            onClose={() => setViewRow(null)}
+            onEdit={() => {
+              setEditRow(viewRow);
+              setViewRow(null);
+            }}
+          />
+        )}
       </AnimatePresence>
       <AnimatePresence>
         {editRow && (
@@ -504,25 +699,42 @@ function PageHeader({ selectedCount }: { selectedCount: number }) {
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/50 p-6 shadow-soft backdrop-blur-2xl sm:p-8"
     >
-      <div aria-hidden className="pointer-events-none absolute -top-32 -right-24 h-72 w-72 rounded-full bg-gradient-to-br from-primary/25 via-accent/15 to-transparent blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-gradient-to-tr from-accent/20 to-primary/10 blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 -right-24 h-72 w-72 rounded-full bg-gradient-to-br from-primary/25 via-accent/15 to-transparent blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-gradient-to-tr from-accent/20 to-primary/10 blur-3xl"
+      />
       <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
         <div className="min-w-0">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <Link to="/admin" className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 transition hover:text-foreground">
+          <nav
+            aria-label="Breadcrumb"
+            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
+          >
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 transition hover:text-foreground"
+            >
               <Home className="h-3.5 w-3.5" /> Admin
             </Link>
             <ChevronRight className="h-3.5 w-3.5 opacity-60" />
-            <span className="rounded-md bg-secondary/70 px-2 py-1 text-foreground">Qns Bank Manager</span>
+            <span className="rounded-md bg-secondary/70 px-2 py-1 text-foreground">
+              Qns Bank Manager
+            </span>
           </nav>
           <div className="mt-3 flex items-center gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary via-primary/80 to-accent text-primary-foreground shadow-[0_10px_30px_-8px_color-mix(in_oklab,var(--primary)_60%,transparent),inset_0_1px_0_0_rgba(255,255,255,0.25)]">
               <ListChecks className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <h1 className="truncate text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Qns Bank Manager</h1>
+              <h1 className="truncate text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Qns Bank Manager
+              </h1>
               <p className="mt-0.5 text-sm text-muted-foreground">
-                Curate, review and publish multiple-choice questions across the entire question bank.
+                Curate, review and publish multiple-choice questions across the entire question
+                bank.
               </p>
             </div>
           </div>
@@ -549,24 +761,96 @@ function PageHeader({ selectedCount }: { selectedCount: number }) {
 
 type KpiTone = "primary" | "accent" | "success" | "warning" | "danger" | "neutral";
 const KPI_TONE: Record<KpiTone, { grad: string; text: string; ring: string }> = {
-  primary:  { grad: "from-primary/25 via-primary/10 to-transparent", text: "text-primary", ring: "ring-primary/20" },
-  accent:   { grad: "from-accent/25 via-accent/10 to-transparent", text: "text-accent", ring: "ring-accent/20" },
-  success:  { grad: "from-success/25 via-success/10 to-transparent", text: "text-success", ring: "ring-success/20" },
-  warning:  { grad: "from-warning/25 via-warning/10 to-transparent", text: "text-warning", ring: "ring-warning/20" },
-  danger:   { grad: "from-destructive/25 via-destructive/10 to-transparent", text: "text-destructive", ring: "ring-destructive/20" },
-  neutral:  { grad: "from-foreground/10 via-foreground/5 to-transparent", text: "text-foreground", ring: "ring-border/50" },
+  primary: {
+    grad: "from-primary/25 via-primary/10 to-transparent",
+    text: "text-primary",
+    ring: "ring-primary/20",
+  },
+  accent: {
+    grad: "from-accent/25 via-accent/10 to-transparent",
+    text: "text-accent",
+    ring: "ring-accent/20",
+  },
+  success: {
+    grad: "from-success/25 via-success/10 to-transparent",
+    text: "text-success",
+    ring: "ring-success/20",
+  },
+  warning: {
+    grad: "from-warning/25 via-warning/10 to-transparent",
+    text: "text-warning",
+    ring: "ring-warning/20",
+  },
+  danger: {
+    grad: "from-destructive/25 via-destructive/10 to-transparent",
+    text: "text-destructive",
+    ring: "ring-destructive/20",
+  },
+  neutral: {
+    grad: "from-foreground/10 via-foreground/5 to-transparent",
+    text: "text-foreground",
+    ring: "ring-border/50",
+  },
 };
 
 function KpiGrid({ kpis }: { kpis: Record<string, number> }) {
   const items = [
-    { key: "total", label: "Total Questions", value: kpis.total, icon: Database, tone: "primary" as KpiTone },
-    { key: "published", label: "Published", value: kpis.published, icon: CheckCircle2, tone: "success" as KpiTone },
-    { key: "draft", label: "Draft", value: kpis.draft, icon: ClipboardList, tone: "warning" as KpiTone },
-    { key: "today", label: "Today's Upload", value: kpis.today, icon: Upload, tone: "accent" as KpiTone },
-    { key: "levels", label: "Levels", value: kpis.levels, icon: Layers, tone: "neutral" as KpiTone },
-    { key: "subjects", label: "Subjects", value: kpis.subjects, icon: BookOpen, tone: "neutral" as KpiTone },
-    { key: "chapters", label: "Chapters", value: kpis.chapters, icon: ClipboardList, tone: "neutral" as KpiTone },
-    { key: "batches", label: "Batches (view)", value: kpis.batches, icon: Package, tone: "neutral" as KpiTone },
+    {
+      key: "total",
+      label: "Total Questions",
+      value: kpis.total,
+      icon: Database,
+      tone: "primary" as KpiTone,
+    },
+    {
+      key: "published",
+      label: "Published",
+      value: kpis.published,
+      icon: CheckCircle2,
+      tone: "success" as KpiTone,
+    },
+    {
+      key: "draft",
+      label: "Draft",
+      value: kpis.draft,
+      icon: ClipboardList,
+      tone: "warning" as KpiTone,
+    },
+    {
+      key: "today",
+      label: "Today's Upload",
+      value: kpis.today,
+      icon: Upload,
+      tone: "accent" as KpiTone,
+    },
+    {
+      key: "levels",
+      label: "Levels",
+      value: kpis.levels,
+      icon: Layers,
+      tone: "neutral" as KpiTone,
+    },
+    {
+      key: "subjects",
+      label: "Subjects",
+      value: kpis.subjects,
+      icon: BookOpen,
+      tone: "neutral" as KpiTone,
+    },
+    {
+      key: "chapters",
+      label: "Chapters",
+      value: kpis.chapters,
+      icon: ClipboardList,
+      tone: "neutral" as KpiTone,
+    },
+    {
+      key: "batches",
+      label: "Batches (view)",
+      value: kpis.batches,
+      icon: Package,
+      tone: "neutral" as KpiTone,
+    },
   ];
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -577,10 +861,18 @@ function KpiGrid({ kpis }: { kpis: Record<string, number> }) {
   );
 }
 
-function KpiCard({ label, value, icon: Icon, tone, index }: {
-  label: string; value: number;
+function KpiCard({
+  label,
+  value,
+  icon: Icon,
+  tone,
+  index,
+}: {
+  label: string;
+  value: number;
   icon: React.ComponentType<{ className?: string }>;
-  tone: KpiTone; index: number;
+  tone: KpiTone;
+  index: number;
 }) {
   const t = KPI_TONE[tone];
   return (
@@ -591,17 +883,30 @@ function KpiCard({ label, value, icon: Icon, tone, index }: {
       whileHover={{ y: -3 }}
       className={`group relative overflow-hidden rounded-2xl border border-border/70 bg-card/50 p-4 shadow-soft backdrop-blur-2xl transition ring-1 ring-transparent hover:${t.ring} hover:shadow-md`}
     >
-      <div aria-hidden className={`pointer-events-none absolute -top-16 -right-10 h-40 w-40 rounded-full bg-gradient-to-br ${t.grad} blur-2xl opacity-80`} />
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -top-16 -right-10 h-40 w-40 rounded-full bg-gradient-to-br ${t.grad} blur-2xl opacity-80`}
+      />
       <div className="relative flex items-start justify-between">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
-        <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-border/60 bg-background/60 ${t.text} shadow-sm transition group-hover:scale-105`}>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          {label}
+        </div>
+        <span
+          className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-border/60 bg-background/60 ${t.text} shadow-sm transition group-hover:scale-105`}
+        >
           <Icon className="h-4 w-4" />
         </span>
       </div>
       <div className="relative mt-3 flex items-baseline gap-1">
-        <AnimatedCounter value={value} className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl" />
+        <AnimatedCounter
+          value={value}
+          className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+        />
       </div>
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"
+      />
     </motion.div>
   );
 }
@@ -613,7 +918,10 @@ function AnimatedCounter({ value, className }: { value: number; className?: stri
   useEffect(() => {
     const controls = animateMV(mv, value, { duration: 1.1, ease: [0.16, 1, 0.3, 1] });
     const unsub = rounded.on("change", (v) => setDisplay(v));
-    return () => { controls.stop(); unsub(); };
+    return () => {
+      controls.stop();
+      unsub();
+    };
   }, [value, mv, rounded]);
   return <span className={className}>{display}</span>;
 }
@@ -623,16 +931,28 @@ function AnimatedCounter({ value, className }: { value: number; className?: stri
 /* ------------------------------------------------------------------ */
 
 function FilterBar(props: {
-  levelId: string; setLevelId: (v: string) => void;
-  subjectId: string; setSubjectId: (v: string) => void;
-  chapterId: string; setChapterId: (v: string) => void;
-  levelOptions: Option[]; subjectOptions: Option[]; chapterOptions: Option[];
-  status: string; setStatus: (v: string) => void;
-  batch: string; setBatch: (v: string) => void; batches: string[];
-  dateRange: DateFilter; setDateRange: (v: DateFilter) => void;
-  query: string; setQuery: (v: string) => void;
-  sortPreset: SortPreset; setSortPreset: (v: SortPreset) => void;
-  viewMode: "table" | "cards"; setViewMode: (v: "table" | "cards") => void;
+  levelId: string;
+  setLevelId: (v: string) => void;
+  subjectId: string;
+  setSubjectId: (v: string) => void;
+  chapterId: string;
+  setChapterId: (v: string) => void;
+  levelOptions: Option[];
+  subjectOptions: Option[];
+  chapterOptions: Option[];
+  status: string;
+  setStatus: (v: string) => void;
+  batch: string;
+  setBatch: (v: string) => void;
+  batches: string[];
+  dateRange: DateFilter;
+  setDateRange: (v: DateFilter) => void;
+  query: string;
+  setQuery: (v: string) => void;
+  sortPreset: SortPreset;
+  setSortPreset: (v: SortPreset) => void;
+  viewMode: "table" | "cards";
+  setViewMode: (v: "table" | "cards") => void;
   onReset: () => void;
   onBulkUpload: () => void;
   onExportAll: () => void;
@@ -668,14 +988,29 @@ function FilterBar(props: {
           <SortMenu value={props.sortPreset} onChange={props.setSortPreset} />
 
           <div className="hidden items-center gap-1 rounded-xl border border-border/70 bg-background/50 p-0.5 sm:inline-flex">
-            <ViewToggle active={props.viewMode === "table"} onClick={() => props.setViewMode("table")} icon={Rows3} label="Table" />
-            <ViewToggle active={props.viewMode === "cards"} onClick={() => props.setViewMode("cards")} icon={LayoutGrid} label="Cards" />
+            <ViewToggle
+              active={props.viewMode === "table"}
+              onClick={() => props.setViewMode("table")}
+              icon={Rows3}
+              label="Table"
+            />
+            <ViewToggle
+              active={props.viewMode === "cards"}
+              onClick={() => props.setViewMode("cards")}
+              icon={LayoutGrid}
+              label="Cards"
+            />
           </div>
 
           <div className="flex items-center gap-2">
             <ActionButton icon={Download} label="Export" onClick={props.onExportAll} />
             <ActionButton icon={FileSpreadsheet} label="Import" onClick={props.onBulkUpload} />
-            <ActionButton icon={Upload} label="Bulk Upload" variant="primary" onClick={props.onBulkUpload} />
+            <ActionButton
+              icon={Upload}
+              label="Bulk Upload"
+              variant="primary"
+              onClick={props.onBulkUpload}
+            />
           </div>
         </div>
 
@@ -683,9 +1018,24 @@ function FilterBar(props: {
           <div className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-background/50 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             <Filter className="h-3 w-3" /> Filters
           </div>
-          <FilterIdSelect value={props.levelId} onChange={props.setLevelId} placeholder="All levels" options={props.levelOptions} />
-          <FilterIdSelect value={props.subjectId} onChange={props.setSubjectId} placeholder="All subjects" options={props.subjectOptions} />
-          <FilterIdSelect value={props.chapterId} onChange={props.setChapterId} placeholder="All chapters" options={props.chapterOptions} />
+          <FilterIdSelect
+            value={props.levelId}
+            onChange={props.setLevelId}
+            placeholder="All levels"
+            options={props.levelOptions}
+          />
+          <FilterIdSelect
+            value={props.subjectId}
+            onChange={props.setSubjectId}
+            placeholder="All subjects"
+            options={props.subjectOptions}
+          />
+          <FilterIdSelect
+            value={props.chapterId}
+            onChange={props.setChapterId}
+            placeholder="All chapters"
+            options={props.chapterOptions}
+          />
           <FilterIdSelect
             value={props.status}
             onChange={props.setStatus}
@@ -696,7 +1046,10 @@ function FilterBar(props: {
             value={props.dateRange === "any" ? "" : props.dateRange}
             onChange={(v) => props.setDateRange((v || "any") as DateFilter)}
             placeholder="Any date"
-            options={DATE_FILTERS.filter((f) => f.key !== "any").map((f) => ({ id: f.key, name: f.label }))}
+            options={DATE_FILTERS.filter((f) => f.key !== "any").map((f) => ({
+              id: f.key,
+              name: f.label,
+            }))}
           />
           <FilterIdSelect
             value={props.batch}
@@ -716,9 +1069,16 @@ function FilterBar(props: {
   );
 }
 
-function ViewToggle({ active, onClick, icon: Icon, label }: {
-  active: boolean; onClick: () => void;
-  icon: React.ComponentType<{ className?: string }>; label: string;
+function ViewToggle({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
 }) {
   return (
     <button
@@ -767,9 +1127,14 @@ function SortMenu({ value, onChange }: { value: SortPreset; onChange: (v: SortPr
             {SORT_PRESETS.map((p) => (
               <button
                 key={p.key}
-                onClick={() => { onChange(p.key); setOpen(false); }}
+                onClick={() => {
+                  onChange(p.key);
+                  setOpen(false);
+                }}
                 className={`flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium transition ${
-                  value === p.key ? "bg-primary/10 text-primary" : "text-foreground hover:bg-secondary/70"
+                  value === p.key
+                    ? "bg-primary/10 text-primary"
+                    : "text-foreground hover:bg-secondary/70"
                 }`}
               >
                 {p.label}
@@ -784,10 +1149,15 @@ function SortMenu({ value, onChange }: { value: SortPreset; onChange: (v: SortPr
 }
 
 function FilterIdSelect({
-  value, onChange, placeholder, options,
+  value,
+  onChange,
+  placeholder,
+  options,
 }: {
-  value: string; onChange: (v: string) => void;
-  placeholder: string; options: Option[];
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  options: Option[];
 }) {
   return (
     <div className="relative">
@@ -798,7 +1168,9 @@ function FilterIdSelect({
       >
         <option value="">{placeholder}</option>
         {options.map((o) => (
-          <option key={o.id} value={o.id}>{o.name}</option>
+          <option key={o.id} value={o.id}>
+            {o.name}
+          </option>
         ))}
       </select>
       <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -806,9 +1178,16 @@ function FilterIdSelect({
   );
 }
 
-function ActionButton({ icon: Icon, label, variant = "ghost", onClick }: {
+function ActionButton({
+  icon: Icon,
+  label,
+  variant = "ghost",
+  onClick,
+}: {
   icon: React.ComponentType<{ className?: string }>;
-  label: string; variant?: "ghost" | "primary"; onClick?: () => void;
+  label: string;
+  variant?: "ghost" | "primary";
+  onClick?: () => void;
 }) {
   if (variant === "primary") {
     return (
@@ -837,11 +1216,22 @@ function ActionButton({ icon: Icon, label, variant = "ghost", onClick }: {
 /* ------------------------------------------------------------------ */
 
 function BulkActionBar({
-  selected, total, onSelectAll, onClear, onMove, onDelete, onExport, onChangeStatus,
+  selected,
+  total,
+  onSelectAll,
+  onClear,
+  onMove,
+  onDelete,
+  onExport,
+  onChangeStatus,
 }: {
-  selected: QBankRow[]; total: number;
-  onSelectAll: () => void; onClear: () => void;
-  onMove: () => void; onDelete: () => void; onExport: () => void;
+  selected: QBankRow[];
+  total: number;
+  onSelectAll: () => void;
+  onClear: () => void;
+  onMove: () => void;
+  onDelete: () => void;
+  onExport: () => void;
   onChangeStatus: (s: QBankStatus) => void;
 }) {
   const [statusOpen, setStatusOpen] = useState(false);
@@ -895,7 +1285,10 @@ function BulkActionBar({
                       {STATUSES.map((s) => (
                         <button
                           key={s}
-                          onClick={() => { onChangeStatus(s); setStatusOpen(false); }}
+                          onClick={() => {
+                            onChangeStatus(s);
+                            setStatusOpen(false);
+                          }}
                           className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium capitalize text-foreground transition hover:bg-secondary/70"
                         >
                           <StatusDot value={s} /> {s}
@@ -920,13 +1313,21 @@ function BulkActionBar({
   );
 }
 
-function BulkBtn({ icon: Icon, label, onClick, tone }: {
+function BulkBtn({
+  icon: Icon,
+  label,
+  onClick,
+  tone,
+}: {
   icon: React.ComponentType<{ className?: string }>;
-  label: string; onClick?: () => void; tone?: "danger";
+  label: string;
+  onClick?: () => void;
+  tone?: "danger";
 }) {
-  const cls = tone === "danger"
-    ? "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/15"
-    : "border-border/70 bg-card/60 text-foreground hover:border-primary/40";
+  const cls =
+    tone === "danger"
+      ? "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/15"
+      : "border-border/70 bg-card/60 text-foreground hover:border-primary/40";
   return (
     <button
       onClick={onClick}
@@ -970,9 +1371,11 @@ function TableCard(props: {
   toggleRow: (id: string) => void;
   togglePageSelect: () => void;
   allOnPageSelected: boolean;
-  page: number; setPage: (n: number) => void;
+  page: number;
+  setPage: (n: number) => void;
   totalPages: number;
-  pageSize: number; setPageSize: (n: number) => void;
+  pageSize: number;
+  setPageSize: (n: number) => void;
   onView: (r: QBankRow) => void;
   onEdit: (r: QBankRow) => void;
   onMove: (r: QBankRow) => void;
@@ -981,9 +1384,25 @@ function TableCard(props: {
   onResetFilters: () => void;
 }) {
   const {
-    loading, rows, totalRows, pageStart, selected, toggleRow, togglePageSelect, allOnPageSelected,
-    page, setPage, totalPages, pageSize, setPageSize,
-    onView, onEdit, onMove, onDelete, onOpenUpload, onResetFilters,
+    loading,
+    rows,
+    totalRows,
+    pageStart,
+    selected,
+    toggleRow,
+    togglePageSelect,
+    allOnPageSelected,
+    page,
+    setPage,
+    totalPages,
+    pageSize,
+    setPageSize,
+    onView,
+    onEdit,
+    onMove,
+    onDelete,
+    onOpenUpload,
+    onResetFilters,
   } = props;
 
   return (
@@ -1004,7 +1423,11 @@ function TableCard(props: {
                   className={`whitespace-nowrap border-b border-border/70 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground first:pl-5 last:pr-5 ${c.className ?? ""}`}
                 >
                   {c.key === "checkbox" ? (
-                    <Checkbox checked={allOnPageSelected} onChange={togglePageSelect} ariaLabel="Select all rows on this page" />
+                    <Checkbox
+                      checked={allOnPageSelected}
+                      onChange={togglePageSelect}
+                      ariaLabel="Select all rows on this page"
+                    />
                   ) : (
                     c.label
                   )}
@@ -1042,18 +1465,31 @@ function TableCard(props: {
       </div>
 
       <PaginationFooter
-        totalRows={totalRows} page={page} setPage={setPage}
-        totalPages={totalPages} pageSize={pageSize} setPageSize={setPageSize}
+        totalRows={totalRows}
+        page={page}
+        setPage={setPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
       />
     </motion.div>
   );
 }
 
 function PaginationFooter({
-  totalRows, page, setPage, totalPages, pageSize, setPageSize,
+  totalRows,
+  page,
+  setPage,
+  totalPages,
+  pageSize,
+  setPageSize,
 }: {
-  totalRows: number; page: number; setPage: (n: number) => void;
-  totalPages: number; pageSize: number; setPageSize: (n: number) => void;
+  totalRows: number;
+  page: number;
+  setPage: (n: number) => void;
+  totalPages: number;
+  pageSize: number;
+  setPageSize: (n: number) => void;
 }) {
   return (
     <div className="flex flex-col gap-3 border-t border-border/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -1079,7 +1515,9 @@ function PaginationFooter({
               className="h-8 appearance-none rounded-lg border border-border/70 bg-background/60 pl-2 pr-7 text-xs font-medium text-foreground shadow-sm outline-none transition hover:border-primary/40"
             >
               {PAGE_SIZES.map((n) => (
-                <option key={n} value={n}>{n}</option>
+                <option key={n} value={n}>
+                  {n}
+                </option>
               ))}
             </select>
             <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
@@ -1087,20 +1525,37 @@ function PaginationFooter({
         </label>
       </div>
       <div className="flex items-center gap-1">
-        <PagerBtn onClick={() => setPage(1)} disabled={page === 1}><ChevronsLeft className="h-3.5 w-3.5" /></PagerBtn>
-        <PagerBtn onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}><ChevronLeft className="h-3.5 w-3.5" /></PagerBtn>
+        <PagerBtn onClick={() => setPage(1)} disabled={page === 1}>
+          <ChevronsLeft className="h-3.5 w-3.5" />
+        </PagerBtn>
+        <PagerBtn onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </PagerBtn>
         <span className="min-w-[80px] rounded-lg border border-border/70 bg-background/60 px-2.5 py-1 text-center text-xs font-semibold text-foreground">
           {page} / {totalPages}
         </span>
-        <PagerBtn onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page >= totalPages}><ChevronRight className="h-3.5 w-3.5" /></PagerBtn>
-        <PagerBtn onClick={() => setPage(totalPages)} disabled={page >= totalPages}><ChevronsRight className="h-3.5 w-3.5" /></PagerBtn>
+        <PagerBtn
+          onClick={() => setPage(Math.min(totalPages, page + 1))}
+          disabled={page >= totalPages}
+        >
+          <ChevronRight className="h-3.5 w-3.5" />
+        </PagerBtn>
+        <PagerBtn onClick={() => setPage(totalPages)} disabled={page >= totalPages}>
+          <ChevronsRight className="h-3.5 w-3.5" />
+        </PagerBtn>
       </div>
     </div>
   );
 }
 
-function PagerBtn({ children, onClick, disabled }: {
-  children: React.ReactNode; onClick: () => void; disabled?: boolean;
+function PagerBtn({
+  children,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
@@ -1113,8 +1568,16 @@ function PagerBtn({ children, onClick, disabled }: {
   );
 }
 
-function Checkbox({ checked, onChange, ariaLabel, size = "md" }: {
-  checked: boolean; onChange: () => void; ariaLabel: string; size?: "sm" | "md";
+function Checkbox({
+  checked,
+  onChange,
+  ariaLabel,
+  size = "md",
+}: {
+  checked: boolean;
+  onChange: () => void;
+  ariaLabel: string;
+  size?: "sm" | "md";
 }) {
   const dim = size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4";
   return (
@@ -1122,7 +1585,10 @@ function Checkbox({ checked, onChange, ariaLabel, size = "md" }: {
       role="checkbox"
       aria-checked={checked}
       aria-label={ariaLabel}
-      onClick={(e) => { e.stopPropagation(); onChange(); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onChange();
+      }}
       className={`grid ${dim} place-items-center rounded-[5px] border transition ${
         checked
           ? "border-primary bg-primary text-primary-foreground shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_18%,transparent)]"
@@ -1131,7 +1597,13 @@ function Checkbox({ checked, onChange, ariaLabel, size = "md" }: {
     >
       {checked && (
         <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none">
-          <path d="M2 6.5 5 9.5 10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M2 6.5 5 9.5 10 3.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       )}
     </button>
@@ -1139,12 +1611,25 @@ function Checkbox({ checked, onChange, ariaLabel, size = "md" }: {
 }
 
 function McqTableRow({
-  row, serial, selected, onToggle, striped,
-  onView, onEdit, onMove, onDelete,
+  row,
+  serial,
+  selected,
+  onToggle,
+  striped,
+  onView,
+  onEdit,
+  onMove,
+  onDelete,
 }: {
-  row: QBankRow; serial: number; selected: boolean; onToggle: () => void; striped: boolean;
-  onView: () => void; onEdit: () => void;
-  onMove: () => void; onDelete: () => void;
+  row: QBankRow;
+  serial: number;
+  selected: boolean;
+  onToggle: () => void;
+  striped: boolean;
+  onView: () => void;
+  onEdit: () => void;
+  onMove: () => void;
+  onDelete: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -1159,7 +1644,11 @@ function McqTableRow({
   return (
     <tr
       className={`group cursor-pointer transition-colors ${
-        selected ? "bg-primary/[0.06]" : striped ? "bg-background/40 hover:bg-secondary/40" : "hover:bg-secondary/40"
+        selected
+          ? "bg-primary/[0.06]"
+          : striped
+            ? "bg-background/40 hover:bg-secondary/40"
+            : "hover:bg-secondary/40"
       }`}
       onClick={onView}
     >
@@ -1184,11 +1673,13 @@ function McqTableRow({
           </div>
         </div>
       </Td>
-      {["A","B","C","D"].map((k, i) => {
+      {["A", "B", "C", "D"].map((k, i) => {
         const opt = row.options[i];
         return (
           <Td key={k}>
-            <div className={`line-clamp-2 max-w-[220px] text-xs ${opt && row.correctIndex === i ? "font-semibold text-success" : "text-muted-foreground"}`}>
+            <div
+              className={`line-clamp-2 max-w-[220px] text-xs ${opt && row.correctIndex === i ? "font-semibold text-success" : "text-muted-foreground"}`}
+            >
               {opt?.text ?? <span className="italic text-destructive/60">—</span>}
             </div>
           </Td>
@@ -1204,13 +1695,23 @@ function McqTableRow({
           {row.explanation || <span className="italic text-destructive/80">Missing</span>}
         </div>
       </Td>
-      <Td><span className="text-xs text-foreground">{row.levelName}</span></Td>
-      <Td><span className="text-xs text-foreground">{row.subjectName}</span></Td>
-      <Td><span className="text-xs text-muted-foreground">{row.chapterName}</span></Td>
+      <Td>
+        <span className="text-xs text-foreground">{row.levelName}</span>
+      </Td>
+      <Td>
+        <span className="text-xs text-foreground">{row.subjectName}</span>
+      </Td>
+      <Td>
+        <span className="text-xs text-muted-foreground">{row.chapterName}</span>
+      </Td>
       <Td>
         <div className="flex items-center gap-1.5">
           <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-primary/30 to-accent/30 text-[9px] font-bold text-primary-foreground">
-            {(row.createdByName || "?").split(" ").map((s) => s[0]).slice(0, 2).join("")}
+            {(row.createdByName || "?")
+              .split(" ")
+              .map((s) => s[0])
+              .slice(0, 2)
+              .join("")}
           </span>
           <span className="truncate text-xs text-foreground">{row.createdByName}</span>
         </div>
@@ -1227,7 +1728,9 @@ function McqTableRow({
           {formatRelative(row.updatedAt)}
         </span>
       </Td>
-      <Td><StatusBadge value={row.status} /></Td>
+      <Td>
+        <StatusBadge value={row.status} />
+      </Td>
       <Td className="pr-5" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <div className="flex items-center justify-end gap-1">
           <IconBtn label="View" icon={Eye} tone="neutral" onClick={onView} />
@@ -1250,11 +1753,40 @@ function McqTableRow({
                   role="menu"
                   className="absolute right-0 top-full z-20 mt-2 w-44 overflow-hidden rounded-xl border border-border/70 bg-popover/95 p-1 text-popover-foreground shadow-xl backdrop-blur-xl"
                 >
-                  <MenuRow icon={Eye} label="View" onClick={() => { setMenuOpen(false); onView(); }} />
-                  <MenuRow icon={Pencil} label="Edit" onClick={() => { setMenuOpen(false); onEdit(); }} />
-                  <MenuRow icon={ArrowRightLeft} label="Move" onClick={() => { setMenuOpen(false); onMove(); }} />
+                  <MenuRow
+                    icon={Eye}
+                    label="View"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onView();
+                    }}
+                  />
+                  <MenuRow
+                    icon={Pencil}
+                    label="Edit"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onEdit();
+                    }}
+                  />
+                  <MenuRow
+                    icon={ArrowRightLeft}
+                    label="Move"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onMove();
+                    }}
+                  />
                   <div className="my-1 h-px bg-border/70" />
-                  <MenuRow icon={Trash2} label="Delete" tone="danger" onClick={() => { setMenuOpen(false); onDelete(); }} />
+                  <MenuRow
+                    icon={Trash2}
+                    label="Delete"
+                    tone="danger"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onDelete();
+                    }}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1265,8 +1797,13 @@ function McqTableRow({
   );
 }
 
-function Td({ children, className, onClick }: {
-  children: React.ReactNode; className?: string;
+function Td({
+  children,
+  className,
+  onClick,
+}: {
+  children: React.ReactNode;
+  className?: string;
   onClick?: (e: React.MouseEvent) => void;
 }) {
   return (
@@ -1279,16 +1816,23 @@ function Td({ children, className, onClick }: {
   );
 }
 
-function IconBtn({ label, icon: Icon, tone, onClick }: {
+function IconBtn({
+  label,
+  icon: Icon,
+  tone,
+  onClick,
+}: {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   tone: "primary" | "danger" | "neutral";
   onClick?: () => void;
 }) {
   const styles =
-    tone === "primary" ? "hover:border-primary/40 hover:text-primary"
-    : tone === "danger" ? "hover:border-destructive/40 hover:text-destructive"
-    : "hover:border-border hover:text-foreground";
+    tone === "primary"
+      ? "hover:border-primary/40 hover:text-primary"
+      : tone === "danger"
+        ? "hover:border-destructive/40 hover:text-destructive"
+        : "hover:border-border hover:text-foreground";
   return (
     <button
       onClick={onClick}
@@ -1301,15 +1845,24 @@ function IconBtn({ label, icon: Icon, tone, onClick }: {
   );
 }
 
-function MenuRow({ icon: Icon, label, tone, onClick }: {
+function MenuRow({
+  icon: Icon,
+  label,
+  tone,
+  onClick,
+}: {
   icon: React.ComponentType<{ className?: string }>;
-  label: string; tone?: "danger"; onClick?: () => void;
+  label: string;
+  tone?: "danger";
+  onClick?: () => void;
 }) {
   return (
     <button
       onClick={onClick}
       className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium transition ${
-        tone === "danger" ? "text-destructive hover:bg-destructive/10" : "text-foreground hover:bg-secondary/70"
+        tone === "danger"
+          ? "text-destructive hover:bg-destructive/10"
+          : "text-foreground hover:bg-secondary/70"
       }`}
     >
       <Icon className="h-3.5 w-3.5" /> {label}
@@ -1318,10 +1871,14 @@ function MenuRow({ icon: Icon, label, tone, onClick }: {
 }
 
 function StatusDot({ value }: { value: QBankStatus }) {
-  const cls = value === "published" ? "bg-success"
-    : value === "review" ? "bg-warning"
-    : value === "archived" ? "bg-muted-foreground/60"
-    : "bg-muted-foreground";
+  const cls =
+    value === "published"
+      ? "bg-success"
+      : value === "review"
+        ? "bg-warning"
+        : value === "archived"
+          ? "bg-muted-foreground/60"
+          : "bg-muted-foreground";
   return <span className={`h-1.5 w-1.5 rounded-full ${cls}`} />;
 }
 
@@ -1334,7 +1891,9 @@ function StatusBadge({ value }: { value: QBankStatus }) {
   };
   const t = map[value];
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${t.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${t.cls}`}
+    >
       <StatusDot value={value} /> {t.label}
     </span>
   );
@@ -1350,9 +1909,11 @@ function CardsView(props: {
   totalRows: number;
   selected: Set<string>;
   toggleRow: (id: string) => void;
-  page: number; setPage: (n: number) => void;
+  page: number;
+  setPage: (n: number) => void;
   totalPages: number;
-  pageSize: number; setPageSize: (n: number) => void;
+  pageSize: number;
+  setPageSize: (n: number) => void;
   onView: (r: QBankRow) => void;
   onEdit: (r: QBankRow) => void;
   onMove: (r: QBankRow) => void;
@@ -1360,8 +1921,24 @@ function CardsView(props: {
   onOpenUpload: () => void;
   onResetFilters: () => void;
 }) {
-  const { loading, rows, totalRows, selected, toggleRow, page, setPage, totalPages, pageSize, setPageSize,
-    onView, onEdit, onMove, onDelete, onOpenUpload, onResetFilters } = props;
+  const {
+    loading,
+    rows,
+    totalRows,
+    selected,
+    toggleRow,
+    page,
+    setPage,
+    totalPages,
+    pageSize,
+    setPageSize,
+    onView,
+    onEdit,
+    onMove,
+    onDelete,
+    onOpenUpload,
+    onResetFilters,
+  } = props;
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -1373,7 +1950,10 @@ function CardsView(props: {
         {loading ? (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-40 rounded-2xl border border-border/60 bg-secondary/40 animate-pulse" />
+              <div
+                key={i}
+                className="h-40 rounded-2xl border border-border/60 bg-secondary/40 animate-pulse"
+              />
             ))}
           </div>
         ) : rows.length === 0 ? (
@@ -1396,23 +1976,41 @@ function CardsView(props: {
         )}
       </div>
       <PaginationFooter
-        totalRows={totalRows} page={page} setPage={setPage}
-        totalPages={totalPages} pageSize={pageSize} setPageSize={setPageSize}
+        totalRows={totalRows}
+        page={page}
+        setPage={setPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
       />
     </motion.div>
   );
 }
 
-function McqCard({ row, selected, onToggle, onView, onEdit, onMove, onDelete }: {
-  row: QBankRow; selected: boolean; onToggle: () => void;
-  onView: () => void; onEdit: () => void;
-  onMove: () => void; onDelete: () => void;
+function McqCard({
+  row,
+  selected,
+  onToggle,
+  onView,
+  onEdit,
+  onMove,
+  onDelete,
+}: {
+  row: QBankRow;
+  selected: boolean;
+  onToggle: () => void;
+  onView: () => void;
+  onEdit: () => void;
+  onMove: () => void;
+  onDelete: () => void;
 }) {
   return (
     <motion.div
       whileHover={{ y: -2 }}
       className={`group relative overflow-hidden rounded-2xl border p-4 shadow-soft backdrop-blur-xl transition ${
-        selected ? "border-primary/40 bg-primary/[0.05]" : "border-border/70 bg-card/60 hover:border-primary/30"
+        selected
+          ? "border-primary/40 bg-primary/[0.05]"
+          : "border-border/70 bg-card/60 hover:border-primary/30"
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -1424,13 +2022,23 @@ function McqCard({ row, selected, onToggle, onView, onEdit, onMove, onDelete }: 
         </div>
         <StatusBadge value={row.status} />
       </div>
-      <button onClick={onView} className="mt-3 line-clamp-3 text-left text-sm font-semibold text-foreground hover:text-primary">
+      <button
+        onClick={onView}
+        className="mt-3 line-clamp-3 text-left text-sm font-semibold text-foreground hover:text-primary"
+      >
         {row.question}
       </button>
       <div className="mt-3 space-y-1">
         {row.options.slice(0, 4).map((o, i) => (
-          <div key={o.key} className={`flex items-start gap-2 text-xs ${row.correctIndex === i ? "text-success font-medium" : "text-muted-foreground"}`}>
-            <span className={`grid h-4 w-4 shrink-0 place-items-center rounded ${row.correctIndex === i ? "bg-success/15 text-success" : "bg-secondary/70"} text-[10px] font-bold`}>{o.key}</span>
+          <div
+            key={o.key}
+            className={`flex items-start gap-2 text-xs ${row.correctIndex === i ? "text-success font-medium" : "text-muted-foreground"}`}
+          >
+            <span
+              className={`grid h-4 w-4 shrink-0 place-items-center rounded ${row.correctIndex === i ? "bg-success/15 text-success" : "bg-secondary/70"} text-[10px] font-bold`}
+            >
+              {o.key}
+            </span>
             <span className="line-clamp-1">{o.text}</span>
           </div>
         ))}
@@ -1441,8 +2049,14 @@ function McqCard({ row, selected, onToggle, onView, onEdit, onMove, onDelete }: 
         <Chip>{row.chapterName}</Chip>
       </div>
       <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3 text-[10px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1"><User className="h-3 w-3" />{row.createdByName}</span>
-        <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{formatRelative(row.updatedAt)}</span>
+        <span className="inline-flex items-center gap-1">
+          <User className="h-3 w-3" />
+          {row.createdByName}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <Clock className="h-3 w-3" />
+          {formatRelative(row.updatedAt)}
+        </span>
       </div>
       <div className="mt-3 flex items-center justify-end gap-1">
         <IconBtn label="View" icon={Eye} tone="neutral" onClick={onView} />
@@ -1492,7 +2106,10 @@ function SkeletonRows() {
 function EmptyState({ onUpload, onReset }: { onUpload?: () => void; onReset?: () => void }) {
   return (
     <div className="relative flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-4 mx-auto h-40 w-64 rounded-full bg-gradient-to-br from-primary/15 to-accent/10 blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-4 mx-auto h-40 w-64 rounded-full bg-gradient-to-br from-primary/15 to-accent/10 blur-3xl"
+      />
       <div className="relative grid h-14 w-14 place-items-center rounded-2xl border border-border/70 bg-card/70 text-primary shadow-soft">
         <Inbox className="h-6 w-6" />
         <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground shadow">
@@ -1500,7 +2117,9 @@ function EmptyState({ onUpload, onReset }: { onUpload?: () => void; onReset?: ()
         </span>
       </div>
       <div>
-        <div className="text-sm font-semibold text-foreground">No questions match these filters</div>
+        <div className="text-sm font-semibold text-foreground">
+          No questions match these filters
+        </div>
         <div className="mt-1 text-xs text-muted-foreground">
           Try clearing filters, adjusting your search, or upload a new batch to get started.
         </div>
@@ -1528,7 +2147,11 @@ function EmptyState({ onUpload, onReset }: { onUpload?: () => void; onReset?: ()
 /* ------------------------------------------------------------------ */
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "2-digit", year: "numeric" });
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
 }
 
 function formatRelative(iso: string) {
@@ -1548,14 +2171,25 @@ function formatRelative(iso: string) {
 /* Modal shell                                                         */
 /* ------------------------------------------------------------------ */
 
-function ModalShell({ onClose, children, maxWidth = "max-w-2xl" }: {
-  onClose: () => void; children: React.ReactNode; maxWidth?: string;
+function ModalShell({
+  onClose,
+  children,
+  maxWidth = "max-w-2xl",
+}: {
+  onClose: () => void;
+  children: React.ReactNode;
+  maxWidth?: string;
 }) {
   useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
   }, [onClose]);
   return (
     <motion.div
@@ -1579,22 +2213,37 @@ function ModalShell({ onClose, children, maxWidth = "max-w-2xl" }: {
   );
 }
 
-function ModalHeader({ icon: Icon, title, subtitle, onClose, tone = "primary" }: {
+function ModalHeader({
+  icon: Icon,
+  title,
+  subtitle,
+  onClose,
+  tone = "primary",
+}: {
   icon: React.ComponentType<{ className?: string }>;
-  title: string; subtitle?: string; onClose: () => void;
+  title: string;
+  subtitle?: string;
+  onClose: () => void;
   tone?: "primary" | "danger";
 }) {
-  const glow = tone === "danger"
-    ? "from-destructive/25 via-destructive/10 to-transparent"
-    : "from-primary/25 via-accent/10 to-transparent";
-  const iconCls = tone === "danger"
-    ? "from-destructive to-destructive/70 text-destructive-foreground"
-    : "from-primary via-primary/80 to-accent text-primary-foreground";
+  const glow =
+    tone === "danger"
+      ? "from-destructive/25 via-destructive/10 to-transparent"
+      : "from-primary/25 via-accent/10 to-transparent";
+  const iconCls =
+    tone === "danger"
+      ? "from-destructive to-destructive/70 text-destructive-foreground"
+      : "from-primary via-primary/80 to-accent text-primary-foreground";
   return (
     <div className="relative overflow-hidden border-b border-border/70 px-6 py-5">
-      <div aria-hidden className={`pointer-events-none absolute -top-16 -right-10 h-48 w-48 rounded-full bg-gradient-to-br ${glow} blur-2xl`} />
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -top-16 -right-10 h-48 w-48 rounded-full bg-gradient-to-br ${glow} blur-2xl`}
+      />
       <div className="relative flex items-center gap-3">
-        <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${iconCls} shadow`}>
+        <span
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${iconCls} shadow`}
+        >
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
@@ -1617,7 +2266,15 @@ function ModalHeader({ icon: Icon, title, subtitle, onClose, tone = "primary" }:
 /* View modal                                                          */
 /* ------------------------------------------------------------------ */
 
-function ViewModal({ row, onClose, onEdit }: { row: QBankRow; onClose: () => void; onEdit: () => void }) {
+function ViewModal({
+  row,
+  onClose,
+  onEdit,
+}: {
+  row: QBankRow;
+  onClose: () => void;
+  onEdit: () => void;
+}) {
   return (
     <ModalShell onClose={onClose} maxWidth="max-w-3xl">
       <ModalHeader
@@ -1628,11 +2285,17 @@ function ViewModal({ row, onClose, onEdit }: { row: QBankRow; onClose: () => voi
       />
       <div className="max-h-[70vh] space-y-5 overflow-auto px-6 py-5">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Question</div>
-          <div className="mt-1.5 text-base font-medium leading-relaxed text-foreground">{row.question}</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Question
+          </div>
+          <div className="mt-1.5 text-base font-medium leading-relaxed text-foreground">
+            {row.question}
+          </div>
         </div>
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Options</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Options
+          </div>
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {row.options.map((o, i) => {
               const correct = i === row.correctIndex;
@@ -1640,11 +2303,15 @@ function ViewModal({ row, onClose, onEdit }: { row: QBankRow; onClose: () => voi
                 <div
                   key={o.key}
                   className={`rounded-xl border p-3 transition ${
-                    correct ? "border-success/40 bg-success/[0.08]" : "border-border/70 bg-background/60"
+                    correct
+                      ? "border-success/40 bg-success/[0.08]"
+                      : "border-border/70 bg-background/60"
                   }`}
                 >
                   <div className="flex items-center gap-2 text-xs">
-                    <span className={`grid h-6 w-6 place-items-center rounded-lg text-[11px] font-bold ${correct ? "bg-success/20 text-success" : "bg-secondary/70 text-foreground"}`}>
+                    <span
+                      className={`grid h-6 w-6 place-items-center rounded-lg text-[11px] font-bold ${correct ? "bg-success/20 text-success" : "bg-secondary/70 text-foreground"}`}
+                    >
                       {o.key}
                     </span>
                     <span className="text-sm text-foreground">{o.text}</span>
@@ -1656,9 +2323,13 @@ function ViewModal({ row, onClose, onEdit }: { row: QBankRow; onClose: () => voi
           </div>
         </div>
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Explanation</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Explanation
+          </div>
           <div className="mt-1.5 rounded-xl border border-border/70 bg-background/60 p-3 text-sm leading-relaxed text-foreground">
-            {row.explanation || <span className="italic text-muted-foreground">No explanation provided.</span>}
+            {row.explanation || (
+              <span className="italic text-muted-foreground">No explanation provided.</span>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -1693,7 +2364,9 @@ function ViewModal({ row, onClose, onEdit }: { row: QBankRow; onClose: () => voi
 function MetaField({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-border/60 bg-background/40 p-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </div>
       <div className="mt-1 text-xs font-medium text-foreground">{value}</div>
     </div>
   );
@@ -1704,20 +2377,30 @@ function MetaField({ label, value }: { label: string; value: React.ReactNode }) 
 /* ------------------------------------------------------------------ */
 
 type UpsertPayload = {
-  chapterId: string; question: string;
+  chapterId: string;
+  question: string;
   options: { key: string; text: string }[];
-  correctIndex: number; explanation: string; status: QBankStatus;
+  correctIndex: number;
+  explanation: string;
+  status: QBankStatus;
 };
 
-function EditModal({ row, tree, onClose, onSave }: {
-  row: QBankRow; tree: ApiLevel[]; onClose: () => void;
+function EditModal({
+  row,
+  tree,
+  onClose,
+  onSave,
+}: {
+  row: QBankRow;
+  tree: ApiLevel[];
+  onClose: () => void;
   onSave: (payload: UpsertPayload) => Promise<void> | void;
 }) {
   const [question, setQuestion] = useState(row.question);
   const [options, setOptions] = useState<{ key: string; text: string }[]>(
     row.options.length
       ? row.options.map((o) => ({ ...o }))
-      : ["A","B","C","D"].map((k) => ({ key: k, text: "" })),
+      : ["A", "B", "C", "D"].map((k) => ({ key: k, text: "" })),
   );
   const [correctIndex, setCorrectIndex] = useState(row.correctIndex);
   const [explanation, setExplanation] = useState(row.explanation);
@@ -1728,22 +2411,35 @@ function EditModal({ row, tree, onClose, onSave }: {
   const [busy, setBusy] = useState(false);
 
   const levelOpts = tree.map((l) => ({ id: l.id, name: l.name }));
-  const subjectOpts = (tree.find((l) => l.id === levelId)?.subjects ?? []).map((s) => ({ id: s.id, name: s.name }));
-  const chapterOpts = (tree.flatMap((l) => l.subjects).find((s) => s.id === subjectId)?.chapters ?? [])
-    .map((c) => ({ id: c.id, name: c.name }));
+  const subjectOpts = (tree.find((l) => l.id === levelId)?.subjects ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+  }));
+  const chapterOpts = (
+    tree.flatMap((l) => l.subjects).find((s) => s.id === subjectId)?.chapters ?? []
+  ).map((c) => ({ id: c.id, name: c.name }));
 
   function setOption(i: number, text: string) {
     setOptions((os) => os.map((o, idx) => (idx === i ? { ...o, text } : o)));
   }
 
-  const canSave = question.trim().length > 0 &&
+  const canSave =
+    question.trim().length > 0 &&
     options.filter((o) => o.text.trim()).length >= 2 &&
-    correctIndex >= 0 && correctIndex < options.length && options[correctIndex]?.text.trim() &&
-    chapterId && !busy;
+    correctIndex >= 0 &&
+    correctIndex < options.length &&
+    options[correctIndex]?.text.trim() &&
+    chapterId &&
+    !busy;
 
   return (
     <ModalShell onClose={onClose} maxWidth="max-w-3xl">
-      <ModalHeader icon={Pencil} title="Edit Question" subtitle={row.id.slice(0, 8)} onClose={onClose} />
+      <ModalHeader
+        icon={Pencil}
+        title="Edit Question"
+        subtitle={row.id.slice(0, 8)}
+        onClose={onClose}
+      />
       <div className="max-h-[70vh] space-y-5 overflow-auto px-6 py-5">
         <FormField label="Question">
           <textarea
@@ -1755,14 +2451,21 @@ function EditModal({ row, tree, onClose, onSave }: {
         </FormField>
 
         <div>
-          <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Options</div>
+          <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Options
+          </div>
           <div className="space-y-2">
             {options.map((o, i) => {
               const isCorrect = correctIndex === i;
               return (
-                <div key={o.key} className={`flex items-start gap-2 rounded-xl border p-2.5 transition ${
-                  isCorrect ? "border-success/40 bg-success/[0.06]" : "border-border/70 bg-background/40"
-                }`}>
+                <div
+                  key={o.key}
+                  className={`flex items-start gap-2 rounded-xl border p-2.5 transition ${
+                    isCorrect
+                      ? "border-success/40 bg-success/[0.06]"
+                      : "border-border/70 bg-background/40"
+                  }`}
+                >
                   <button
                     type="button"
                     onClick={() => setCorrectIndex(i)}
@@ -1803,19 +2506,46 @@ function EditModal({ row, tree, onClose, onSave }: {
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
           <FormField label="Level">
-            <IdSelectField value={levelId} onChange={(v) => { setLevelId(v); setSubjectId(""); setChapterId(""); }} options={levelOpts} placeholder="Pick" />
+            <IdSelectField
+              value={levelId}
+              onChange={(v) => {
+                setLevelId(v);
+                setSubjectId("");
+                setChapterId("");
+              }}
+              options={levelOpts}
+              placeholder="Pick"
+            />
           </FormField>
           <FormField label="Subject">
-            <IdSelectField value={subjectId} onChange={(v) => { setSubjectId(v); setChapterId(""); }} options={subjectOpts} placeholder={levelId ? "Pick" : "Choose level first"} disabled={!levelId} />
+            <IdSelectField
+              value={subjectId}
+              onChange={(v) => {
+                setSubjectId(v);
+                setChapterId("");
+              }}
+              options={subjectOpts}
+              placeholder={levelId ? "Pick" : "Choose level first"}
+              disabled={!levelId}
+            />
           </FormField>
           <FormField label="Chapter">
-            <IdSelectField value={chapterId} onChange={setChapterId} options={chapterOpts} placeholder={subjectId ? "Pick" : "Choose subject first"} disabled={!subjectId} />
+            <IdSelectField
+              value={chapterId}
+              onChange={setChapterId}
+              options={chapterOpts}
+              placeholder={subjectId ? "Pick" : "Choose subject first"}
+              disabled={!subjectId}
+            />
           </FormField>
           <FormField label="Status">
             <IdSelectField
               value={status}
               onChange={(v) => setStatus(v as QBankStatus)}
-              options={STATUSES.map((s) => ({ id: s, name: s.charAt(0).toUpperCase() + s.slice(1) }))}
+              options={STATUSES.map((s) => ({
+                id: s,
+                name: s.charAt(0).toUpperCase() + s.slice(1),
+              }))}
               placeholder=""
             />
           </FormField>
@@ -1834,18 +2564,27 @@ function EditModal({ row, tree, onClose, onSave }: {
             setBusy(true);
             try {
               await onSave({
-                chapterId, question: question.trim(),
-                options: options.filter((o) => o.text.trim()).map((o, i) => ({ key: String.fromCharCode(65 + i), text: o.text.trim() })),
+                chapterId,
+                question: question.trim(),
+                options: options
+                  .filter((o) => o.text.trim())
+                  .map((o, i) => ({ key: String.fromCharCode(65 + i), text: o.text.trim() })),
                 correctIndex,
                 explanation: explanation.trim(),
                 status,
               });
-            } finally { setBusy(false); }
+            } finally {
+              setBusy(false);
+            }
           }}
           disabled={!canSave}
           className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-br from-primary to-accent px-3 text-xs font-semibold text-primary-foreground shadow transition hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
         >
-          {busy ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+          {busy ? (
+            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-3.5 w-3.5" />
+          )}
           Save changes
         </button>
       </div>
@@ -1856,17 +2595,26 @@ function EditModal({ row, tree, onClose, onSave }: {
 function FormField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </div>
       {children}
     </label>
   );
 }
 
 function IdSelectField({
-  value, onChange, options, placeholder, disabled,
+  value,
+  onChange,
+  options,
+  placeholder,
+  disabled,
 }: {
-  value: string; onChange: (v: string) => void;
-  options: Option[]; placeholder: string; disabled?: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  options: Option[];
+  placeholder: string;
+  disabled?: boolean;
 }) {
   return (
     <div className="relative">
@@ -1878,7 +2626,9 @@ function IdSelectField({
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((o) => (
-          <option key={o.id} value={o.id}>{o.name}</option>
+          <option key={o.id} value={o.id}>
+            {o.name}
+          </option>
         ))}
       </select>
       <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -1890,8 +2640,15 @@ function IdSelectField({
 /* Move modal                                                          */
 /* ------------------------------------------------------------------ */
 
-function MoveModal({ rows, tree, onClose, onConfirm }: {
-  rows: QBankRow[]; tree: ApiLevel[]; onClose: () => void;
+function MoveModal({
+  rows,
+  tree,
+  onClose,
+  onConfirm,
+}: {
+  rows: QBankRow[];
+  tree: ApiLevel[];
+  onClose: () => void;
   onConfirm: (chapterId: string) => Promise<void> | void;
 }) {
   const [levelId, setLevelId] = useState(rows[0].levelId);
@@ -1900,9 +2657,13 @@ function MoveModal({ rows, tree, onClose, onConfirm }: {
   const [busy, setBusy] = useState(false);
 
   const levelOpts = tree.map((l) => ({ id: l.id, name: l.name }));
-  const subjectOpts = (tree.find((l) => l.id === levelId)?.subjects ?? []).map((s) => ({ id: s.id, name: s.name }));
-  const chapterOpts = (tree.flatMap((l) => l.subjects).find((s) => s.id === subjectId)?.chapters ?? [])
-    .map((c) => ({ id: c.id, name: c.name }));
+  const subjectOpts = (tree.find((l) => l.id === levelId)?.subjects ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+  }));
+  const chapterOpts = (
+    tree.flatMap((l) => l.subjects).find((s) => s.id === subjectId)?.chapters ?? []
+  ).map((c) => ({ id: c.id, name: c.name }));
 
   const currentLevels = uniq(rows.map((r) => r.levelName));
   const currentSubjects = uniq(rows.map((r) => r.subjectName));
@@ -1939,13 +2700,37 @@ function MoveModal({ rows, tree, onClose, onConfirm }: {
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <FormField label="Move to Level">
-            <IdSelectField value={levelId} onChange={(v) => { setLevelId(v); setSubjectId(""); setChapterId(""); }} options={levelOpts} placeholder="Pick" />
+            <IdSelectField
+              value={levelId}
+              onChange={(v) => {
+                setLevelId(v);
+                setSubjectId("");
+                setChapterId("");
+              }}
+              options={levelOpts}
+              placeholder="Pick"
+            />
           </FormField>
           <FormField label="Move to Subject">
-            <IdSelectField value={subjectId} onChange={(v) => { setSubjectId(v); setChapterId(""); }} options={subjectOpts} placeholder={levelId ? "Pick" : "Choose level first"} disabled={!levelId} />
+            <IdSelectField
+              value={subjectId}
+              onChange={(v) => {
+                setSubjectId(v);
+                setChapterId("");
+              }}
+              options={subjectOpts}
+              placeholder={levelId ? "Pick" : "Choose level first"}
+              disabled={!levelId}
+            />
           </FormField>
           <FormField label="Move to Chapter">
-            <IdSelectField value={chapterId} onChange={setChapterId} options={chapterOpts} placeholder={subjectId ? "Pick" : "Choose subject first"} disabled={!subjectId} />
+            <IdSelectField
+              value={chapterId}
+              onChange={setChapterId}
+              options={chapterOpts}
+              placeholder={subjectId ? "Pick" : "Choose subject first"}
+              disabled={!subjectId}
+            />
           </FormField>
         </div>
       </div>
@@ -1961,12 +2746,20 @@ function MoveModal({ rows, tree, onClose, onConfirm }: {
           onClick={async () => {
             if (busy || !chapterId) return;
             setBusy(true);
-            try { await onConfirm(chapterId); } finally { setBusy(false); }
+            try {
+              await onConfirm(chapterId);
+            } finally {
+              setBusy(false);
+            }
           }}
           disabled={busy || !chapterId}
           className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-br from-primary to-accent px-3 text-xs font-semibold text-primary-foreground shadow transition hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
         >
-          {busy ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Move className="h-3.5 w-3.5" />}
+          {busy ? (
+            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Move className="h-3.5 w-3.5" />
+          )}
           {busy ? "Moving…" : `Move ${rows.length > 1 ? `${rows.length} Questions` : "Question"}`}
         </button>
       </div>
@@ -1974,14 +2767,22 @@ function MoveModal({ rows, tree, onClose, onConfirm }: {
   );
 }
 
-function uniq(arr: string[]) { return Array.from(new Set(arr.filter(Boolean))); }
+function uniq(arr: string[]) {
+  return Array.from(new Set(arr.filter(Boolean)));
+}
 
 /* ------------------------------------------------------------------ */
 /* Delete modal                                                        */
 /* ------------------------------------------------------------------ */
 
-function DeleteModal({ rows, onClose, onConfirm }: {
-  rows: QBankRow[]; onClose: () => void; onConfirm: () => Promise<void> | void;
+function DeleteModal({
+  rows,
+  onClose,
+  onConfirm,
+}: {
+  rows: QBankRow[];
+  onClose: () => void;
+  onConfirm: () => Promise<void> | void;
 }) {
   const [confirmText, setConfirmText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -1993,7 +2794,11 @@ function DeleteModal({ rows, onClose, onConfirm }: {
   const handle = async () => {
     if (!canDelete) return;
     setBusy(true);
-    try { await onConfirm(); } finally { setBusy(false); }
+    try {
+      await onConfirm();
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -2009,10 +2814,12 @@ function DeleteModal({ rows, onClose, onConfirm }: {
         <div className="rounded-xl border border-destructive/30 bg-destructive/[0.06] p-3 text-xs text-destructive">
           <div className="flex items-center gap-2 font-semibold">
             <ShieldAlert className="h-4 w-4" />
-            You are about to permanently remove {rows.length.toLocaleString()} question{rows.length > 1 ? "s" : ""}.
+            You are about to permanently remove {rows.length.toLocaleString()} question
+            {rows.length > 1 ? "s" : ""}.
           </div>
           <p className="mt-1.5 text-destructive/80">
-            Students will lose access immediately and any linked practice sessions will exclude these questions.
+            Students will lose access immediately and any linked practice sessions will exclude
+            these questions.
           </p>
         </div>
         <div className="grid grid-cols-3 gap-2 text-[11px]">
@@ -2045,7 +2852,11 @@ function DeleteModal({ rows, onClose, onConfirm }: {
           disabled={!canDelete}
           className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-br from-destructive to-destructive/80 px-3 text-xs font-semibold text-destructive-foreground shadow transition hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
         >
-          {busy ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+          {busy ? (
+            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Trash2 className="h-3.5 w-3.5" />
+          )}
           {busy ? "Deleting…" : "Permanently delete"}
         </button>
       </div>

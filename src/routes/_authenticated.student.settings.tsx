@@ -47,8 +47,6 @@ import {
 import { sendPasswordReset, signOut, updatePassword } from "@/lib/auth";
 import { useAuth } from "@/hooks/use-auth";
 
-
-
 export const Route = createFileRoute("/_authenticated/student/settings")({
   head: () => ({
     meta: [
@@ -171,9 +169,7 @@ function SectionCard({
         </span>
         <div className="min-w-0">
           <h2 className="text-base font-semibold tracking-tight text-foreground">{title}</h2>
-          {description && (
-            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
-          )}
+          {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
         </div>
       </div>
       <div className="px-6 py-6">{children}</div>
@@ -209,13 +205,22 @@ function Field({
 const inputCls =
   "w-full rounded-xl border border-border/60 bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-indigo-500/60 focus:bg-background focus:ring-2 focus:ring-indigo-500/20";
 
-function Flash({ show, kind = "ok", children }: { show: boolean; kind?: "ok" | "err"; children?: React.ReactNode }) {
+function Flash({
+  show,
+  kind = "ok",
+  children,
+}: {
+  show: boolean;
+  kind?: "ok" | "err";
+  children?: React.ReactNode;
+}) {
   if (!show) return null;
-  const okCls =
-    "bg-emerald-500/10 text-emerald-600 ring-emerald-500/20";
+  const okCls = "bg-emerald-500/10 text-emerald-600 ring-emerald-500/20";
   const errCls = "bg-red-500/10 text-red-600 ring-red-500/20";
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ring-1 ${kind === "ok" ? okCls : errCls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ring-1 ${kind === "ok" ? okCls : errCls}`}
+    >
       {kind === "ok" ? <Check className="h-3 w-3" /> : null}
       {children ?? "Saved"}
     </span>
@@ -559,9 +564,7 @@ function ProfileSection() {
                 rows={3}
                 value={draft.extras.bio}
                 onChange={(e) =>
-                  setDraft((d) =>
-                    d ? { ...d, extras: { ...d.extras, bio: e.target.value } } : d,
-                  )
+                  setDraft((d) => (d ? { ...d, extras: { ...d.extras, bio: e.target.value } } : d))
                 }
                 placeholder="Tell us a bit about yourself"
                 maxLength={500}
@@ -656,7 +659,13 @@ function AccountSection() {
               />
               <ActionButton
                 disabled={!newEmail || emailMut.isPending}
-                icon={emailMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                icon={
+                  emailMut.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Save className="h-3.5 w-3.5" />
+                  )
+                }
                 onClick={() => emailMut.mutate(newEmail)}
               >
                 Update email
@@ -695,7 +704,13 @@ function AccountSection() {
             <div className="flex flex-wrap items-center gap-2">
               <ActionButton
                 disabled={!pw1 || !pw2 || passwordMut.isPending}
-                icon={passwordMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                icon={
+                  passwordMut.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Save className="h-3.5 w-3.5" />
+                  )
+                }
                 onClick={() => passwordMut.mutate()}
               >
                 Update password
@@ -703,7 +718,13 @@ function AccountSection() {
               <ActionButton
                 variant="secondary"
                 disabled={resetMut.isPending}
-                icon={resetMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
+                icon={
+                  resetMut.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Mail className="h-3.5 w-3.5" />
+                  )
+                }
                 onClick={() => resetMut.mutate()}
               >
                 Send reset email
@@ -726,10 +747,16 @@ function AccountSection() {
 function InfoRow({ label, value, tone }: { label: string; value: string; tone?: "ok" | "warn" }) {
   return (
     <div>
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
       <div
         className={`mt-1 text-sm font-medium ${
-          tone === "ok" ? "text-emerald-600" : tone === "warn" ? "text-amber-600" : "text-foreground"
+          tone === "ok"
+            ? "text-emerald-600"
+            : tone === "warn"
+              ? "text-amber-600"
+              : "text-foreground"
         }`}
       >
         {value}
@@ -799,7 +826,13 @@ function StudySection() {
             Reset
           </ActionButton>
           <ActionButton
-            icon={saveMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            icon={
+              saveMut.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Save className="h-3.5 w-3.5" />
+              )
+            }
             disabled={!dirty || saveMut.isPending}
             onClick={() => saveMut.mutate()}
           >
@@ -930,7 +963,13 @@ function NotificationsSection() {
             Reset
           </ActionButton>
           <ActionButton
-            icon={saveMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            icon={
+              saveMut.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Save className="h-3.5 w-3.5" />
+              )
+            }
             disabled={!dirty || saveMut.isPending}
             onClick={() => saveMut.mutate()}
           >
@@ -1010,7 +1049,12 @@ function AppearanceSection() {
   };
 
   const opts: { v: Theme; label: string; icon: React.ReactNode; hint: string }[] = [
-    { v: "light", label: "Light", icon: <Sun className="h-4 w-4" />, hint: "Bright, high contrast" },
+    {
+      v: "light",
+      label: "Light",
+      icon: <Sun className="h-4 w-4" />,
+      hint: "Bright, high contrast",
+    },
     { v: "dark", label: "Dark", icon: <Moon className="h-4 w-4" />, hint: "Easier at night" },
     { v: "system", label: "System", icon: <Monitor className="h-4 w-4" />, hint: "Match device" },
   ];
@@ -1135,7 +1179,13 @@ function PrivacySection() {
           </div>
           <ActionButton
             variant="secondary"
-            icon={exportMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+            icon={
+              exportMut.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+              )
+            }
             disabled={exportMut.isPending}
             onClick={() => exportMut.mutate()}
           >
@@ -1152,7 +1202,13 @@ function PrivacySection() {
           </div>
           <ActionButton
             variant="danger"
-            icon={logoutAllMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
+            icon={
+              logoutAllMut.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <LogOut className="h-3.5 w-3.5" />
+              )
+            }
             disabled={logoutAllMut.isPending}
             onClick={() => setConfirmLogoutAll(true)}
           >
@@ -1208,7 +1264,8 @@ function PrivacySection() {
           <div className="space-y-2">
             <p>This permanently removes your account and all data. This cannot be undone.</p>
             <p className="text-xs">
-              Type <span className="font-mono font-semibold text-foreground">DELETE</span> to confirm.
+              Type <span className="font-mono font-semibold text-foreground">DELETE</span> to
+              confirm.
             </p>
             <input
               className={inputCls}

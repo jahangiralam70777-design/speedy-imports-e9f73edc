@@ -74,35 +74,32 @@ export function OptionCard({
   const showWrong = variant === "wrong";
   const selected = variant === "selected";
 
-  const container =
-    showCorrect
-      ? "border-emerald-400/80 bg-emerald-400/10 shadow-lg shadow-emerald-500/10"
-      : showWrong
-        ? "border-rose-400/80 bg-rose-400/10 shadow-lg shadow-rose-500/10"
-        : selected
-          ? "border-indigo-400/80 bg-indigo-400/10 shadow-md shadow-indigo-500/15"
-          : "border-border/60 bg-background/40" +
-            (readOnly
-              ? ""
-              : " hover:-translate-y-[1px] hover:border-indigo-300/70 hover:bg-accent/40 hover:shadow-md hover:shadow-indigo-500/[0.06]");
+  const container = showCorrect
+    ? "border-emerald-400/80 bg-emerald-400/10 shadow-lg shadow-emerald-500/10"
+    : showWrong
+      ? "border-rose-400/80 bg-rose-400/10 shadow-lg shadow-rose-500/10"
+      : selected
+        ? "border-indigo-400/80 bg-indigo-400/10 shadow-md shadow-indigo-500/15"
+        : "border-border/60 bg-background/40" +
+          (readOnly
+            ? ""
+            : " hover:-translate-y-[1px] hover:border-indigo-300/70 hover:bg-accent/40 hover:shadow-md hover:shadow-indigo-500/[0.06]");
 
-  const radio =
-    showCorrect
-      ? "border-emerald-500 bg-emerald-500"
-      : showWrong
-        ? "border-rose-500 bg-rose-500"
-        : selected
-          ? "border-indigo-500 bg-indigo-500"
-          : "border-border/80 bg-background";
+  const radio = showCorrect
+    ? "border-emerald-500 bg-emerald-500"
+    : showWrong
+      ? "border-rose-500 bg-rose-500"
+      : selected
+        ? "border-indigo-500 bg-indigo-500"
+        : "border-border/80 bg-background";
 
-  const letter =
-    showCorrect
-      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
-      : showWrong
-        ? "bg-rose-500 text-white shadow-md shadow-rose-500/30"
-        : selected
-          ? "bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white shadow-md shadow-indigo-500/30"
-          : "bg-muted text-muted-foreground";
+  const letter = showCorrect
+    ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
+    : showWrong
+      ? "bg-rose-500 text-white shadow-md shadow-rose-500/30"
+      : selected
+        ? "bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white shadow-md shadow-indigo-500/30"
+        : "bg-muted text-muted-foreground";
 
   return (
     <button

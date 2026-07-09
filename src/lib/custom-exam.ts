@@ -2,10 +2,7 @@
 // Only this module reads across MCQ Practice (academic-store + mcq-bank)
 // and Qns Bank Practice (qbank-store); no other module is touched.
 
-import {
-  readLevels as readMcqLevels,
-  chapterMcqTotal as mcqChapterTotal,
-} from "./academic-store";
+import { readLevels as readMcqLevels, chapterMcqTotal as mcqChapterTotal } from "./academic-store";
 import { getChapterMcqs as getMcqQuestions, type Mcq as SourceMcq } from "./mcq-bank";
 import {
   readLevels as readQbankLevels,
@@ -117,9 +114,7 @@ export function listChapters(
 /* Question sampling                                                   */
 
 function loadQuestions(ref: ChapterRef): SourceMcq[] {
-  return ref.src === "mcq"
-    ? getMcqQuestions(ref.chapterId)
-    : getQbankQuestions(ref.chapterId);
+  return ref.src === "mcq" ? getMcqQuestions(ref.chapterId) : getQbankQuestions(ref.chapterId);
 }
 
 // Mulberry32 — deterministic shuffle when seeded, still fast.
@@ -178,8 +173,12 @@ export function sampleQuestions(refs: ChapterRef[], n: number): ExamQuestion[] {
   // Partial Fisher–Yates: only the first `take` positions need to be finalized.
   for (let i = 0; i < take; i++) {
     const j = i + Math.floor(rng() * (totalCount - i));
-    const tr = idxRef[i]; idxRef[i] = idxRef[j]; idxRef[j] = tr;
-    const tq = idxQ[i]; idxQ[i] = idxQ[j]; idxQ[j] = tq;
+    const tr = idxRef[i];
+    idxRef[i] = idxRef[j];
+    idxRef[j] = tr;
+    const tq = idxQ[i];
+    idxQ[i] = idxQ[j];
+    idxQ[j] = tq;
   }
 
   // Materialize only the sampled entries. (Index pairs are unique per source,

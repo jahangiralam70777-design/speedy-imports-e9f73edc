@@ -158,10 +158,7 @@ function RoutineManagerPage() {
         title="Design a new study routine"
         description="Fewer fields, faster shipping — publish a routine in under a minute."
       >
-        <CreateRoutineCard
-          editing={editing}
-          onDoneEditing={() => setEditing(null)}
-        />
+        <CreateRoutineCard editing={editing} onDoneEditing={() => setEditing(null)} />
       </Section>
 
       <Section
@@ -251,9 +248,8 @@ function PageHeader() {
           Routine Manager
         </h1>
         <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          A calm, focused space to plan, publish and observe every study
-          routine your students follow. Real-time metrics stream from the
-          backend below.
+          A calm, focused space to plan, publish and observe every study routine your students
+          follow. Real-time metrics stream from the backend below.
         </p>
       </div>
     </motion.div>
@@ -279,9 +275,7 @@ function Section({
         </div>
         <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
           <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h2>
-          <p className="max-w-xl text-sm text-muted-foreground sm:text-right">
-            {description}
-          </p>
+          <p className="max-w-xl text-sm text-muted-foreground sm:text-right">{description}</p>
         </div>
       </div>
       {children}
@@ -303,13 +297,49 @@ function OverviewGrid(props: {
   avgCompletion: number;
 }) {
   const cards = [
-    { label: "Total routines", value: props.totalRoutines, icon: BookOpen, accent: "from-primary/25 to-transparent" },
-    { label: "Active", value: props.active, icon: Activity, accent: "from-emerald-400/25 to-transparent" },
-    { label: "Upcoming", value: props.upcoming, icon: CalendarClock, accent: "from-sky-400/25 to-transparent" },
-    { label: "Completed", value: props.completed, icon: CheckCircle2, accent: "from-violet-400/25 to-transparent" },
-    { label: "Archived", value: props.archived, icon: Archive, accent: "from-muted/40 to-transparent" },
-    { label: "Students following", value: props.studentsFollowing, icon: Users, accent: "from-fuchsia-400/25 to-transparent" },
-    { label: "Avg completion", value: props.avgCompletion, suffix: "%", icon: Sparkles, accent: "from-amber-300/25 to-transparent" },
+    {
+      label: "Total routines",
+      value: props.totalRoutines,
+      icon: BookOpen,
+      accent: "from-primary/25 to-transparent",
+    },
+    {
+      label: "Active",
+      value: props.active,
+      icon: Activity,
+      accent: "from-emerald-400/25 to-transparent",
+    },
+    {
+      label: "Upcoming",
+      value: props.upcoming,
+      icon: CalendarClock,
+      accent: "from-sky-400/25 to-transparent",
+    },
+    {
+      label: "Completed",
+      value: props.completed,
+      icon: CheckCircle2,
+      accent: "from-violet-400/25 to-transparent",
+    },
+    {
+      label: "Archived",
+      value: props.archived,
+      icon: Archive,
+      accent: "from-muted/40 to-transparent",
+    },
+    {
+      label: "Students following",
+      value: props.studentsFollowing,
+      icon: Users,
+      accent: "from-fuchsia-400/25 to-transparent",
+    },
+    {
+      label: "Avg completion",
+      value: props.avgCompletion,
+      suffix: "%",
+      icon: Sparkles,
+      accent: "from-amber-300/25 to-transparent",
+    },
   ];
 
   return (
@@ -322,7 +352,10 @@ function OverviewGrid(props: {
           transition={{ delay: 0.04 * i, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card/60 p-6 shadow-sm backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
         >
-          <div aria-hidden className={`pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br ${c.accent} blur-2xl`} />
+          <div
+            aria-hidden
+            className={`pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br ${c.accent} blur-2xl`}
+          />
           <div className="relative flex items-center justify-between">
             <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               {c.label}
@@ -336,9 +369,7 @@ function OverviewGrid(props: {
               <AnimatedCounter value={c.value} />
             </span>
             {c.suffix && (
-              <span className="text-base font-medium text-muted-foreground">
-                {c.suffix}
-              </span>
+              <span className="text-base font-medium text-muted-foreground">{c.suffix}</span>
             )}
           </div>
         </motion.div>
@@ -434,7 +465,6 @@ function CreateRoutineCard({
     },
   });
 
-
   useEffect(() => {
     if (editing) {
       setForm({
@@ -455,8 +485,8 @@ function CreateRoutineCard({
     }
   }, [editing]);
 
-  const subjects = form.level ? SUBJECTS_BY_LEVEL[form.level] ?? [] : [];
-  const chapters = form.subject ? CHAPTERS_BY_SUBJECT[form.subject] ?? [] : [];
+  const subjects = form.level ? (SUBJECTS_BY_LEVEL[form.level] ?? []) : [];
+  const chapters = form.subject ? (CHAPTERS_BY_SUBJECT[form.subject] ?? []) : [];
 
   const reset = () => {
     setForm(EMPTY_FORM);
@@ -509,7 +539,10 @@ function CreateRoutineCard({
       onSubmit={submit}
       className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/60 p-6 shadow-sm backdrop-blur-2xl sm:p-8"
     >
-      <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-56 w-56 rounded-full bg-gradient-to-br from-primary/15 via-accent/10 to-transparent blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-24 -top-24 h-56 w-56 rounded-full bg-gradient-to-br from-primary/15 via-accent/10 to-transparent blur-3xl"
+      />
 
       <div className="relative grid grid-cols-1 gap-5 md:grid-cols-2">
         <Field label="Level" required>
@@ -552,7 +585,10 @@ function CreateRoutineCard({
         </Field>
 
         <Field label="Routine type" required>
-          <div role="radiogroup" className="grid grid-cols-4 overflow-hidden rounded-xl border border-border/60 bg-background/40 p-1 text-xs font-semibold">
+          <div
+            role="radiogroup"
+            className="grid grid-cols-4 overflow-hidden rounded-xl border border-border/60 bg-background/40 p-1 text-xs font-semibold"
+          >
             {(["daily", "weekly", "monthly", "custom"] as RoutineType[]).map((t) => (
               <button
                 key={t}
@@ -561,7 +597,9 @@ function CreateRoutineCard({
                 aria-checked={form.type === t}
                 onClick={() => setForm((f) => ({ ...f, type: t }))}
                 className={`rounded-lg px-2 py-2 capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 ${
-                  form.type === t ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  form.type === t
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {t}
@@ -583,11 +621,21 @@ function CreateRoutineCard({
         </Field>
 
         <Field label="Start date" required>
-          <input type="date" value={form.startDate} onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} className={inputBase} />
+          <input
+            type="date"
+            value={form.startDate}
+            onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
+            className={inputBase}
+          />
         </Field>
 
         <Field label="End date" required>
-          <input type="date" value={form.endDate} onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} className={inputBase} />
+          <input
+            type="date"
+            value={form.endDate}
+            onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))}
+            className={inputBase}
+          />
         </Field>
       </div>
 
@@ -599,7 +647,9 @@ function CreateRoutineCard({
       >
         <Settings2 className="h-3.5 w-3.5" />
         Advanced settings
-        <ChevronRight className={`h-3.5 w-3.5 transition-transform ${advanced ? "rotate-90" : ""}`} />
+        <ChevronRight
+          className={`h-3.5 w-3.5 transition-transform ${advanced ? "rotate-90" : ""}`}
+        />
       </button>
 
       <AnimatePresence initial={false}>
@@ -623,7 +673,10 @@ function CreateRoutineCard({
               </Field>
 
               <Field label="Status">
-                <div role="radiogroup" className="grid grid-cols-2 overflow-hidden rounded-xl border border-border/60 bg-background/40 p-1 text-xs font-semibold">
+                <div
+                  role="radiogroup"
+                  className="grid grid-cols-2 overflow-hidden rounded-xl border border-border/60 bg-background/40 p-1 text-xs font-semibold"
+                >
                   {(["active", "inactive"] as RStatus[]).map((s) => (
                     <button
                       key={s}
@@ -632,7 +685,9 @@ function CreateRoutineCard({
                       aria-checked={form.status === s}
                       onClick={() => setForm((f) => ({ ...f, status: s }))}
                       className={`rounded-lg px-2 py-2 capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 ${
-                        form.status === s ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                        form.status === s
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {s}
@@ -691,7 +746,11 @@ function CreateRoutineCard({
             disabled={saving}
             className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-primary via-primary to-accent px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_-12px_color-mix(in_oklab,var(--primary)_65%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-14px_color-mix(in_oklab,var(--primary)_70%,transparent)] disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />}
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />
+            )}
             {editing ? "Update routine" : "Save routine"}
           </button>
         </div>
@@ -800,8 +859,7 @@ function RoutineListCard(props: {
     onSuccess: invalidate,
   });
   const archMut = useMutation({
-    mutationFn: (input: { ids: string[]; archived: boolean }) =>
-      archiveFn({ data: input }),
+    mutationFn: (input: { ids: string[]; archived: boolean }) => archiveFn({ data: input }),
     onSuccess: invalidate,
   });
   const dupMut = useMutation({
@@ -927,8 +985,8 @@ function RoutineListCard(props: {
                       <BookOpen className="h-5 w-5" />
                     </div>
                     <p className="text-sm">
-                      No routines match your filters yet. Try clearing filters
-                      or create a new one above.
+                      No routines match your filters yet. Try clearing filters or create a new one
+                      above.
                     </p>
                   </div>
                 </td>
@@ -942,7 +1000,10 @@ function RoutineListCard(props: {
               </tr>
             )}
             {props.routines.map((r) => (
-              <tr key={r.id} className="border-b border-border/40 transition-colors last:border-b-0 hover:bg-secondary/30">
+              <tr
+                key={r.id}
+                className="border-b border-border/40 transition-colors last:border-b-0 hover:bg-secondary/30"
+              >
                 <td className="px-4 py-3">
                   <input
                     type="checkbox"
@@ -954,11 +1015,17 @@ function RoutineListCard(props: {
                 </td>
                 <td className="px-3 py-3">
                   <div className="flex items-center gap-3">
-                    <span aria-hidden className="h-8 w-1 rounded-full" style={{ background: r.accent }} />
+                    <span
+                      aria-hidden
+                      className="h-8 w-1 rounded-full"
+                      style={{ background: r.accent }}
+                    />
                     <div className="min-w-0">
                       <div className="truncate font-semibold text-foreground">{r.title}</div>
                       {r.description && (
-                        <div className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{r.description}</div>
+                        <div className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                          {r.description}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -972,7 +1039,9 @@ function RoutineListCard(props: {
                 <td className="px-3 py-3">
                   <StatusBadge status={r.isArchived ? "archived" : r.status} />
                 </td>
-                <td className="px-3 py-3 text-xs text-muted-foreground">{r.createdAt.slice(0, 10)}</td>
+                <td className="px-3 py-3 text-xs text-muted-foreground">
+                  {r.createdAt.slice(0, 10)}
+                </td>
                 <td className="px-3 py-3">
                   <div className="flex items-center justify-end gap-1">
                     <IconButton label="View" onClick={() => props.onView(r)}>
@@ -1009,10 +1078,9 @@ function RoutineListCard(props: {
 
       <div className="flex flex-col gap-3 border-t border-border/60 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div>
-          Showing{" "}
-          <span className="font-semibold text-foreground">{props.routines.length}</span> of{" "}
-          <span className="font-semibold text-foreground">{props.total}</span>{" "}
-          routine{props.total === 1 ? "" : "s"}
+          Showing <span className="font-semibold text-foreground">{props.routines.length}</span> of{" "}
+          <span className="font-semibold text-foreground">{props.total}</span> routine
+          {props.total === 1 ? "" : "s"}
         </div>
         <div className="flex items-center gap-1.5">
           <PageButton
@@ -1077,10 +1145,16 @@ function StatusBadge({ status }: { status: RStatus | "archived" }) {
         ? "bg-amber-500/15 text-amber-500 border-amber-500/30"
         : "bg-muted text-muted-foreground border-border/60";
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${styles}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${styles}`}
+    >
       <span
         className={`h-1.5 w-1.5 rounded-full ${
-          status === "active" ? "bg-emerald-500" : status === "archived" ? "bg-amber-500" : "bg-muted-foreground/50"
+          status === "active"
+            ? "bg-emerald-500"
+            : status === "archived"
+              ? "bg-amber-500"
+              : "bg-muted-foreground/50"
         }`}
       />
       {status}
@@ -1106,7 +1180,9 @@ function IconButton({
       aria-label={label}
       title={label}
       className={`grid h-8 w-8 place-items-center rounded-lg border border-border/60 bg-background/40 transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 ${
-        destructive ? "text-destructive hover:border-destructive/50 hover:bg-destructive/10" : "text-muted-foreground hover:text-foreground"
+        destructive
+          ? "text-destructive hover:border-destructive/50 hover:bg-destructive/10"
+          : "text-muted-foreground hover:text-foreground"
       }`}
     >
       {children}
@@ -1139,13 +1215,7 @@ function PageButton({
 /* View dialog                                                         */
 /* ------------------------------------------------------------------ */
 
-function ViewRoutineDialog({
-  routine,
-  onClose,
-}: {
-  routine: Routine | null;
-  onClose: () => void;
-}) {
+function ViewRoutineDialog({ routine, onClose }: { routine: Routine | null; onClose: () => void }) {
   useEffect(() => {
     if (!routine) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -1176,7 +1246,9 @@ function ViewRoutineDialog({
             <div
               aria-hidden
               className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full blur-3xl"
-              style={{ background: `radial-gradient(circle, ${routine.accent}55, transparent 70%)` }}
+              style={{
+                background: `radial-gradient(circle, ${routine.accent}55, transparent 70%)`,
+              }}
             />
             <button
               type="button"
@@ -1188,7 +1260,9 @@ function ViewRoutineDialog({
             </button>
 
             <div className="relative">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Routine</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                Routine
+              </div>
               <h3 className="mt-1 text-2xl font-semibold tracking-tight">{routine.title}</h3>
               {routine.description && (
                 <p className="mt-2 text-sm text-muted-foreground">{routine.description}</p>
@@ -1204,9 +1278,17 @@ function ViewRoutineDialog({
                 <MetaItem label="End" value={routine.endDate} />
                 <MetaItem label="Assigned students" value={routine.assigned.toLocaleString()} />
                 <MetaItem label="Completion" value={`${routine.completion}%`} />
-                <MetaItem label="Status" value={routine.isArchived ? "archived" : routine.status} capitalize />
-                {routine.targetMcqs != null && <MetaItem label="Target MCQs" value={String(routine.targetMcqs)} />}
-                {routine.targetChapters != null && <MetaItem label="Target chapters" value={String(routine.targetChapters)} />}
+                <MetaItem
+                  label="Status"
+                  value={routine.isArchived ? "archived" : routine.status}
+                  capitalize
+                />
+                {routine.targetMcqs != null && (
+                  <MetaItem label="Target MCQs" value={String(routine.targetMcqs)} />
+                )}
+                {routine.targetChapters != null && (
+                  <MetaItem label="Target chapters" value={String(routine.targetChapters)} />
+                )}
               </dl>
             </div>
           </motion.div>
@@ -1227,8 +1309,14 @@ function MetaItem({
 }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
-      <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</dt>
-      <dd className={`mt-1 text-sm font-semibold text-foreground ${capitalize ? "capitalize" : ""}`}>{value}</dd>
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </dt>
+      <dd
+        className={`mt-1 text-sm font-semibold text-foreground ${capitalize ? "capitalize" : ""}`}
+      >
+        {value}
+      </dd>
     </div>
   );
 }
@@ -1341,19 +1429,27 @@ function ProgressCard() {
                       <Users className="h-5 w-5" />
                     </div>
                     <p className="text-sm">
-                      No student progress yet. Once students start following an
-                      active routine, their live progress will appear here.
+                      No student progress yet. Once students start following an active routine,
+                      their live progress will appear here.
                     </p>
                   </div>
                 </td>
               </tr>
             )}
             {shown.map((s: RoutineStudentRow) => (
-              <tr key={s.id} className="border-b border-border/40 transition-colors last:border-b-0 hover:bg-secondary/30">
+              <tr
+                key={s.id}
+                className="border-b border-border/40 transition-colors last:border-b-0 hover:bg-secondary/30"
+              >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="grid h-9 w-9 place-items-center rounded-xl border border-border/60 bg-background/40 text-[11px] font-semibold text-foreground">
-                      {s.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+                      {s.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <div className="truncate font-semibold text-foreground">{s.name}</div>
@@ -1363,7 +1459,11 @@ function ProgressCard() {
                 </td>
                 <td className="px-3 py-3">
                   <div className="flex items-center gap-2">
-                    <span aria-hidden className="h-6 w-1 rounded-full" style={{ background: s.routineAccent }} />
+                    <span
+                      aria-hidden
+                      className="h-6 w-1 rounded-full"
+                      style={{ background: s.routineAccent }}
+                    />
                     <span className="truncate text-muted-foreground">{s.routineTitle}</span>
                   </div>
                 </td>
@@ -1401,7 +1501,9 @@ function ProgressStatusBadge({ status }: { status: "on-track" | "behind" | "comp
     completed: "bg-primary/15 text-primary border-primary/30",
   } as const;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${map[status]}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${map[status]}`}
+    >
       {status}
     </span>
   );

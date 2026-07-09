@@ -48,24 +48,91 @@ export type Mcq = {
 const LEVELS = ["Class 9", "Class 10", "Class 11", "Class 12", "JEE Main", "NEET"];
 const SUBJECTS = ["Physics", "Chemistry", "Biology", "Mathematics", "English"];
 const CHAPTERS = [
-  "Kinematics", "Thermodynamics", "Cell Biology", "Organic Chemistry",
-  "Trigonometry", "Electromagnetism", "Genetics", "Algebra",
+  "Kinematics",
+  "Thermodynamics",
+  "Cell Biology",
+  "Organic Chemistry",
+  "Trigonometry",
+  "Electromagnetism",
+  "Genetics",
+  "Algebra",
 ];
 const SEEDS: { q: string; options: string[]; answer: string; explanation: string }[] = [
-  { q: "Which planet in our solar system has the most moons?", options: ["Jupiter","Saturn","Uranus","Neptune"], answer: "B", explanation: "Saturn currently leads with the highest confirmed moon count." },
-  { q: "The chemical symbol 'Au' represents which element?", options: ["Silver","Aluminium","Gold","Argon"], answer: "C", explanation: "Au comes from the Latin word 'aurum' meaning gold." },
-  { q: "Which data structure uses LIFO ordering?", options: ["Queue","Stack","Heap","Linked list"], answer: "B", explanation: "A stack follows Last-In-First-Out semantics via push/pop." },
-  { q: "In economics, GDP stands for", options: ["Gross Domestic Product","General Development Plan","Global Demand Price","Growth Distribution Point"], answer: "A", explanation: "GDP is the total monetary value of goods and services produced within a country in a period." },
-  { q: "Which enzyme unwinds DNA during replication?", options: ["Ligase","Helicase","Primase","Polymerase"], answer: "B", explanation: "Helicase breaks the hydrogen bonds between complementary bases to open the double helix." },
-  { q: "The derivative of ln(x) with respect to x is", options: ["x","1/x","e^x","ln(x)"], answer: "B", explanation: "d/dx [ln x] = 1/x for x > 0." },
-  { q: "The Great Wall of China was primarily built during which dynasty?", options: ["Han","Tang","Ming","Qing"], answer: "C", explanation: "Most of the surviving wall was built during the Ming dynasty (1368–1644)." },
-  { q: "Which gas is most abundant in the Earth's atmosphere?", options: ["Oxygen","Nitrogen","Carbon dioxide","Argon"], answer: "B", explanation: "Nitrogen makes up roughly 78% of the atmosphere by volume." },
-  { q: "The SI unit of electric current is", options: ["Coulomb","Volt","Ampere","Ohm"], answer: "C", explanation: "The ampere (A) is the base SI unit of electric current." },
-  { q: "Which of these sorting algorithms has O(n log n) average complexity?", options: ["Bubble sort","Insertion sort","Quick sort","Selection sort"], answer: "C", explanation: "Quick sort averages O(n log n); the others are O(n²) on average." },
+  {
+    q: "Which planet in our solar system has the most moons?",
+    options: ["Jupiter", "Saturn", "Uranus", "Neptune"],
+    answer: "B",
+    explanation: "Saturn currently leads with the highest confirmed moon count.",
+  },
+  {
+    q: "The chemical symbol 'Au' represents which element?",
+    options: ["Silver", "Aluminium", "Gold", "Argon"],
+    answer: "C",
+    explanation: "Au comes from the Latin word 'aurum' meaning gold.",
+  },
+  {
+    q: "Which data structure uses LIFO ordering?",
+    options: ["Queue", "Stack", "Heap", "Linked list"],
+    answer: "B",
+    explanation: "A stack follows Last-In-First-Out semantics via push/pop.",
+  },
+  {
+    q: "In economics, GDP stands for",
+    options: [
+      "Gross Domestic Product",
+      "General Development Plan",
+      "Global Demand Price",
+      "Growth Distribution Point",
+    ],
+    answer: "A",
+    explanation:
+      "GDP is the total monetary value of goods and services produced within a country in a period.",
+  },
+  {
+    q: "Which enzyme unwinds DNA during replication?",
+    options: ["Ligase", "Helicase", "Primase", "Polymerase"],
+    answer: "B",
+    explanation:
+      "Helicase breaks the hydrogen bonds between complementary bases to open the double helix.",
+  },
+  {
+    q: "The derivative of ln(x) with respect to x is",
+    options: ["x", "1/x", "e^x", "ln(x)"],
+    answer: "B",
+    explanation: "d/dx [ln x] = 1/x for x > 0.",
+  },
+  {
+    q: "The Great Wall of China was primarily built during which dynasty?",
+    options: ["Han", "Tang", "Ming", "Qing"],
+    answer: "C",
+    explanation: "Most of the surviving wall was built during the Ming dynasty (1368–1644).",
+  },
+  {
+    q: "Which gas is most abundant in the Earth's atmosphere?",
+    options: ["Oxygen", "Nitrogen", "Carbon dioxide", "Argon"],
+    answer: "B",
+    explanation: "Nitrogen makes up roughly 78% of the atmosphere by volume.",
+  },
+  {
+    q: "The SI unit of electric current is",
+    options: ["Coulomb", "Volt", "Ampere", "Ohm"],
+    answer: "C",
+    explanation: "The ampere (A) is the base SI unit of electric current.",
+  },
+  {
+    q: "Which of these sorting algorithms has O(n log n) average complexity?",
+    options: ["Bubble sort", "Insertion sort", "Quick sort", "Selection sort"],
+    answer: "C",
+    explanation: "Quick sort averages O(n log n); the others are O(n²) on average.",
+  },
 ];
 const ROW_COUNT = 162;
 
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const slug = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 const levelId = (l: string) => `qb-l-${slug(l)}`;
 const subjectId = (l: string, s: string) => `qb-s-${slug(l)}-${slug(s)}`;
 const chapterIdOf = (l: string, s: string, c: string) => `qb-c-${slug(l)}-${slug(s)}-${slug(c)}`;
@@ -86,18 +153,41 @@ const _chapterMcqs: Record<string, Mcq[]> = {};
 
     let lvl = lMap.get(lid);
     if (!lvl) {
-      lvl = { id: lid, name: lName, code: lName.toUpperCase().replace(/\s+/g, ""), description: `Question Bank curated for ${lName}.`, createdAt: 0, updatedAt: 0, subjects: [] };
+      lvl = {
+        id: lid,
+        name: lName,
+        code: lName.toUpperCase().replace(/\s+/g, ""),
+        description: `Question Bank curated for ${lName}.`,
+        createdAt: 0,
+        updatedAt: 0,
+        subjects: [],
+      };
       lMap.set(lid, lvl);
       _levels.push(lvl);
     }
     let sub = lvl.subjects.find((x) => x.id === sid);
     if (!sub) {
-      sub = { id: sid, name: sName, code: sName.slice(0, 4).toUpperCase(), description: `${sName} — verified bank items.`, createdAt: 0, updatedAt: 0, chapters: [] };
+      sub = {
+        id: sid,
+        name: sName,
+        code: sName.slice(0, 4).toUpperCase(),
+        description: `${sName} — verified bank items.`,
+        createdAt: 0,
+        updatedAt: 0,
+        chapters: [],
+      };
       lvl.subjects.push(sub);
     }
     let ch = sub.chapters.find((x) => x.id === cid);
     if (!ch) {
-      ch = { id: cid, name: cName, code: cName.slice(0, 4).toUpperCase(), description: `${cName} question bank.`, createdAt: 0, updatedAt: 0 };
+      ch = {
+        id: cid,
+        name: cName,
+        code: cName.slice(0, 4).toUpperCase(),
+        description: `${cName} question bank.`,
+        createdAt: 0,
+        updatedAt: 0,
+      };
       sub.chapters.push(ch);
       _chapterMcqs[cid] = [];
     }
@@ -146,7 +236,15 @@ export type ChapterProgress = {
 export type ProgressMap = Record<string, ChapterProgress>;
 
 export function emptyChapterProgress(): ChapterProgress {
-  return { completed: 0, lastIndex: 0, answers: {}, bookmarks: [], reports: [], timeSpent: 0, lastPracticedAt: 0 };
+  return {
+    completed: 0,
+    lastIndex: 0,
+    answers: {},
+    bookmarks: [],
+    reports: [],
+    timeSpent: 0,
+    lastPracticedAt: 0,
+  };
 }
 
 export function ensureChapterProgress(progress: ProgressMap, chapterId: string): ChapterProgress {
@@ -159,7 +257,8 @@ export function ensureChapterProgress(progress: ProgressMap, chapterId: string):
     bookmarks: Array.isArray(raw.bookmarks) ? raw.bookmarks : [],
     reports: Array.isArray(raw.reports) ? raw.reports : [],
     timeSpent: typeof raw.timeSpent === "number" && raw.timeSpent > 0 ? raw.timeSpent : 0,
-    lastPracticedAt: typeof raw.lastPracticedAt === "number" && raw.lastPracticedAt > 0 ? raw.lastPracticedAt : 0,
+    lastPracticedAt:
+      typeof raw.lastPracticedAt === "number" && raw.lastPracticedAt > 0 ? raw.lastPracticedAt : 0,
   };
 }
 
@@ -170,12 +269,16 @@ export function readProgress(): ProgressMap {
     if (!raw) return {};
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === "object" ? (parsed as ProgressMap) : {};
-  } catch { return {}; }
+  } catch {
+    return {};
+  }
 }
 
 export function writeProgress(map: ProgressMap) {
   if (typeof window === "undefined") return;
-  try { window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(map)); } catch {}
+  try {
+    window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(map));
+  } catch {}
 }
 
 export function chapterCompleted(progress: ProgressMap, chapterId: string): number {
@@ -185,12 +288,15 @@ export function chapterCompleted(progress: ProgressMap, chapterId: string): numb
 }
 export function chapterCorrectWrong(progress: ProgressMap, chapterId: string) {
   const cp = progress[chapterId];
-  let correct = 0, wrong = 0, skipped = 0;
-  if (cp?.answers) for (const v of Object.values(cp.answers)) {
-    if (v === "correct") correct++;
-    else if (v === "wrong") wrong++;
-    else if (v === "skipped") skipped++;
-  }
+  let correct = 0,
+    wrong = 0,
+    skipped = 0;
+  if (cp?.answers)
+    for (const v of Object.values(cp.answers)) {
+      if (v === "correct") correct++;
+      else if (v === "wrong") wrong++;
+      else if (v === "skipped") skipped++;
+    }
   return { correct, wrong, skipped };
 }
 export function chapterAccuracy(progress: ProgressMap, chapterId: string): number {
@@ -228,7 +334,8 @@ export function formatRelativeTime(ts: number): string {
   const timeStr = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   if (d.toDateString() === today.toDateString()) return `Today ${timeStr}`;
   if (d.toDateString() === y.toDateString()) return `Yesterday ${timeStr}`;
-  if (d.getFullYear() === today.getFullYear()) return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  if (d.getFullYear() === today.getFullYear())
+    return d.toLocaleDateString([], { month: "short", day: "numeric" });
   return d.toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" });
 }
 export function estimateChapterTimeLeft(progress: ProgressMap, chapterId: string): number {
@@ -241,7 +348,10 @@ export function estimateChapterTimeLeft(progress: ProgressMap, chapterId: string
   const avgMs = done >= 3 && spent > 0 ? spent / done : 45_000;
   return Math.round(remaining * avgMs);
 }
-export function motivationalMessage(progressPct: number): { text: string; tone: "start" | "go" | "half" | "close" | "done" } {
+export function motivationalMessage(progressPct: number): {
+  text: string;
+  tone: "start" | "go" | "half" | "close" | "done";
+} {
   if (progressPct >= 100) return { text: "Chapter completed", tone: "done" };
   if (progressPct >= 90) return { text: "Chapter almost finished", tone: "close" };
   if (progressPct >= 75) return { text: "Home stretch — keep going", tone: "close" };
@@ -256,42 +366,75 @@ export function pct(done: number, total: number): number {
 }
 
 export type SubjectRollup = {
-  chapters: number; totalMcqs: number; completedMcqs: number;
-  correct: number; wrong: number; avgAccuracy: number;
-  completedChapters: number; timeSpent: number;
+  chapters: number;
+  totalMcqs: number;
+  completedMcqs: number;
+  correct: number;
+  wrong: number;
+  avgAccuracy: number;
+  completedChapters: number;
+  timeSpent: number;
 };
 export function rollupSubject(sub: Subject, progress: ProgressMap): SubjectRollup {
-  let totalMcqs = 0, completedMcqs = 0, correct = 0, wrong = 0, completedChapters = 0, timeSpent = 0;
+  let totalMcqs = 0,
+    completedMcqs = 0,
+    correct = 0,
+    wrong = 0,
+    completedChapters = 0,
+    timeSpent = 0;
   for (const ch of sub.chapters) {
     const total = chapterMcqTotal(ch.id);
     const done = chapterCompleted(progress, ch.id);
-    totalMcqs += total; completedMcqs += done;
+    totalMcqs += total;
+    completedMcqs += done;
     const cw = chapterCorrectWrong(progress, ch.id);
-    correct += cw.correct; wrong += cw.wrong;
+    correct += cw.correct;
+    wrong += cw.wrong;
     if (total > 0 && done >= total) completedChapters++;
     timeSpent += chapterTimeSpent(progress, ch.id);
   }
   const answered = correct + wrong;
   return {
     chapters: sub.chapters.length,
-    totalMcqs, completedMcqs, correct, wrong,
+    totalMcqs,
+    completedMcqs,
+    correct,
+    wrong,
     avgAccuracy: answered === 0 ? 0 : Math.round((correct / answered) * 100),
-    completedChapters, timeSpent,
+    completedChapters,
+    timeSpent,
   };
 }
 export type LevelRollup = SubjectRollup & { subjects: number; remainingChapters: number };
 export function rollupLevel(level: Level, progress: ProgressMap): LevelRollup {
-  let chapters = 0, totalMcqs = 0, completedMcqs = 0, correct = 0, wrong = 0, completedChapters = 0, timeSpent = 0;
+  let chapters = 0,
+    totalMcqs = 0,
+    completedMcqs = 0,
+    correct = 0,
+    wrong = 0,
+    completedChapters = 0,
+    timeSpent = 0;
   for (const sub of level.subjects) {
     const r = rollupSubject(sub, progress);
-    chapters += r.chapters; totalMcqs += r.totalMcqs; completedMcqs += r.completedMcqs;
-    correct += r.correct; wrong += r.wrong; completedChapters += r.completedChapters; timeSpent += r.timeSpent;
+    chapters += r.chapters;
+    totalMcqs += r.totalMcqs;
+    completedMcqs += r.completedMcqs;
+    correct += r.correct;
+    wrong += r.wrong;
+    completedChapters += r.completedChapters;
+    timeSpent += r.timeSpent;
   }
   const answered = correct + wrong;
   return {
     subjects: level.subjects.length,
-    chapters, totalMcqs, completedMcqs, correct, wrong,
+    chapters,
+    totalMcqs,
+    completedMcqs,
+    correct,
+    wrong,
     avgAccuracy: answered === 0 ? 0 : Math.round((correct / answered) * 100),
-    completedChapters, remainingChapters: Math.max(0, chapters - completedChapters), timeSpent,
+    completedChapters,
+    remainingChapters: Math.max(0, chapters - completedChapters),
+    timeSpent,
   };
 }

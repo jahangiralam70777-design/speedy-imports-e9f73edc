@@ -21,8 +21,8 @@ export type ChapterCheckpointsDTO = {
   cls: boolean;
   slide: boolean;
   easy: boolean;
-  mcq: boolean;      // derived: mcqDone >= mcqTotal && mcqTotal > 0
-  mcqAuto: boolean;  // true if `mcq` was auto-derived (as opposed to no data)
+  mcq: boolean; // derived: mcqDone >= mcqTotal && mcqTotal > 0
+  mcqAuto: boolean; // true if `mcq` was auto-derived (as opposed to no data)
   mcqDone: number;
   mcqTotal: number;
   updatedAt: number; // epoch ms of latest manual update
@@ -78,10 +78,7 @@ export const getMyProgressTracker = createServerFn({ method: "GET" })
           .select("id,name,slug,position,subject_id")
           .order("position"),
         supabase.from("mcq_questions").select("chapter_id").eq("status", "published"),
-        supabase
-          .from("mcq_attempts")
-          .select("question_id,chapter_id")
-          .eq("user_id", userId),
+        supabase.from("mcq_attempts").select("question_id,chapter_id").eq("user_id", userId),
         supabase
           .from("student_preferences")
           .select("preferences")
@@ -117,10 +114,9 @@ export const getMyProgressTracker = createServerFn({ method: "GET" })
     // Manual checkpoints
     const prefs = (prefsRes.data?.preferences ?? {}) as Record<string, unknown>;
     const cpMap =
-      (prefs.progressCheckpoints as Record<
-        string,
-        { cls?: boolean; slide?: boolean; easy?: boolean; updatedAt?: number }
-      > | undefined) ?? {};
+      (prefs.progressCheckpoints as
+        | Record<string, { cls?: boolean; slide?: boolean; easy?: boolean; updatedAt?: number }>
+        | undefined) ?? {};
 
     // Build tree
     const chaptersBySubject = new Map<string, TrackerChapter[]>();
@@ -175,12 +171,14 @@ export const getMyProgressTracker = createServerFn({ method: "GET" })
       subjectsByLevel.set(s.level_id, arr);
     }
 
-    const levels: TrackerLevel[] = ((levelsRes.data ?? []) as Array<{
-      id: string;
-      name: string;
-      slug: string | null;
-      position: number;
-    }>).map((l) => ({
+    const levels: TrackerLevel[] = (
+      (levelsRes.data ?? []) as Array<{
+        id: string;
+        name: string;
+        slug: string | null;
+        position: number;
+      }>
+    ).map((l) => ({
       id: l.id,
       name: l.name,
       code: l.slug ?? "",
@@ -224,10 +222,9 @@ export const setMyProgressCheckpoint = createServerFn({ method: "POST" })
 
     const prefs = (existing?.preferences ?? {}) as Record<string, unknown>;
     const cpMap =
-      (prefs.progressCheckpoints as Record<
-        string,
-        { cls?: boolean; slide?: boolean; easy?: boolean; updatedAt?: number }
-      > | undefined) ?? {};
+      (prefs.progressCheckpoints as
+        | Record<string, { cls?: boolean; slide?: boolean; easy?: boolean; updatedAt?: number }>
+        | undefined) ?? {};
     const cur = cpMap[data.chapterId] ?? {};
     const nextEntry = {
       cls: !!cur.cls,
@@ -243,10 +240,7 @@ export const setMyProgressCheckpoint = createServerFn({ method: "POST" })
 
     const { error: upErr } = await supabase
       .from("student_preferences")
-      .upsert(
-        { user_id: userId, preferences: nextPrefs },
-        { onConflict: "user_id" },
-      );
+      .upsert({ user_id: userId, preferences: nextPrefs }, { onConflict: "user_id" });
     if (upErr) throw new Error(upErr.message);
     return { ok: true as const };
   });

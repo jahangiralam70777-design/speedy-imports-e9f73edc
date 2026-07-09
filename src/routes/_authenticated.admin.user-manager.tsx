@@ -173,10 +173,7 @@ function UserManagerPage() {
   const deleteFn = useServerFn(deleteUsers);
 
   const listQuery = useQuery({
-    queryKey: [
-      "admin-users",
-      { q, role, status, verif, regFrom, regTo, sort, page, pageSize },
-    ],
+    queryKey: ["admin-users", { q, role, status, verif, regFrom, regTo, sort, page, pageSize }],
     queryFn: () =>
       listFn({
         data: {
@@ -256,12 +253,42 @@ function UserManagerPage() {
     <div className="space-y-6">
       {/* ---------------- KPI ROW ---------------- */}
       <section className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
-        <Kpi label="Total Users"       value={stats?.total ?? 0}        icon={Users2}      accent="from-primary to-accent" />
-        <Kpi label="Students"          value={stats?.students ?? 0}     icon={UserCheck}   accent="from-emerald-400 to-teal-500" />
-        <Kpi label="Admins"            value={stats?.admins ?? 0}       icon={Crown}       accent="from-amber-400 to-orange-500" />
-        <Kpi label="Active Today"      value={stats?.activeToday ?? 0}  icon={TrendingUp}  accent="from-sky-400 to-indigo-500" />
-        <Kpi label="Verified Users"    value={stats?.verified ?? 0}     icon={ShieldCheck} accent="from-violet-400 to-fuchsia-500" />
-        <Kpi label="New (7 days)"      value={stats?.newLast7Days ?? 0} icon={UserPlus}    accent="from-rose-400 to-pink-500" />
+        <Kpi
+          label="Total Users"
+          value={stats?.total ?? 0}
+          icon={Users2}
+          accent="from-primary to-accent"
+        />
+        <Kpi
+          label="Students"
+          value={stats?.students ?? 0}
+          icon={UserCheck}
+          accent="from-emerald-400 to-teal-500"
+        />
+        <Kpi
+          label="Admins"
+          value={stats?.admins ?? 0}
+          icon={Crown}
+          accent="from-amber-400 to-orange-500"
+        />
+        <Kpi
+          label="Active Today"
+          value={stats?.activeToday ?? 0}
+          icon={TrendingUp}
+          accent="from-sky-400 to-indigo-500"
+        />
+        <Kpi
+          label="Verified Users"
+          value={stats?.verified ?? 0}
+          icon={ShieldCheck}
+          accent="from-violet-400 to-fuchsia-500"
+        />
+        <Kpi
+          label="New (7 days)"
+          value={stats?.newLast7Days ?? 0}
+          icon={UserPlus}
+          accent="from-rose-400 to-pink-500"
+        />
       </section>
 
       {/* ---------------- FILTER BAR ---------------- */}
@@ -319,8 +346,18 @@ function UserManagerPage() {
               Reset filters
             </button>
           </div>
-          <DateField label="Registered from" value={regFrom} onChange={setRegFrom} className="md:col-span-3" />
-          <DateField label="Registered to"   value={regTo}   onChange={setRegTo}   className="md:col-span-3" />
+          <DateField
+            label="Registered from"
+            value={regFrom}
+            onChange={setRegFrom}
+            className="md:col-span-3"
+          />
+          <DateField
+            label="Registered to"
+            value={regTo}
+            onChange={setRegTo}
+            className="md:col-span-3"
+          />
           <Select
             label="Sort by"
             value={sort}
@@ -352,9 +389,7 @@ function UserManagerPage() {
             exit={{ opacity: 0, y: -6 }}
             className="flex flex-wrap items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-accent/10 to-transparent px-3 py-2 backdrop-blur-xl sm:px-4"
           >
-            <span className="text-sm font-medium text-foreground">
-              {selected.size} selected
-            </span>
+            <span className="text-sm font-medium text-foreground">{selected.size} selected</span>
             <span className="mx-2 h-4 w-px bg-border/70" />
             <BulkBtn
               icon={CheckCircle2}
@@ -442,19 +477,24 @@ function UserManagerPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && rows.length === 0 && Array.from({ length: 8 }).map((_, i) => (
-                <tr key={`sk-${i}`} className="border-t border-border/60">
-                  <td colSpan={10} className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-4 w-4 shrink-0 rounded bg-muted/60 animate-pulse" />
-                      <div className="h-9 w-9 shrink-0 rounded-full bg-muted/60 animate-pulse" />
-                      <div className="h-3 flex-1 rounded bg-muted/60 animate-pulse" style={{ maxWidth: `${40 + ((i * 13) % 40)}%` }} />
-                      <div className="h-3 w-16 rounded bg-muted/50 animate-pulse" />
-                      <div className="h-5 w-16 rounded-full bg-muted/50 animate-pulse" />
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {loading &&
+                rows.length === 0 &&
+                Array.from({ length: 8 }).map((_, i) => (
+                  <tr key={`sk-${i}`} className="border-t border-border/60">
+                    <td colSpan={10} className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-4 w-4 shrink-0 rounded bg-muted/60 animate-pulse" />
+                        <div className="h-9 w-9 shrink-0 rounded-full bg-muted/60 animate-pulse" />
+                        <div
+                          className="h-3 flex-1 rounded bg-muted/60 animate-pulse"
+                          style={{ maxWidth: `${40 + ((i * 13) % 40)}%` }}
+                        />
+                        <div className="h-3 w-16 rounded bg-muted/50 animate-pulse" />
+                        <div className="h-5 w-16 rounded-full bg-muted/50 animate-pulse" />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               {!loading && rows.length === 0 && (
                 <tr>
                   <td colSpan={10} className="px-6 py-16">
@@ -462,7 +502,9 @@ function UserManagerPage() {
                       <div className="grid h-14 w-14 place-items-center rounded-2xl bg-secondary/60 text-muted-foreground">
                         <SearchX className="h-6 w-6" aria-hidden="true" />
                       </div>
-                      <h3 className="mt-4 text-sm font-semibold text-foreground">No users match your filters</h3>
+                      <h3 className="mt-4 text-sm font-semibold text-foreground">
+                        No users match your filters
+                      </h3>
                       <p className="mt-1 text-xs text-muted-foreground">
                         Try loosening a filter, clearing search, or resetting all filters.
                       </p>
@@ -481,13 +523,19 @@ function UserManagerPage() {
                 return (
                   <tr
                     key={u.id}
-                    onDoubleClick={() => navigate({ to: "/admin/user-manager/$userId", params: { userId: u.id } })}
+                    onDoubleClick={() =>
+                      navigate({ to: "/admin/user-manager/$userId", params: { userId: u.id } })
+                    }
                     className={`border-t border-border/60 transition-colors ${
                       isSel ? "bg-primary/5" : "hover:bg-secondary/40"
                     }`}
                   >
                     <td className="pl-4 py-3">
-                      <Checkbox checked={isSel} onChange={() => toggleRow(u.id)} ariaLabel={`Select ${u.fullName || u.email}`} />
+                      <Checkbox
+                        checked={isSel}
+                        onChange={() => toggleRow(u.id)}
+                        ariaLabel={`Select ${u.fullName || u.email}`}
+                      />
                     </td>
                     <td className="py-3">
                       <Avatar user={u} />
@@ -498,7 +546,9 @@ function UserManagerPage() {
                         {u.verified && <BadgeCheck className="h-3.5 w-3.5 text-sky-500" />}
                         {u.role === "admin" && <Crown className="h-3.5 w-3.5 text-amber-500" />}
                       </div>
-                      <div className="text-[11px] text-muted-foreground font-mono truncate max-w-[220px]">{u.id}</div>
+                      <div className="text-[11px] text-muted-foreground font-mono truncate max-w-[220px]">
+                        {u.id}
+                      </div>
                     </td>
                     <td className="py-3 pr-2 text-muted-foreground">{u.email}</td>
                     <td className="py-3 pr-2 text-muted-foreground">{u.phone || "—"}</td>
@@ -506,13 +556,19 @@ function UserManagerPage() {
                       <RolePill role={u.role} />
                     </td>
                     <td className="py-3 pr-2 text-muted-foreground">{fmtDate(u.createdAt)}</td>
-                    <td className="py-3 pr-2 text-muted-foreground">{fmtRelative(u.lastLoginAt)}</td>
-                    <td className="py-3 pr-2"><StatusPill status={u.status} /></td>
+                    <td className="py-3 pr-2 text-muted-foreground">
+                      {fmtRelative(u.lastLoginAt)}
+                    </td>
+                    <td className="py-3 pr-2">
+                      <StatusPill status={u.status} />
+                    </td>
                     <td className="py-3 pr-4">
                       <RowActions
                         user={u}
                         onView={() => setViewing(u)}
-                        onOpen={() => navigate({ to: "/admin/user-manager/$userId", params: { userId: u.id } })}
+                        onOpen={() =>
+                          navigate({ to: "/admin/user-manager/$userId", params: { userId: u.id } })
+                        }
                         onEdit={() => setEditing(u)}
                         onDisable={() =>
                           setConfirm({
@@ -623,7 +679,11 @@ function UserManagerPage() {
                 onChange={(e) => setPageSize(Number(e.target.value))}
                 className="h-8 appearance-none rounded-lg border border-border/70 bg-background/70 pl-2 pr-7 text-xs font-medium text-foreground outline-none focus:border-primary/50"
               >
-                {PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
+                {PAGE_SIZES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
               <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             </div>
@@ -631,19 +691,29 @@ function UserManagerPage() {
               {total === 0
                 ? "0"
                 : `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, total)}`}
-              {" of "}{total.toLocaleString()}
+              {" of "}
+              {total.toLocaleString()}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <PagerBtn onClick={() => setPage(1)} disabled={page === 1}>«</PagerBtn>
+            <PagerBtn onClick={() => setPage(1)} disabled={page === 1}>
+              «
+            </PagerBtn>
             <PagerBtn onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
               <ChevronLeft className="h-3.5 w-3.5" />
             </PagerBtn>
-            <span className="px-2 text-xs text-muted-foreground">Page {page} of {totalPages}</span>
-            <PagerBtn onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+            <span className="px-2 text-xs text-muted-foreground">
+              Page {page} of {totalPages}
+            </span>
+            <PagerBtn
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+            >
               <ChevronRight className="h-3.5 w-3.5" />
             </PagerBtn>
-            <PagerBtn onClick={() => setPage(totalPages)} disabled={page >= totalPages}>»</PagerBtn>
+            <PagerBtn onClick={() => setPage(totalPages)} disabled={page >= totalPages}>
+              »
+            </PagerBtn>
           </div>
         </div>
       </section>
@@ -696,23 +766,33 @@ function UserManagerPage() {
 /* ------------------------------------------------------------------ */
 
 function Kpi({
-  label, value, icon: Icon, accent,
+  label,
+  value,
+  icon: Icon,
+  accent,
 }: {
-  label: string; value: number;
+  label: string;
+  value: number;
   icon: React.ComponentType<{ className?: string }>;
   accent: string;
 }) {
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-4 shadow-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${accent} opacity-15 blur-2xl transition group-hover:opacity-25`} />
+      <div
+        className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${accent} opacity-15 blur-2xl transition group-hover:opacity-25`}
+      />
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            {label}
+          </div>
           <div className="mt-1.5 text-2xl font-bold tabular-nums tracking-tight text-foreground sm:text-3xl">
             <Counter to={value} />
           </div>
         </div>
-        <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${accent} text-white shadow-inner`}>
+        <div
+          className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${accent} text-white shadow-inner`}
+        >
           <Icon className="h-4 w-4" />
         </div>
       </div>
@@ -743,10 +823,17 @@ function Counter({ to }: { to: number }) {
 }
 
 function Select({
-  label, value, onChange, options, className,
+  label,
+  value,
+  onChange,
+  options,
+  className,
 }: {
-  label: string; value: string; onChange: (v: string) => void;
-  options: [string, string][]; className?: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: [string, string][];
+  className?: string;
 }) {
   return (
     <label className={`block ${className ?? ""}`}>
@@ -759,7 +846,11 @@ function Select({
           onChange={(e) => onChange(e.target.value)}
           className="h-10 w-full appearance-none rounded-xl border border-border/70 bg-background/70 pl-3 pr-8 text-sm text-foreground outline-none transition focus:border-primary/50 focus:ring-4 focus:ring-primary/15"
         >
-          {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          {options.map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
         </select>
         <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       </div>
@@ -768,9 +859,15 @@ function Select({
 }
 
 function DateField({
-  label, value, onChange, className,
+  label,
+  value,
+  onChange,
+  className,
 }: {
-  label: string; value: string; onChange: (v: string) => void; className?: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  className?: string;
 }) {
   return (
     <label className={`block ${className ?? ""}`}>
@@ -792,12 +889,20 @@ function Th({ children, className }: { children?: React.ReactNode; className?: s
 }
 
 function Checkbox({
-  checked, indeterminate, onChange, ariaLabel,
+  checked,
+  indeterminate,
+  onChange,
+  ariaLabel,
 }: {
-  checked: boolean; indeterminate?: boolean; onChange: () => void; ariaLabel: string;
+  checked: boolean;
+  indeterminate?: boolean;
+  onChange: () => void;
+  ariaLabel: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
-  useEffect(() => { if (ref.current) ref.current.indeterminate = !!indeterminate && !checked; }, [indeterminate, checked]);
+  useEffect(() => {
+    if (ref.current) ref.current.indeterminate = !!indeterminate && !checked;
+  }, [indeterminate, checked]);
   return (
     <input
       ref={ref}
@@ -844,7 +949,9 @@ function StatusPill({ status }: { status: UserStatus }) {
       ? "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 ring-emerald-500/25"
       : "bg-rose-500/12 text-rose-600 dark:text-rose-400 ring-rose-500/25";
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${cls}`}
+    >
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {status === "active" ? "Active" : "Disabled"}
     </span>
@@ -857,14 +964,25 @@ function RolePill({ role }: { role: UserRole }) {
       ? "bg-amber-500/12 text-amber-600 dark:text-amber-400 ring-amber-500/25"
       : "bg-sky-500/12 text-sky-600 dark:text-sky-400 ring-sky-500/25";
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${cls}`}
+    >
       {role === "admin" ? "Admin" : "Student"}
     </span>
   );
 }
 
 function RowActions({
-  user, onView, onOpen, onEdit, onDisable, onActivate, onReset, onForceLogout, onChangeRole, onDelete,
+  user,
+  onView,
+  onOpen,
+  onEdit,
+  onDisable,
+  onActivate,
+  onReset,
+  onForceLogout,
+  onChangeRole,
+  onDelete,
 }: {
   user: AdminUserRow;
   onView: () => void;
@@ -880,8 +998,12 @@ function RowActions({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
-    const k = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    const h = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const k = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", h);
     document.addEventListener("keydown", k);
     return () => {
@@ -909,20 +1031,87 @@ function RowActions({
             role="menu"
             className="absolute right-0 top-full z-20 mt-1 w-52 overflow-hidden rounded-xl border border-border/70 bg-popover/95 p-1 text-sm text-popover-foreground shadow-xl backdrop-blur-xl"
           >
-            <MenuItem icon={Eye}    label="Quick view" onClick={() => { setOpen(false); onView(); }} />
-            <MenuItem icon={Pencil} label="Edit profile" onClick={() => { setOpen(false); onEdit(); }} />
-            <MenuItem icon={Crown}  label={user.role === "admin" ? "Demote to student" : "Promote to admin"} onClick={() => { setOpen(false); onChangeRole(); }} />
+            <MenuItem
+              icon={Eye}
+              label="Quick view"
+              onClick={() => {
+                setOpen(false);
+                onView();
+              }}
+            />
+            <MenuItem
+              icon={Pencil}
+              label="Edit profile"
+              onClick={() => {
+                setOpen(false);
+                onEdit();
+              }}
+            />
+            <MenuItem
+              icon={Crown}
+              label={user.role === "admin" ? "Demote to student" : "Promote to admin"}
+              onClick={() => {
+                setOpen(false);
+                onChangeRole();
+              }}
+            />
             <div className="my-1 h-px bg-border/70" />
-            <MenuItem icon={KeyRound} label="Send password reset" onClick={() => { setOpen(false); onReset(); }} />
-            <MenuItem icon={LogOut}   label="Force logout" onClick={() => { setOpen(false); onForceLogout(); }} tone="warning" />
+            <MenuItem
+              icon={KeyRound}
+              label="Send password reset"
+              onClick={() => {
+                setOpen(false);
+                onReset();
+              }}
+            />
+            <MenuItem
+              icon={LogOut}
+              label="Force logout"
+              onClick={() => {
+                setOpen(false);
+                onForceLogout();
+              }}
+              tone="warning"
+            />
             {user.status === "active" ? (
-              <MenuItem icon={Ban}          label="Disable account"  onClick={() => { setOpen(false); onDisable(); }} tone="warning" />
+              <MenuItem
+                icon={Ban}
+                label="Disable account"
+                onClick={() => {
+                  setOpen(false);
+                  onDisable();
+                }}
+                tone="warning"
+              />
             ) : (
-              <MenuItem icon={CheckCircle2} label="Activate account" onClick={() => { setOpen(false); onActivate(); }} tone="success" />
+              <MenuItem
+                icon={CheckCircle2}
+                label="Activate account"
+                onClick={() => {
+                  setOpen(false);
+                  onActivate();
+                }}
+                tone="success"
+              />
             )}
             <div className="my-1 h-px bg-border/70" />
-            <MenuItem icon={Eye}    label="Open full details" onClick={() => { setOpen(false); onOpen(); }} />
-            <MenuItem icon={Trash2} label="Delete user"       onClick={() => { setOpen(false); onDelete(); }} tone="danger" />
+            <MenuItem
+              icon={Eye}
+              label="Open full details"
+              onClick={() => {
+                setOpen(false);
+                onOpen();
+              }}
+            />
+            <MenuItem
+              icon={Trash2}
+              label="Delete user"
+              onClick={() => {
+                setOpen(false);
+                onDelete();
+              }}
+              tone="danger"
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -931,16 +1120,24 @@ function RowActions({
 }
 
 function MenuItem({
-  icon: Icon, label, onClick, tone,
+  icon: Icon,
+  label,
+  onClick,
+  tone,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  label: string; onClick: () => void; tone?: "danger" | "warning" | "success";
+  label: string;
+  onClick: () => void;
+  tone?: "danger" | "warning" | "success";
 }) {
   const toneCls =
-    tone === "danger" ? "text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
-    : tone === "warning" ? "text-orange-600 dark:text-orange-400 hover:bg-orange-500/10"
-    : tone === "success" ? "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
-    : "hover:bg-secondary/70";
+    tone === "danger"
+      ? "text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+      : tone === "warning"
+        ? "text-orange-600 dark:text-orange-400 hover:bg-orange-500/10"
+        : tone === "success"
+          ? "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+          : "hover:bg-secondary/70";
   return (
     <button
       role="menuitem"
@@ -954,15 +1151,22 @@ function MenuItem({
 }
 
 function BulkBtn({
-  icon: Icon, label, tone, onClick,
+  icon: Icon,
+  label,
+  tone,
+  onClick,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  label: string; tone: "success" | "warning" | "danger"; onClick: () => void;
+  label: string;
+  tone: "success" | "warning" | "danger";
+  onClick: () => void;
 }) {
   const cls =
-    tone === "success" ? "border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400"
-    : tone === "warning" ? "border-orange-500/40 text-orange-600 hover:bg-orange-500/10 dark:text-orange-400"
-    : "border-rose-500/40 text-rose-600 hover:bg-rose-500/10 dark:text-rose-400";
+    tone === "success"
+      ? "border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400"
+      : tone === "warning"
+        ? "border-orange-500/40 text-orange-600 hover:bg-orange-500/10 dark:text-orange-400"
+        : "border-rose-500/40 text-rose-600 hover:bg-rose-500/10 dark:text-rose-400";
   return (
     <button
       onClick={onClick}
@@ -975,9 +1179,13 @@ function BulkBtn({
 }
 
 function PagerBtn({
-  children, onClick, disabled,
+  children,
+  onClick,
+  disabled,
 }: {
-  children: React.ReactNode; onClick: () => void; disabled?: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
@@ -993,13 +1201,21 @@ function PagerBtn({
 /* ------------------------- Modals ------------------------- */
 
 function ModalShell({
-  open, onClose, children, size = "md",
+  open,
+  onClose,
+  children,
+  size = "md",
 }: {
-  open: boolean; onClose: () => void; children: React.ReactNode; size?: "sm" | "md" | "lg";
+  open: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  size?: "sm" | "md" | "lg";
 }) {
   useEffect(() => {
     if (!open) return;
-    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const h = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     document.addEventListener("keydown", h);
     return () => document.removeEventListener("keydown", h);
   }, [open, onClose]);
@@ -1009,7 +1225,9 @@ function ModalShell({
       {open && (
         <>
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-background/60 backdrop-blur-sm"
             onClick={onClose}
           />
@@ -1055,16 +1273,21 @@ function ViewDialog({ user, onClose }: { user: AdminUserRow | null; onClose: () 
                 </div>
                 <div className="text-xs text-muted-foreground font-mono truncate">{user.id}</div>
               </div>
-              <div className="ml-auto pb-1"><StatusPill status={user.status} /></div>
+              <div className="ml-auto pb-1">
+                <StatusPill status={user.status} />
+              </div>
             </div>
 
             <dl className="mt-6 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-              <Info icon={Mail}  label="Email" value={user.email} />
+              <Info icon={Mail} label="Email" value={user.email} />
               <Info icon={Phone} label="Phone" value={user.phone || "—"} />
-              <Info label="Role"   value={user.role === "admin" ? "Admin" : "Student"} />
-              <Info label="Verified"   value={user.verified ? "Yes" : "No"} />
+              <Info label="Role" value={user.role === "admin" ? "Admin" : "Student"} />
+              <Info label="Verified" value={user.verified ? "Yes" : "No"} />
               <Info label="Joined" value={fmtDate(user.createdAt)} />
-              <Info label="Last login" value={`${fmtDate(user.lastLoginAt)} · ${fmtRelative(user.lastLoginAt)}`} />
+              <Info
+                label="Last login"
+                value={`${fmtDate(user.lastLoginAt)} · ${fmtRelative(user.lastLoginAt)}`}
+              />
             </dl>
           </div>
         </div>
@@ -1074,13 +1297,19 @@ function ViewDialog({ user, onClose }: { user: AdminUserRow | null; onClose: () 
 }
 
 function Info({
-  label, value, icon: Icon,
+  label,
+  value,
+  icon: Icon,
 }: {
-  label: string; value: string; icon?: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
     <div className="rounded-xl border border-border/60 bg-background/50 px-3 py-2.5">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </div>
       <div className="mt-0.5 flex items-center gap-1.5 text-sm font-medium text-foreground">
         {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground" />}
         <span className="truncate">{value}</span>
@@ -1090,7 +1319,9 @@ function Info({
 }
 
 function EditDialog({
-  user, onClose, onSave,
+  user,
+  onClose,
+  onSave,
 }: {
   user: AdminUserRow | null;
   onClose: () => void;
@@ -1122,7 +1353,12 @@ function EditDialog({
               <h3 className="text-base font-semibold">Edit user</h3>
               <p className="text-xs text-muted-foreground font-mono">{user.id}</p>
             </div>
-            <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary/60 hover:text-foreground" aria-label="Close">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+              aria-label="Close"
+            >
               <X className="h-4 w-4" />
             </button>
           </header>
@@ -1131,18 +1367,40 @@ function EditDialog({
               <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
             </Field>
             <Field label="Email (read-only)">
-              <input value={user.email} readOnly className={`${inputCls} bg-secondary/40 text-muted-foreground`} />
+              <input
+                value={user.email}
+                readOnly
+                className={`${inputCls} bg-secondary/40 text-muted-foreground`}
+              />
             </Field>
             <Field label="Phone">
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} />
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={inputCls}
+              />
             </Field>
             <Field label="Role">
-              <input value={user.role === "admin" ? "Admin" : "Student"} readOnly className={`${inputCls} bg-secondary/40 text-muted-foreground`} />
+              <input
+                value={user.role === "admin" ? "Admin" : "Student"}
+                readOnly
+                className={`${inputCls} bg-secondary/40 text-muted-foreground`}
+              />
             </Field>
           </div>
           <footer className="flex items-center justify-end gap-2 border-t border-border/60 bg-background/40 px-6 py-3">
-            <button type="button" onClick={onClose} className="rounded-xl border border-border/70 bg-background/60 px-3 py-2 text-sm font-medium hover:bg-secondary/60">Cancel</button>
-            <button type="submit" disabled={saving} className="rounded-xl bg-gradient-to-br from-primary to-accent px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow hover:brightness-110 disabled:opacity-60">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-border/70 bg-background/60 px-3 py-2 text-sm font-medium hover:bg-secondary/60"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-xl bg-gradient-to-br from-primary to-accent px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow hover:brightness-110 disabled:opacity-60"
+            >
               {saving ? "Saving…" : "Save changes"}
             </button>
           </footer>
@@ -1158,38 +1416,65 @@ const inputCls =
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</span>
+      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </span>
       {children}
     </label>
   );
 }
 
 function ConfirmDialog({
-  data, onClose,
+  data,
+  onClose,
 }: {
-  data: null | { title: string; body: string; tone: "danger" | "warning" | "primary"; cta: string; action: () => void | Promise<void> };
+  data: null | {
+    title: string;
+    body: string;
+    tone: "danger" | "warning" | "primary";
+    cta: string;
+    action: () => void | Promise<void>;
+  };
   onClose: () => void;
 }) {
   const [busy, setBusy] = useState(false);
   const toneRing =
-    data?.tone === "danger" ? "ring-rose-500/30 text-rose-500"
-    : data?.tone === "warning" ? "ring-orange-500/30 text-orange-500"
-    : "ring-primary/30 text-primary";
+    data?.tone === "danger"
+      ? "ring-rose-500/30 text-rose-500"
+      : data?.tone === "warning"
+        ? "ring-orange-500/30 text-orange-500"
+        : "ring-primary/30 text-primary";
   const toneBtn =
-    data?.tone === "danger" ? "bg-rose-600 hover:bg-rose-500 text-white"
-    : data?.tone === "warning" ? "bg-orange-500 hover:bg-orange-400 text-white"
-    : "bg-primary hover:brightness-110 text-primary-foreground";
+    data?.tone === "danger"
+      ? "bg-rose-600 hover:bg-rose-500 text-white"
+      : data?.tone === "warning"
+        ? "bg-orange-500 hover:bg-orange-400 text-white"
+        : "bg-primary hover:brightness-110 text-primary-foreground";
   return (
-    <ModalShell open={!!data} onClose={() => { if (!busy) onClose(); }} size="sm">
+    <ModalShell
+      open={!!data}
+      onClose={() => {
+        if (!busy) onClose();
+      }}
+      size="sm"
+    >
       {data && (
         <div className="p-6">
-          <div className={`mb-4 inline-grid h-11 w-11 place-items-center rounded-2xl ring-4 ${toneRing} bg-background/70`}>
+          <div
+            className={`mb-4 inline-grid h-11 w-11 place-items-center rounded-2xl ring-4 ${toneRing} bg-background/70`}
+          >
             <Ban className="h-5 w-5" />
           </div>
           <h3 className="text-base font-semibold text-foreground">{data.title}</h3>
           <p className="mt-1 text-sm text-muted-foreground">{data.body}</p>
           <div className="mt-5 flex items-center justify-end gap-2">
-            <button disabled={busy} onClick={onClose} className="rounded-xl border border-border/70 bg-background/60 px-3 py-2 text-sm font-medium hover:bg-secondary/60 disabled:opacity-60">Cancel</button>
+            <button
+              disabled={busy}
+              onClick={onClose}
+              className="rounded-xl border border-border/70 bg-background/60 px-3 py-2 text-sm font-medium hover:bg-secondary/60 disabled:opacity-60"
+            >
+              Cancel
+            </button>
             <button
               disabled={busy}
               onClick={async () => {

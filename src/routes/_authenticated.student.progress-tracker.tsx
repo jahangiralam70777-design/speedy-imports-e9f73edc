@@ -256,10 +256,7 @@ function ProgressTrackerPage() {
 
     const q = debouncedSearch.trim().toLowerCase();
     let filtered = q
-      ? base.filter(
-          (r) =>
-            r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q),
-        )
+      ? base.filter((r) => r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q))
       : base;
     if (statusFilter !== "all") {
       filtered = filtered.filter((r) => r.status === statusFilter);
@@ -322,7 +319,6 @@ function ProgressTrackerPage() {
     }
   };
 
-
   return (
     <div className="min-w-0 p-4 sm:p-6 md:p-8">
       {/* Header */}
@@ -335,8 +331,8 @@ function ProgressTrackerPage() {
           Progress Tracker
         </h1>
         <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-          Tick each checkpoint as you complete it — chapter, subject and level
-          progress update instantly and save automatically.
+          Tick each checkpoint as you complete it — chapter, subject and level progress update
+          instantly and save automatically.
         </p>
       </header>
 
@@ -403,11 +399,47 @@ function ProgressTrackerPage() {
         <>
           {/* Top summary */}
           <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            <SummaryCard icon={GraduationCap} label="Selected Level" value={selectedLevel.name} hint={`${summary.lvlPct}% level progress`} tone="from-indigo-500/20 via-indigo-500/5 to-transparent" accent="text-indigo-500" />
-            <SummaryCard icon={BookOpen} label="Selected Subject" value={selectedSubject.name} hint={`${selectedSubject.chapters.length} chapters`} tone="from-fuchsia-500/20 via-fuchsia-500/5 to-transparent" accent="text-fuchsia-500" />
-            <SummaryCard icon={Layers} label="Total Chapters" value={String(summary.total)} hint="in this subject" tone="from-sky-500/20 via-sky-500/5 to-transparent" accent="text-sky-500" />
-            <SummaryCard icon={CheckCircle2} label="Completed Chapters" value={`${summary.completed}/${summary.total}`} hint={`${summary.inProgress} in progress`} tone="from-emerald-500/20 via-emerald-500/5 to-transparent" accent="text-emerald-500" />
-            <SummaryCard icon={Target} label="Overall Subject Progress" value={`${summary.subjPct}%`} hint="live weighted avg" tone="from-amber-500/20 via-amber-500/5 to-transparent" accent="text-amber-500" progress={summary.subjPct} />
+            <SummaryCard
+              icon={GraduationCap}
+              label="Selected Level"
+              value={selectedLevel.name}
+              hint={`${summary.lvlPct}% level progress`}
+              tone="from-indigo-500/20 via-indigo-500/5 to-transparent"
+              accent="text-indigo-500"
+            />
+            <SummaryCard
+              icon={BookOpen}
+              label="Selected Subject"
+              value={selectedSubject.name}
+              hint={`${selectedSubject.chapters.length} chapters`}
+              tone="from-fuchsia-500/20 via-fuchsia-500/5 to-transparent"
+              accent="text-fuchsia-500"
+            />
+            <SummaryCard
+              icon={Layers}
+              label="Total Chapters"
+              value={String(summary.total)}
+              hint="in this subject"
+              tone="from-sky-500/20 via-sky-500/5 to-transparent"
+              accent="text-sky-500"
+            />
+            <SummaryCard
+              icon={CheckCircle2}
+              label="Completed Chapters"
+              value={`${summary.completed}/${summary.total}`}
+              hint={`${summary.inProgress} in progress`}
+              tone="from-emerald-500/20 via-emerald-500/5 to-transparent"
+              accent="text-emerald-500"
+            />
+            <SummaryCard
+              icon={Target}
+              label="Overall Subject Progress"
+              value={`${summary.subjPct}%`}
+              hint="live weighted avg"
+              tone="from-amber-500/20 via-amber-500/5 to-transparent"
+              accent="text-amber-500"
+              progress={summary.subjPct}
+            />
           </section>
 
           {/* Toolbar */}
@@ -433,9 +465,28 @@ function ProgressTrackerPage() {
               )}
             </div>
             <div className="ml-auto flex flex-wrap items-center gap-1.5 text-[11px]">
-              <LegendPill status="not_started" count={summary.notStarted} active={statusFilter === "not_started"} onClick={() => setStatusFilter((f) => (f === "not_started" ? "all" : "not_started"))} />
-              <LegendPill status="in_progress" count={summary.inProgress} active={statusFilter === "in_progress"} onClick={() => setStatusFilter((f) => (f === "in_progress" ? "all" : "in_progress"))} />
-              <LegendPill status="completed" count={summary.completed} active={statusFilter === "completed"} onClick={() => setStatusFilter((f) => (f === "completed" ? "all" : "completed"))} />
+              <LegendPill
+                status="not_started"
+                count={summary.notStarted}
+                active={statusFilter === "not_started"}
+                onClick={() =>
+                  setStatusFilter((f) => (f === "not_started" ? "all" : "not_started"))
+                }
+              />
+              <LegendPill
+                status="in_progress"
+                count={summary.inProgress}
+                active={statusFilter === "in_progress"}
+                onClick={() =>
+                  setStatusFilter((f) => (f === "in_progress" ? "all" : "in_progress"))
+                }
+              />
+              <LegendPill
+                status="completed"
+                count={summary.completed}
+                active={statusFilter === "completed"}
+                onClick={() => setStatusFilter((f) => (f === "completed" ? "all" : "completed"))}
+              />
               {statusFilter !== "all" && (
                 <button
                   type="button"
@@ -459,13 +510,57 @@ function ProgressTrackerPage() {
                 <table className="w-full min-w-[1040px] text-sm">
                   <thead className="sticky top-0 z-10 bg-card/95 text-[11px] uppercase tracking-[0.12em] text-muted-foreground backdrop-blur-xl">
                     <tr className="border-b border-border/60">
-                      <SortableTh label="Chapter" sortKey="name" active={sortKey} dir={sortDir} onClick={toggleSort} align="left" />
-                      <SortableTh label="Class" sortKey="cls" active={sortKey} dir={sortDir} onClick={toggleSort} />
-                      <SortableTh label="Slide" sortKey="slide" active={sortKey} dir={sortDir} onClick={toggleSort} />
-                      <SortableTh label="Easy Slide" sortKey="easy" active={sortKey} dir={sortDir} onClick={toggleSort} />
-                      <SortableTh label="MCQ" sortKey="mcq" active={sortKey} dir={sortDir} onClick={toggleSort} />
-                      <SortableTh label="Progress" sortKey="pct" active={sortKey} dir={sortDir} onClick={toggleSort} className="min-w-[220px]" />
-                      <SortableTh label="Status" sortKey="status" active={sortKey} dir={sortDir} onClick={toggleSort} />
+                      <SortableTh
+                        label="Chapter"
+                        sortKey="name"
+                        active={sortKey}
+                        dir={sortDir}
+                        onClick={toggleSort}
+                        align="left"
+                      />
+                      <SortableTh
+                        label="Class"
+                        sortKey="cls"
+                        active={sortKey}
+                        dir={sortDir}
+                        onClick={toggleSort}
+                      />
+                      <SortableTh
+                        label="Slide"
+                        sortKey="slide"
+                        active={sortKey}
+                        dir={sortDir}
+                        onClick={toggleSort}
+                      />
+                      <SortableTh
+                        label="Easy Slide"
+                        sortKey="easy"
+                        active={sortKey}
+                        dir={sortDir}
+                        onClick={toggleSort}
+                      />
+                      <SortableTh
+                        label="MCQ"
+                        sortKey="mcq"
+                        active={sortKey}
+                        dir={sortDir}
+                        onClick={toggleSort}
+                      />
+                      <SortableTh
+                        label="Progress"
+                        sortKey="pct"
+                        active={sortKey}
+                        dir={sortDir}
+                        onClick={toggleSort}
+                        className="min-w-[220px]"
+                      />
+                      <SortableTh
+                        label="Status"
+                        sortKey="status"
+                        active={sortKey}
+                        dir={sortDir}
+                        onClick={toggleSort}
+                      />
                     </tr>
                   </thead>
                   <tbody>
@@ -550,10 +645,21 @@ function ProgressTrackerPage() {
 /* ------------------------------------------------------------------ */
 
 function StepCard({
-  step, title, icon: Icon, active, done, disabled, children,
+  step,
+  title,
+  icon: Icon,
+  active,
+  done,
+  disabled,
+  children,
 }: {
-  step: number; title: string; icon: React.ComponentType<{ className?: string }>;
-  active?: boolean; done?: boolean; disabled?: boolean; children: React.ReactNode;
+  step: number;
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  active?: boolean;
+  done?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
 }) {
   return (
     <div
@@ -561,11 +667,20 @@ function StepCard({
         disabled ? "opacity-60" : "hover:-translate-y-0.5 hover:shadow-lg"
       } ${active ? "border-indigo-500/60 ring-2 ring-indigo-500/20" : "border-border/60"}`}
     >
-      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-500/20 via-fuchsia-500/10 to-transparent blur-2xl" aria-hidden />
+      <div
+        className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-500/20 via-fuchsia-500/10 to-transparent blur-2xl"
+        aria-hidden
+      />
       <div className="relative mb-3 flex items-center gap-3">
-        <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold ${
-          done ? "bg-emerald-500/15 text-emerald-500" : active ? "bg-indigo-500/15 text-indigo-500" : "bg-muted text-muted-foreground"
-        }`}>
+        <span
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold ${
+            done
+              ? "bg-emerald-500/15 text-emerald-500"
+              : active
+                ? "bg-indigo-500/15 text-indigo-500"
+                : "bg-muted text-muted-foreground"
+          }`}
+        >
           {done ? <CheckCircle2 className="h-4 w-4" /> : `0${step}`}
         </span>
         <div className="flex items-center gap-2">
@@ -579,7 +694,15 @@ function StepCard({
   );
 }
 
-function PillButton({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
+function PillButton({
+  selected,
+  onClick,
+  children,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -602,28 +725,51 @@ function EmptyHint({ text }: { text: string }) {
 function SkeletonPills() {
   return (
     <div className="flex flex-wrap gap-2">
-      {[0, 1, 2].map((i) => <div key={i} className="h-7 w-20 animate-pulse rounded-full bg-muted" />)}
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="h-7 w-20 animate-pulse rounded-full bg-muted" />
+      ))}
     </div>
   );
 }
 
 function SummaryCard({
-  icon: Icon, label, value, hint, tone, accent, progress,
+  icon: Icon,
+  label,
+  value,
+  hint,
+  tone,
+  accent,
+  progress,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  label: string; value: string; hint?: string; tone: string; accent: string; progress?: number;
+  label: string;
+  value: string;
+  hint?: string;
+  tone: string;
+  accent: string;
+  progress?: number;
 }) {
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-border hover:shadow-lg">
-      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tone} opacity-80 transition-opacity duration-300 group-hover:opacity-100`} aria-hidden />
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tone} opacity-80 transition-opacity duration-300 group-hover:opacity-100`}
+        aria-hidden
+      />
       <div className="relative">
-        <Icon className={`mb-2 h-4 w-4 ${accent} transition-transform duration-300 group-hover:scale-110`} />
+        <Icon
+          className={`mb-2 h-4 w-4 ${accent} transition-transform duration-300 group-hover:scale-110`}
+        />
         <div className="text-[11px] font-medium leading-tight text-muted-foreground">{label}</div>
-        <div className="mt-1 truncate text-lg font-semibold tracking-tight tabular-nums">{value}</div>
+        <div className="mt-1 truncate text-lg font-semibold tracking-tight tabular-nums">
+          {value}
+        </div>
         {hint && <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{hint}</div>}
         {typeof progress === "number" && (
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-orange-400 transition-[width] duration-500" style={{ width: `${progress}%` }} />
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-orange-400 transition-[width] duration-500"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         )}
       </div>
@@ -632,15 +778,28 @@ function SummaryCard({
 }
 
 function SortableTh({
-  label, sortKey, active, dir, onClick, align = "center", className = "",
+  label,
+  sortKey,
+  active,
+  dir,
+  onClick,
+  align = "center",
+  className = "",
 }: {
-  label: string; sortKey: SortKey; active: SortKey; dir: SortDir;
-  onClick: (k: SortKey) => void; align?: "left" | "center"; className?: string;
+  label: string;
+  sortKey: SortKey;
+  active: SortKey;
+  dir: SortDir;
+  onClick: (k: SortKey) => void;
+  align?: "left" | "center";
+  className?: string;
 }) {
   const isActive = active === sortKey;
   const Icon = !isActive ? ArrowUpDown : dir === "asc" ? ArrowUp : ArrowDown;
   return (
-    <th className={`px-4 py-3 font-semibold ${align === "left" ? "text-left" : "text-center"} ${className}`}>
+    <th
+      className={`px-4 py-3 font-semibold ${align === "left" ? "text-left" : "text-center"} ${className}`}
+    >
       <button
         type="button"
         onClick={() => onClick(sortKey)}
@@ -656,17 +815,38 @@ function SortableTh({
 }
 
 const ACCENT_STYLES: Record<string, { on: string; off: string; ring: string }> = {
-  indigo: { on: "bg-gradient-to-br from-indigo-500 to-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-500/30", off: "hover:border-indigo-500/60 hover:bg-indigo-500/5", ring: "focus-visible:ring-indigo-500/40" },
-  sky:    { on: "bg-gradient-to-br from-sky-500 to-sky-600 border-sky-500 text-white shadow-md shadow-sky-500/30", off: "hover:border-sky-500/60 hover:bg-sky-500/5", ring: "focus-visible:ring-sky-500/40" },
-  teal:   { on: "bg-gradient-to-br from-teal-500 to-teal-600 border-teal-500 text-white shadow-md shadow-teal-500/30", off: "hover:border-teal-500/60 hover:bg-teal-500/5", ring: "focus-visible:ring-teal-500/40" },
-  fuchsia:{ on: "bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 border-fuchsia-500 text-white shadow-md shadow-fuchsia-500/30", off: "hover:border-fuchsia-500/60 hover:bg-fuchsia-500/5", ring: "focus-visible:ring-fuchsia-500/40" },
+  indigo: {
+    on: "bg-gradient-to-br from-indigo-500 to-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-500/30",
+    off: "hover:border-indigo-500/60 hover:bg-indigo-500/5",
+    ring: "focus-visible:ring-indigo-500/40",
+  },
+  sky: {
+    on: "bg-gradient-to-br from-sky-500 to-sky-600 border-sky-500 text-white shadow-md shadow-sky-500/30",
+    off: "hover:border-sky-500/60 hover:bg-sky-500/5",
+    ring: "focus-visible:ring-sky-500/40",
+  },
+  teal: {
+    on: "bg-gradient-to-br from-teal-500 to-teal-600 border-teal-500 text-white shadow-md shadow-teal-500/30",
+    off: "hover:border-teal-500/60 hover:bg-teal-500/5",
+    ring: "focus-visible:ring-teal-500/40",
+  },
+  fuchsia: {
+    on: "bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 border-fuchsia-500 text-white shadow-md shadow-fuchsia-500/30",
+    off: "hover:border-fuchsia-500/60 hover:bg-fuchsia-500/5",
+    ring: "focus-visible:ring-fuchsia-500/40",
+  },
 };
 
 const CheckCell = memo(function CheckCell({
-  icon: Icon, checked, onToggle, accent,
+  icon: Icon,
+  checked,
+  onToggle,
+  accent,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  checked: boolean; onToggle: () => void; accent: keyof typeof ACCENT_STYLES;
+  checked: boolean;
+  onToggle: () => void;
+  accent: keyof typeof ACCENT_STYLES;
 }) {
   const s = ACCENT_STYLES[accent];
   return (
@@ -680,19 +860,39 @@ const CheckCell = memo(function CheckCell({
           checked ? s.on + " border" : "border-border/60 bg-background text-foreground " + s.off
         }`}
       >
-        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
-          checked ? "border-white/60 bg-white/20 scale-100" : "border-border bg-background group-hover/chk:border-foreground/40"
-        }`} aria-hidden>
-          {checked ? <Check className="h-3.5 w-3.5 text-white animate-scale-in" strokeWidth={3} /> : <Icon className="h-3 w-3 text-muted-foreground" />}
+        <span
+          className={`inline-flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
+            checked
+              ? "border-white/60 bg-white/20 scale-100"
+              : "border-border bg-background group-hover/chk:border-foreground/40"
+          }`}
+          aria-hidden
+        >
+          {checked ? (
+            <Check className="h-3.5 w-3.5 text-white animate-scale-in" strokeWidth={3} />
+          ) : (
+            <Icon className="h-3 w-3 text-muted-foreground" />
+          )}
         </span>
-        <span className="hidden text-xs font-semibold tabular-nums sm:inline">{checked ? "+25%" : "25%"}</span>
+        <span className="hidden text-xs font-semibold tabular-nums sm:inline">
+          {checked ? "+25%" : "25%"}
+        </span>
       </button>
     </td>
   );
 });
 
 const ChapterRow = memo(function ChapterRow({
-  id, name, code, cp, pct, status, zebra, onToggle, expanded, onExpand,
+  id,
+  name,
+  code,
+  cp,
+  pct,
+  status,
+  zebra,
+  onToggle,
+  expanded,
+  onExpand,
 }: {
   id: string;
   name: string;
@@ -705,14 +905,20 @@ const ChapterRow = memo(function ChapterRow({
   expanded: boolean;
   onExpand: (id: string) => void;
 }) {
-  const onCls   = useCallback(() => onToggle(id, "cls"), [id, onToggle]);
+  const onCls = useCallback(() => onToggle(id, "cls"), [id, onToggle]);
   const onSlide = useCallback(() => onToggle(id, "slide"), [id, onToggle]);
-  const onEasy  = useCallback(() => onToggle(id, "easy"), [id, onToggle]);
-  const onMcq   = useCallback(() => onToggle(id, "mcq"), [id, onToggle]);
+  const onEasy = useCallback(() => onToggle(id, "easy"), [id, onToggle]);
+  const onMcq = useCallback(() => onToggle(id, "mcq"), [id, onToggle]);
   const onRowClick = useCallback(() => onExpand(id), [id, onExpand]);
-  const onKey = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onExpand(id); }
-  }, [id, onExpand]);
+  const onKey = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onExpand(id);
+      }
+    },
+    [id, onExpand],
+  );
   return (
     <>
       <tr
@@ -728,11 +934,15 @@ const ChapterRow = memo(function ChapterRow({
             <CircularProgress value={pct} size={40} stroke={4} />
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 ${expanded ? "rotate-90 text-indigo-500" : ""}`} />
+                <ChevronRight
+                  className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 ${expanded ? "rotate-90 text-indigo-500" : ""}`}
+                />
                 <div className="truncate font-medium text-foreground">{name}</div>
               </div>
               <div className="mt-0.5 flex items-center gap-1.5 pl-5 text-[11px] text-muted-foreground">
-                <span className="rounded bg-muted px-1.5 py-0.5 font-mono tabular-nums">{code}</span>
+                <span className="rounded bg-muted px-1.5 py-0.5 font-mono tabular-nums">
+                  {code}
+                </span>
                 <Clock className="h-3 w-3" />
                 <span>{formatRelative(cp.updatedAt)}</span>
               </div>
@@ -740,16 +950,16 @@ const ChapterRow = memo(function ChapterRow({
           </div>
         </td>
         <td onClick={(e) => e.stopPropagation()}>
-          <CheckCellInner icon={Presentation} checked={cp.cls}   onToggle={onCls}   accent="indigo" />
+          <CheckCellInner icon={Presentation} checked={cp.cls} onToggle={onCls} accent="indigo" />
         </td>
         <td onClick={(e) => e.stopPropagation()}>
-          <CheckCellInner icon={Layers}       checked={cp.slide} onToggle={onSlide} accent="sky" />
+          <CheckCellInner icon={Layers} checked={cp.slide} onToggle={onSlide} accent="sky" />
         </td>
         <td onClick={(e) => e.stopPropagation()}>
-          <CheckCellInner icon={Sparkles}     checked={cp.easy}  onToggle={onEasy}  accent="teal" />
+          <CheckCellInner icon={Sparkles} checked={cp.easy} onToggle={onEasy} accent="teal" />
         </td>
         <td onClick={(e) => e.stopPropagation()}>
-          <CheckCellInner icon={Target}       checked={cp.mcq}   onToggle={onMcq}   accent="fuchsia" />
+          <CheckCellInner icon={Target} checked={cp.mcq} onToggle={onMcq} accent="fuchsia" />
         </td>
         <td className="px-4 py-3">
           <ProgressBar pct={pct} />
@@ -774,10 +984,15 @@ const ChapterRow = memo(function ChapterRow({
 /* CheckCell inner: same visuals as before but not wrapped in <td> so we can wrap
    with a <td onClick={stopPropagation}> to keep the row click for expansion. */
 const CheckCellInner = memo(function CheckCellInner({
-  icon: Icon, checked, onToggle, accent,
+  icon: Icon,
+  checked,
+  onToggle,
+  accent,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  checked: boolean; onToggle: () => void; accent: keyof typeof ACCENT_STYLES;
+  checked: boolean;
+  onToggle: () => void;
+  accent: keyof typeof ACCENT_STYLES;
 }) {
   const s = ACCENT_STYLES[accent];
   return (
@@ -791,33 +1006,60 @@ const CheckCellInner = memo(function CheckCellInner({
           checked ? s.on + " border" : "border-border/60 bg-background text-foreground " + s.off
         }`}
       >
-        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
-          checked ? "border-white/60 bg-white/20" : "border-border bg-background group-hover/chk:border-foreground/40"
-        }`} aria-hidden>
-          {checked ? <Check className="h-3.5 w-3.5 text-white animate-scale-in" strokeWidth={3} /> : <Icon className="h-3 w-3 text-muted-foreground" />}
+        <span
+          className={`inline-flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
+            checked
+              ? "border-white/60 bg-white/20"
+              : "border-border bg-background group-hover/chk:border-foreground/40"
+          }`}
+          aria-hidden
+        >
+          {checked ? (
+            <Check className="h-3.5 w-3.5 text-white animate-scale-in" strokeWidth={3} />
+          ) : (
+            <Icon className="h-3 w-3 text-muted-foreground" />
+          )}
         </span>
-        <span className="hidden text-xs font-semibold tabular-nums sm:inline">{checked ? "+25%" : "25%"}</span>
+        <span className="hidden text-xs font-semibold tabular-nums sm:inline">
+          {checked ? "+25%" : "25%"}
+        </span>
       </button>
     </div>
   );
 });
 
-const CHECKPOINT_META: Array<{ key: Checkpoint; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { key: "cls",   label: "Class Status",         icon: Presentation },
-  { key: "slide", label: "Slide Status",         icon: Layers },
-  { key: "easy",  label: "Easy Slide Status",    icon: Sparkles },
-  { key: "mcq",   label: "MCQ Progress",         icon: Target },
+const CHECKPOINT_META: Array<{
+  key: Checkpoint;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
+  { key: "cls", label: "Class Status", icon: Presentation },
+  { key: "slide", label: "Slide Status", icon: Layers },
+  { key: "easy", label: "Easy Slide Status", icon: Sparkles },
+  { key: "mcq", label: "MCQ Progress", icon: Target },
 ];
 
 function ChapterDetails({
-  cp, pct, status, name,
-}: { cp: ChapterCheckpoints; pct: number; status: Status; name: string }) {
-  const completionDate = pct >= 100 && cp.updatedAt
-    ? new Date(cp.updatedAt).toLocaleString([], {
-        year: "numeric", month: "short", day: "numeric",
-        hour: "numeric", minute: "2-digit",
-      })
-    : null;
+  cp,
+  pct,
+  status,
+  name,
+}: {
+  cp: ChapterCheckpoints;
+  pct: number;
+  status: Status;
+  name: string;
+}) {
+  const completionDate =
+    pct >= 100 && cp.updatedAt
+      ? new Date(cp.updatedAt).toLocaleString([], {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        })
+      : null;
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -827,12 +1069,18 @@ function ChapterDetails({
       </div>
       <div className="flex flex-col items-stretch justify-between gap-2 rounded-xl border border-border/60 bg-background/60 p-3 md:min-w-[240px]">
         <div>
-          <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Chapter</div>
-          <div className="mt-0.5 truncate text-sm font-semibold" title={name}>{name}</div>
+          <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            Chapter
+          </div>
+          <div className="mt-0.5 truncate text-sm font-semibold" title={name}>
+            {name}
+          </div>
         </div>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Progress</div>
+            <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              Progress
+            </div>
             <div className="mt-0.5 text-lg font-semibold tabular-nums">{pct}%</div>
           </div>
           <StatusBadge status={status} />
@@ -851,20 +1099,32 @@ function ChapterDetails({
 }
 
 function CheckpointStatusCard({
-  label, icon: Icon, done,
-}: { label: string; icon: React.ComponentType<{ className?: string }>; done: boolean }) {
+  label,
+  icon: Icon,
+  done,
+}: {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  done: boolean;
+}) {
   const cls = done
     ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
     : "border-border/60 bg-background/60 text-muted-foreground";
-  const dot = done ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]" : "bg-muted-foreground/40";
+  const dot = done
+    ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+    : "bg-muted-foreground/40";
   return (
     <div className={`flex items-center gap-3 rounded-xl border p-3 transition-all ${cls}`}>
       <span className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-background/60">
         <Icon className="h-4 w-4" />
-        <span className={`absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dot}`} />
+        <span
+          className={`absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-background ${dot}`}
+        />
       </span>
       <div className="min-w-0">
-        <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</div>
+        <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          {label}
+        </div>
         <div className="mt-0.5 text-xs font-semibold">
           {done ? "Completed" : "Pending"}
           <span className="ml-1.5 tabular-nums text-muted-foreground">{done ? "+25%" : "0%"}</span>
@@ -875,10 +1135,19 @@ function CheckpointStatusCard({
 }
 
 function TablePager({
-  page, totalPages, pageSize, total, onPage, onPageSize,
+  page,
+  totalPages,
+  pageSize,
+  total,
+  onPage,
+  onPageSize,
 }: {
-  page: number; totalPages: number; pageSize: number; total: number;
-  onPage: (p: number) => void; onPageSize: (n: number) => void;
+  page: number;
+  totalPages: number;
+  pageSize: number;
+  total: number;
+  onPage: (p: number) => void;
+  onPageSize: (n: number) => void;
 }) {
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
@@ -902,24 +1171,50 @@ function TablePager({
           className="h-8 rounded-lg border border-border/60 bg-background px-2 text-xs outline-none transition-colors hover:border-border focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20"
         >
           {[25, 50, 100, 200].map((n) => (
-            <option key={n} value={n}>{n}</option>
+            <option key={n} value={n}>
+              {n}
+            </option>
           ))}
         </select>
       </label>
       <div className="flex items-center gap-1">
-        <button type="button" className={btn} onClick={() => onPage(1)} disabled={page <= 1} aria-label="First page">
+        <button
+          type="button"
+          className={btn}
+          onClick={() => onPage(1)}
+          disabled={page <= 1}
+          aria-label="First page"
+        >
           <ChevronsLeft className="h-4 w-4" />
         </button>
-        <button type="button" className={btn} onClick={() => onPage(page - 1)} disabled={page <= 1} aria-label="Previous page">
+        <button
+          type="button"
+          className={btn}
+          onClick={() => onPage(page - 1)}
+          disabled={page <= 1}
+          aria-label="Previous page"
+        >
           <ChevronLeft className="h-4 w-4" />
         </button>
         <span className="min-w-[80px] text-center tabular-nums text-muted-foreground">
           Page <span className="font-semibold text-foreground">{page}</span> / {totalPages}
         </span>
-        <button type="button" className={btn} onClick={() => onPage(page + 1)} disabled={page >= totalPages} aria-label="Next page">
+        <button
+          type="button"
+          className={btn}
+          onClick={() => onPage(page + 1)}
+          disabled={page >= totalPages}
+          aria-label="Next page"
+        >
           <ChevronRight className="h-4 w-4" />
         </button>
-        <button type="button" className={btn} onClick={() => onPage(totalPages)} disabled={page >= totalPages} aria-label="Last page">
+        <button
+          type="button"
+          className={btn}
+          onClick={() => onPage(totalPages)}
+          disabled={page >= totalPages}
+          aria-label="Last page"
+        >
           <ChevronsRight className="h-4 w-4" />
         </button>
       </div>
@@ -939,24 +1234,47 @@ function ProgressBar({ pct }: { pct: number }) {
           className="relative h-full rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-orange-400 shadow-[0_0_12px_rgba(217,70,239,0.35)] transition-[width] duration-500"
           style={{ width: `${pct}%` }}
         >
-          <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/25 to-transparent" aria-hidden />
+          <span
+            className="absolute inset-0 rounded-full bg-gradient-to-b from-white/25 to-transparent"
+            aria-hidden
+          />
         </div>
       </div>
     </div>
   );
 }
 
-const STATUS_META: Record<Status, { label: string; cls: string; icon: React.ComponentType<{ className?: string }>; dot: string }> = {
-  not_started: { label: "Not Started", cls: "border-muted-foreground/30 bg-muted/50 text-muted-foreground", icon: Circle, dot: "bg-muted-foreground/50" },
-  in_progress: { label: "In Progress", cls: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400", icon: Clock, dot: "bg-amber-500" },
-  completed:   { label: "Completed",   cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", icon: CheckCircle2, dot: "bg-emerald-500" },
+const STATUS_META: Record<
+  Status,
+  { label: string; cls: string; icon: React.ComponentType<{ className?: string }>; dot: string }
+> = {
+  not_started: {
+    label: "Not Started",
+    cls: "border-muted-foreground/30 bg-muted/50 text-muted-foreground",
+    icon: Circle,
+    dot: "bg-muted-foreground/50",
+  },
+  in_progress: {
+    label: "In Progress",
+    cls: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    icon: Clock,
+    dot: "bg-amber-500",
+  },
+  completed: {
+    label: "Completed",
+    cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    icon: CheckCircle2,
+    dot: "bg-emerald-500",
+  },
 };
 
 function StatusBadge({ status }: { status: Status }) {
   const m = STATUS_META[status];
   const Icon = m.icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${m.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${m.cls}`}
+    >
       <Icon className="h-3 w-3" />
       {m.label}
     </span>
@@ -964,8 +1282,16 @@ function StatusBadge({ status }: { status: Status }) {
 }
 
 function LegendPill({
-  status, count, active, onClick,
-}: { status: Status; count: number; active?: boolean; onClick?: () => void }) {
+  status,
+  count,
+  active,
+  onClick,
+}: {
+  status: Status;
+  count: number;
+  active?: boolean;
+  onClick?: () => void;
+}) {
   const m = STATUS_META[status];
   const base = `inline-flex items-center gap-1.5 rounded-full border px-2 py-1 transition-all ${m.cls}`;
   const interactive = onClick
@@ -989,14 +1315,25 @@ function LegendPill({
 }
 
 function CircularProgress({
-  value, size = 64, stroke = 6, showLabel = false,
-}: { value: number; size?: number; stroke?: number; showLabel?: boolean }) {
+  value,
+  size = 64,
+  stroke = 6,
+  showLabel = false,
+}: {
+  value: number;
+  size?: number;
+  stroke?: number;
+  showLabel?: boolean;
+}) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const offset = c - (Math.min(100, Math.max(0, value)) / 100) * c;
   const id = `pt-grad-${size}`;
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <div
+      className="relative inline-flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="0%">
@@ -1005,7 +1342,14 @@ function CircularProgress({
             <stop offset="100%" stopColor="oklch(0.75 0.19 60)" />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--color-muted)" strokeWidth={stroke} fill="none" />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="var(--color-muted)"
+          strokeWidth={stroke}
+          fill="none"
+        />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -1022,20 +1366,32 @@ function CircularProgress({
       {showLabel ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-semibold tabular-nums leading-none">{value}%</span>
-          <span className="mt-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Complete</span>
+          <span className="mt-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Complete
+          </span>
         </div>
       ) : (
-        <span className="absolute text-[10px] font-semibold tabular-nums text-foreground">{value}%</span>
+        <span className="absolute text-[10px] font-semibold tabular-nums text-foreground">
+          {value}%
+        </span>
       )}
     </div>
   );
 }
 
 function ProgressPanel({
-  icon: Icon, title, subtitle, pct, color, stats,
+  icon: Icon,
+  title,
+  subtitle,
+  pct,
+  color,
+  stats,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  title: string; subtitle: string; pct: number; color: string;
+  title: string;
+  subtitle: string;
+  pct: number;
+  color: string;
   stats: { label: string; value: string }[];
 }) {
   return (
@@ -1050,7 +1406,9 @@ function ProgressPanel({
           <Icon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
-          <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{title}</div>
+          <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            {title}
+          </div>
           <div className="truncate text-sm font-semibold tracking-tight">{subtitle}</div>
         </div>
       </div>
@@ -1058,8 +1416,13 @@ function ProgressPanel({
         <CircularProgress value={pct} size={132} stroke={10} showLabel />
         <div className="grid flex-1 grid-cols-3 gap-3 sm:gap-4">
           {stats.map((s) => (
-            <div key={s.label} className="rounded-xl border border-border/50 bg-background/60 px-3 py-2.5 text-center">
-              <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{s.label}</div>
+            <div
+              key={s.label}
+              className="rounded-xl border border-border/50 bg-background/60 px-3 py-2.5 text-center"
+            >
+              <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                {s.label}
+              </div>
               <div className="mt-0.5 text-base font-semibold tabular-nums">{s.value}</div>
             </div>
           ))}
@@ -1085,13 +1448,7 @@ const CHART_COLORS = [
   "oklch(0.68 0.19 30)",
 ];
 
-function AnalyticsSection({
-  level,
-  subject,
-}: {
-  level: Level;
-  subject: Subject;
-}) {
+function AnalyticsSection({ level, subject }: { level: Level; subject: Subject }) {
   const data = useMemo(() => {
     const chapterRows = subject.chapters.map((c, i) => {
       const pct = chapterPct(c.checkpoints);
@@ -1108,9 +1465,7 @@ function AnalyticsSection({
     const avgPct = totalChapters
       ? Math.round(chapterRows.reduce((s, r) => s + r.pct, 0) / totalChapters)
       : 0;
-    const completedPct = totalChapters
-      ? Math.round((completedChapters / totalChapters) * 100)
-      : 0;
+    const completedPct = totalChapters ? Math.round((completedChapters / totalChapters) * 100) : 0;
     const remainingPct = 100 - completedPct;
 
     const subjectRows = level.subjects.map((s, i) => ({
@@ -1125,9 +1480,7 @@ function AnalyticsSection({
     // Cap bar chart data to keep it fast for 1000+ chapters
     const CHART_LIMIT = 60;
     const chartRows =
-      chapterRows.length > CHART_LIMIT
-        ? chapterRows.slice(0, CHART_LIMIT)
-        : chapterRows;
+      chapterRows.length > CHART_LIMIT ? chapterRows.slice(0, CHART_LIMIT) : chapterRows;
 
     return {
       chapterRows,
@@ -1257,7 +1610,13 @@ function AnalyticsSection({
                   cursor={{ fill: "var(--color-accent)", opacity: 0.4 }}
                   content={<ChartTooltip suffix="%" nameKey="name" />}
                 />
-                <Bar dataKey="pct" fill="url(#pt-bar)" radius={[8, 8, 4, 4]} maxBarSize={44} isAnimationActive={data.chartRows.length <= 40} />
+                <Bar
+                  dataKey="pct"
+                  fill="url(#pt-bar)"
+                  radius={[8, 8, 4, 4]}
+                  maxBarSize={44}
+                  isAnimationActive={data.chartRows.length <= 40}
+                />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1386,7 +1745,9 @@ function KpiCard({
       />
       <div className="relative">
         <div className="mb-2 flex items-center justify-between">
-          <Icon className={`h-4 w-4 ${accent} transition-transform duration-300 group-hover:scale-110`} />
+          <Icon
+            className={`h-4 w-4 ${accent} transition-transform duration-300 group-hover:scale-110`}
+          />
           {typeof progress === "number" && (
             <span className="rounded-full border border-border/60 bg-background/60 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
               {progress}%

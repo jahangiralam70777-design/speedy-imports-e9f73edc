@@ -82,8 +82,7 @@ function Avatar({ name, size = 44 }: { name: string; size?: number }) {
     .map((n) => n[0])
     .slice(0, 2)
     .join("");
-  const gradient =
-    AVATAR_GRADIENTS[name.charCodeAt(0) % AVATAR_GRADIENTS.length];
+  const gradient = AVATAR_GRADIENTS[name.charCodeAt(0) % AVATAR_GRADIENTS.length];
   return (
     <div
       className={`relative flex flex-none items-center justify-center rounded-full bg-gradient-to-br ${gradient} font-semibold text-white shadow-glow`}
@@ -135,7 +134,10 @@ function TestimonialCard({ t }: { t: (typeof TESTIMONIALS)[number] }) {
   return (
     <div className="glass shadow-soft h-full flex flex-col rounded-3xl border border-border p-7 sm:p-8">
       <Quote className="h-6 w-6 text-accent" />
-      <p className="mt-5 flex-1 text-base leading-relaxed sm:text-lg" style={{ letterSpacing: "-0.005em" }}>
+      <p
+        className="mt-5 flex-1 text-base leading-relaxed sm:text-lg"
+        style={{ letterSpacing: "-0.005em" }}
+      >
         {t.q}
       </p>
       <div className="mt-6 flex gap-0.5">
@@ -183,7 +185,10 @@ export function TestimonialsSection() {
     <section className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow={{ icon: <Sparkles className="h-3.5 w-3.5 text-accent" />, label: "Loved by CA students" }}
+          eyebrow={{
+            icon: <Sparkles className="h-3.5 w-3.5 text-accent" />,
+            label: "Loved by CA students",
+          }}
           title="Trusted by Bangladesh"
           gradient="ICAB candidates."
           desc="Real words from Certificate, Professional and Advanced Level students preparing across Bangladesh."
@@ -205,10 +210,7 @@ export function TestimonialsSection() {
           style={{ scrollBehavior: "auto" }}
         >
           {items.map((t, i) => (
-            <div
-              key={i}
-              className="w-[86vw] flex-none sm:w-[420px]"
-            >
+            <div key={i} className="w-[86vw] flex-none sm:w-[420px]">
               <TestimonialCard t={t} />
             </div>
           ))}
@@ -254,7 +256,10 @@ export function FAQSection() {
     <section id="faq" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow={{ icon: <HelpCircle className="h-3.5 w-3.5 text-accent" />, label: "Frequently asked" }}
+          eyebrow={{
+            icon: <HelpCircle className="h-3.5 w-3.5 text-accent" />,
+            label: "Frequently asked",
+          }}
           title="Everything CA students"
           gradient="usually ask."
         />
@@ -274,9 +279,7 @@ export function FAQSection() {
                     aria-expanded={isOpen}
                     className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
                   >
-                    <span className="text-base font-semibold tracking-tight sm:text-lg">
-                      {f.q}
-                    </span>
+                    <span className="text-base font-semibold tracking-tight sm:text-lg">{f.q}</span>
                     <span
                       className={`flex h-8 w-8 flex-none items-center justify-center rounded-full transition-all duration-500 ${
                         isOpen
@@ -385,9 +388,24 @@ export function Footer() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const cols = [
-    { title: "Platform", links: ["Features", "MCQ Practice", "Chapter Quizzes", "Mock Exams", "Question Bank"] },
-    { title: "ICAB Levels", links: ["Certificate Level", "Professional Level", "Advanced Level", "Pre-Articleship", "Articleship"] },
-    { title: "Resources", links: ["Study Guides", "Blog", "Student Community", "Help Centre", "Status"] },
+    {
+      title: "Platform",
+      links: ["Features", "MCQ Practice", "Chapter Quizzes", "Mock Exams", "Question Bank"],
+    },
+    {
+      title: "ICAB Levels",
+      links: [
+        "Certificate Level",
+        "Professional Level",
+        "Advanced Level",
+        "Pre-Articleship",
+        "Articleship",
+      ],
+    },
+    {
+      title: "Resources",
+      links: ["Study Guides", "Blog", "Student Community", "Help Centre", "Status"],
+    },
     { title: "Company", links: ["About", "Contact", "Privacy", "Terms", "Cookies"] },
   ];
   const socials = [
@@ -477,8 +495,8 @@ export function Footer() {
               </div>
             </div>
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Bangladesh's premium practice platform for ICAB CA students — chapter-wise MCQs,
-              timed quizzes, mock examinations and performance analytics in one calm dashboard.
+              Bangladesh's premium practice platform for ICAB CA students — chapter-wise MCQs, timed
+              quizzes, mock examinations and performance analytics in one calm dashboard.
             </p>
             <div className="mt-6 flex gap-2">
               {socials.map((s) => (
@@ -533,7 +551,8 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> All systems normal
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> All systems
+              normal
             </span>
             <span>v1.0</span>
           </div>

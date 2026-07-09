@@ -1,14 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  Moon,
-  Sparkles,
-  Sun,
-} from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Moon, Sparkles, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 
 /* ---------- Theme toggle ---------- */
@@ -96,10 +89,7 @@ function BrandPanel({
   return (
     <div className="relative isolate hidden overflow-hidden lg:flex lg:w-[46%] xl:w-1/2">
       {/* Base gradient */}
-      <div
-        className="absolute inset-0 -z-20"
-        style={{ background: gradient }}
-      />
+      <div className="absolute inset-0 -z-20" style={{ background: gradient }} />
       {/* Grid */}
       <div className="absolute inset-0 -z-10 grid-pattern opacity-25 [mask-image:radial-gradient(ellipse_at_center,black_35%,transparent_75%)]" />
 
@@ -167,9 +157,7 @@ function BrandPanel({
               {gradientWord}
             </span>
           </h1>
-          <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/85">
-            {description}
-          </p>
+          <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/85">{description}</p>
 
           {/* Badges */}
           <div className="mt-8 flex flex-wrap gap-2">
@@ -196,7 +184,10 @@ function BrandPanel({
           className="grid max-w-md grid-cols-3 gap-4 text-white"
         >
           {stats.map((s) => (
-            <div key={s.label} className="border-l border-white/20 pl-4 first:border-l-0 first:pl-0">
+            <div
+              key={s.label}
+              className="border-l border-white/20 pl-4 first:border-l-0 first:pl-0"
+            >
               <div
                 className="text-2xl font-bold tracking-tight"
                 style={{ letterSpacing: "-0.03em" }}
@@ -318,7 +309,10 @@ export function Field({
           aria-live="polite"
           className="mt-1.5 flex items-start gap-1 text-[11px] font-medium text-destructive"
         >
-          <span aria-hidden className="mt-0.5 inline-block h-1 w-1 flex-none rounded-full bg-destructive" />
+          <span
+            aria-hidden
+            className="mt-0.5 inline-block h-1 w-1 flex-none rounded-full bg-destructive"
+          />
           {error}
         </p>
       ) : hint ? (
@@ -450,7 +444,8 @@ export function AuthShell({
         </div>
 
         <div className="px-4 pb-6 text-center text-[11px] text-muted-foreground sm:px-8">
-          © {new Date().getFullYear()} CL Aspire · Bangladesh's Premium Platform for ICAB CA Students
+          © {new Date().getFullYear()} CL Aspire · Bangladesh's Premium Platform for ICAB CA
+          Students
         </div>
       </main>
     </div>

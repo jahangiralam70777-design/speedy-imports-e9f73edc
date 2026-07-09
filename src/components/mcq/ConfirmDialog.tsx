@@ -25,7 +25,6 @@ export function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -64,9 +63,7 @@ export function ConfirmDialog({
         <div className="flex items-start gap-3 px-6 pt-6">
           <span
             className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
-              destructive
-                ? "bg-rose-500/10 text-rose-500"
-                : "bg-indigo-500/10 text-indigo-500"
+              destructive ? "bg-rose-500/10 text-rose-500" : "bg-indigo-500/10 text-indigo-500"
             }`}
           >
             <AlertTriangle className="h-5 w-5" />
@@ -106,7 +103,6 @@ export function ConfirmDialog({
           >
             {confirmLabel}
           </button>
-
         </div>
       </div>
     </div>

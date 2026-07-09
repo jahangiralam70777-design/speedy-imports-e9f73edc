@@ -21,8 +21,7 @@ export const Route = createFileRoute("/forgot-password")({
       { name: "robots", content: "noindex, nofollow" },
       {
         name: "description",
-        content:
-          "Request a secure password reset link for your CL Aspire student account.",
+        content: "Request a secure password reset link for your CL Aspire student account.",
       },
     ],
   }),
@@ -81,8 +80,7 @@ function ForgotPasswordPage() {
           { value: "1-tap", label: "Sign back in" },
           { value: "TLS", label: "Encrypted" },
         ],
-        gradient:
-          "linear-gradient(135deg, #0f172a 0%, #4338ca 40%, #7c3aed 80%, #06b6d4 130%)",
+        gradient: "linear-gradient(135deg, #0f172a 0%, #4338ca 40%, #7c3aed 80%, #06b6d4 130%)",
       }}
     >
       <div className="glass shadow-glow relative overflow-hidden rounded-3xl border border-border p-6 sm:p-9">

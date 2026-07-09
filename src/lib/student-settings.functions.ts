@@ -155,10 +155,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     // Ensure row exists (upsert)
     const { error } = await context.supabase
       .from("profiles")
-      .upsert(
-        { id: context.userId, ...patch } as never,
-        { onConflict: "id" },
-      );
+      .upsert({ id: context.userId, ...patch } as never, { onConflict: "id" });
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -183,7 +180,10 @@ export const updateMyPreferences = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => {
     const s = (input ?? {}) as Record<string, unknown>;
-    if (typeof s.section !== "string" || !["study", "notifications", "profileExtras"].includes(s.section)) {
+    if (
+      typeof s.section !== "string" ||
+      !["study", "notifications", "profileExtras"].includes(s.section)
+    ) {
       throw new Error("Invalid section");
     }
     if (typeof s.patch !== "object" || s.patch === null) {

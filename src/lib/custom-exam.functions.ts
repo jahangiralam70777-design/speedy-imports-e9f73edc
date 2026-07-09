@@ -145,17 +145,10 @@ export const getCustomExamTaxonomy = createServerFn({ method: "GET" })
     if (lErr) throw new Error(lErr.message);
 
     // Per-chapter counts of published questions in each bank.
-    const [{ data: mcqRows, error: mErr }, { data: qbRows, error: qErr }] =
-      await Promise.all([
-        supabase
-          .from("mcq_questions")
-          .select("chapter_id")
-          .eq("status", "published"),
-        supabase
-          .from("qbank_questions")
-          .select("chapter_id")
-          .eq("status", "published"),
-      ]);
+    const [{ data: mcqRows, error: mErr }, { data: qbRows, error: qErr }] = await Promise.all([
+      supabase.from("mcq_questions").select("chapter_id").eq("status", "published"),
+      supabase.from("qbank_questions").select("chapter_id").eq("status", "published"),
+    ]);
     if (mErr) throw new Error(mErr.message);
     if (qErr) throw new Error(qErr.message);
 
@@ -163,8 +156,7 @@ export const getCustomExamTaxonomy = createServerFn({ method: "GET" })
     for (const r of mcqRows ?? [])
       mcqByChap.set(r.chapter_id, (mcqByChap.get(r.chapter_id) ?? 0) + 1);
     const qbByChap = new Map<string, number>();
-    for (const r of qbRows ?? [])
-      qbByChap.set(r.chapter_id, (qbByChap.get(r.chapter_id) ?? 0) + 1);
+    for (const r of qbRows ?? []) qbByChap.set(r.chapter_id, (qbByChap.get(r.chapter_id) ?? 0) + 1);
 
     const out: TaxonomyLevel[] = [];
     for (const l of levels ?? []) {
@@ -213,11 +205,10 @@ export const generateCustomExam = createServerFn({ method: "POST" })
     const src = (input ?? {}) as Record<string, unknown>;
     const title = typeof src.title === "string" ? src.title.slice(0, 200) : "";
     const rawSources = Array.isArray(src.sources) ? src.sources : [];
-    const sources = rawSources.filter(
-      (s): s is ExamSource => s === "mcq" || s === "qbank",
+    const sources = rawSources.filter((s): s is ExamSource => s === "mcq" || s === "qbank");
+    const chapterIds = (Array.isArray(src.chapterIds) ? src.chapterIds : []).filter(
+      (s): s is string => typeof s === "string" && s.length > 0,
     );
-    const chapterIds = (Array.isArray(src.chapterIds) ? src.chapterIds : [])
-      .filter((s): s is string => typeof s === "string" && s.length > 0);
     const numQuestions =
       typeof src.numQuestions === "number" && src.numQuestions > 0
         ? Math.floor(src.numQuestions)
@@ -227,8 +218,9 @@ export const generateCustomExam = createServerFn({ method: "POST" })
         ? Math.min(480, Math.floor(src.durationMinutes))
         : 0;
     const levelName = typeof src.levelName === "string" ? src.levelName : "";
-    const subjectNames = (Array.isArray(src.subjectNames) ? src.subjectNames : [])
-      .filter((s): s is string => typeof s === "string");
+    const subjectNames = (Array.isArray(src.subjectNames) ? src.subjectNames : []).filter(
+      (s): s is string => typeof s === "string",
+    );
     if (!sources.length) throw new Error("Select at least one source");
     if (!chapterIds.length) throw new Error("Select at least one chapter");
     if (numQuestions <= 0) throw new Error("Number of questions must be > 0");
@@ -306,9 +298,7 @@ export const generateCustomExam = createServerFn({ method: "POST" })
     if (data.sources.includes("qbank")) {
       const { data: rows, error } = await supabase
         .from("qbank_questions")
-        .select(
-          "id, chapter_id, position, question, prompt, options, correct_index, explanation",
-        )
+        .select("id, chapter_id, position, question, prompt, options, correct_index, explanation")
         .in("chapter_id", data.chapterIds)
         .eq("status", "published")
         .order("position", { ascending: true });
@@ -429,11 +419,12 @@ export const generateCustomExam = createServerFn({ method: "POST" })
 
 function defaultExamName(level: string, subjects: string[]): string {
   if (!level) return "Custom Exam";
-  const subj = subjects.length === 0
-    ? ""
-    : subjects.length <= 2
-      ? ` — ${subjects.join(" & ")}`
-      : ` — ${subjects.length} subjects`;
+  const subj =
+    subjects.length === 0
+      ? ""
+      : subjects.length <= 2
+        ? ` — ${subjects.join(" & ")}`
+        : ` — ${subjects.length} subjects`;
   return `${level}${subj} Custom Exam`;
 }
 
@@ -453,9 +444,7 @@ export const getCustomExamSession = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: s, error } = await supabase
       .from("custom_exam_sessions")
-      .select(
-        "id, title, config, started_at, finished_at, score, total_questions, correct_count",
-      )
+      .select("id, title, config, started_at, finished_at, score, total_questions, correct_count")
       .eq("id", data.sessionId)
       .eq("user_id", userId)
       .maybeSingle();
@@ -481,12 +470,8 @@ export const getCustomExamSession = createServerFn({ method: "POST" })
     }));
 
     // Bookmarks across both banks for questions in this exam.
-    const mcqIds = config.questions
-      .filter((q) => q.src === "mcq")
-      .map((q) => q.questionId);
-    const qbIds = config.questions
-      .filter((q) => q.src === "qbank")
-      .map((q) => q.questionId);
+    const mcqIds = config.questions.filter((q) => q.src === "mcq").map((q) => q.questionId);
+    const qbIds = config.questions.filter((q) => q.src === "qbank").map((q) => q.questionId);
     const bookmarkedUids: string[] = [];
     if (mcqIds.length > 0) {
       const { data: rows } = await supabase
@@ -534,89 +519,84 @@ export const submitCustomExamAnswer = createServerFn({ method: "POST" })
     const sourceRaw = src.source;
     const source: ExamSource | null =
       sourceRaw === "mcq" || sourceRaw === "qbank" ? sourceRaw : null;
-    const selectedIndex = Number.isInteger(src.selectedIndex)
-      ? (src.selectedIndex as number)
-      : -1;
+    const selectedIndex = Number.isInteger(src.selectedIndex) ? (src.selectedIndex as number) : -1;
     if (!sessionId) throw new Error("sessionId required");
     if (!questionId) throw new Error("questionId required");
     if (!source) throw new Error("source required");
     if (selectedIndex < 0) throw new Error("selectedIndex required");
     return { sessionId, questionId, source, selectedIndex };
   })
-  .handler(
-    async ({ data, context }): Promise<{ isCorrect: boolean; correctIndex: number }> => {
-      const { supabase, userId } = context;
+  .handler(async ({ data, context }): Promise<{ isCorrect: boolean; correctIndex: number }> => {
+    const { supabase, userId } = context;
 
-      // Verify the session belongs to the user and is not finished.
-      const { data: s, error: sErr } = await supabase
-        .from("custom_exam_sessions")
-        .select("id, finished_at, config")
-        .eq("id", data.sessionId)
+    // Verify the session belongs to the user and is not finished.
+    const { data: s, error: sErr } = await supabase
+      .from("custom_exam_sessions")
+      .select("id, finished_at, config")
+      .eq("id", data.sessionId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (sErr) throw new Error(sErr.message);
+    if (!s) throw new Error("Session not found");
+    if (s.finished_at) throw new Error("Exam already submitted");
+
+    // Score from the snapshot stored in config (authoritative for this session).
+    const config = s.config as unknown as ExamConfig;
+    const q = config.questions.find(
+      (x) => x.questionId === data.questionId && x.src === data.source,
+    );
+    if (!q) throw new Error("Question not part of this exam");
+    const isCorrect = data.selectedIndex === q.correctIndex;
+    const answerKey = q.options[data.selectedIndex]?.key ?? indexToLetter(data.selectedIndex);
+
+    const { error: aErr } = await supabase.from("custom_exam_answers").upsert(
+      {
+        session_id: data.sessionId,
+        user_id: userId,
+        source: data.source,
+        question_id: data.questionId,
+        selected_index: data.selectedIndex,
+        answer: answerKey,
+        is_correct: isCorrect,
+      },
+      { onConflict: "session_id,question_id,source" },
+    );
+    if (aErr) throw new Error(aErr.message);
+
+    if (!isCorrect) {
+      const { data: existing, error: exErr } = await supabase
+        .from("wrong_answer_bookmarks")
+        .select("id, wrong_count")
         .eq("user_id", userId)
+        .eq("source", data.source)
+        .eq("question_id", data.questionId)
         .maybeSingle();
-      if (sErr) throw new Error(sErr.message);
-      if (!s) throw new Error("Session not found");
-      if (s.finished_at) throw new Error("Exam already submitted");
-
-      // Score from the snapshot stored in config (authoritative for this session).
-      const config = s.config as unknown as ExamConfig;
-      const q = config.questions.find(
-        (x) => x.questionId === data.questionId && x.src === data.source,
-      );
-      if (!q) throw new Error("Question not part of this exam");
-      const isCorrect = data.selectedIndex === q.correctIndex;
-      const answerKey =
-        q.options[data.selectedIndex]?.key ?? indexToLetter(data.selectedIndex);
-
-      const { error: aErr } = await supabase.from("custom_exam_answers").upsert(
-        {
-          session_id: data.sessionId,
+      if (exErr) throw new Error(exErr.message);
+      const nowIso = new Date().toISOString();
+      if (existing) {
+        const { error } = await supabase
+          .from("wrong_answer_bookmarks")
+          .update({
+            wrong_count: (existing.wrong_count ?? 0) + 1,
+            last_wrong_at: nowIso,
+            cleared_at: null,
+          })
+          .eq("id", existing.id);
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await supabase.from("wrong_answer_bookmarks").insert({
           user_id: userId,
           source: data.source,
           question_id: data.questionId,
-          selected_index: data.selectedIndex,
-          answer: answerKey,
-          is_correct: isCorrect,
-        },
-        { onConflict: "session_id,question_id,source" },
-      );
-      if (aErr) throw new Error(aErr.message);
-
-      if (!isCorrect) {
-        const { data: existing, error: exErr } = await supabase
-          .from("wrong_answer_bookmarks")
-          .select("id, wrong_count")
-          .eq("user_id", userId)
-          .eq("source", data.source)
-          .eq("question_id", data.questionId)
-          .maybeSingle();
-        if (exErr) throw new Error(exErr.message);
-        const nowIso = new Date().toISOString();
-        if (existing) {
-          const { error } = await supabase
-            .from("wrong_answer_bookmarks")
-            .update({
-              wrong_count: (existing.wrong_count ?? 0) + 1,
-              last_wrong_at: nowIso,
-              cleared_at: null,
-            })
-            .eq("id", existing.id);
-          if (error) throw new Error(error.message);
-        } else {
-          const { error } = await supabase.from("wrong_answer_bookmarks").insert({
-            user_id: userId,
-            source: data.source,
-            question_id: data.questionId,
-            wrong_count: 1,
-            last_wrong_at: nowIso,
-          });
-          if (error) throw new Error(error.message);
-        }
+          wrong_count: 1,
+          last_wrong_at: nowIso,
+        });
+        if (error) throw new Error(error.message);
       }
+    }
 
-      return { isCorrect, correctIndex: q.correctIndex };
-    },
-  );
+    return { isCorrect, correctIndex: q.correctIndex };
+  });
 
 // ---------------------------------------------------------------------------
 // toggleCustomExamBookmark — insert/delete bookmark for a specific source.
@@ -671,7 +651,10 @@ export const finishCustomExam = createServerFn({ method: "POST" })
     return { sessionId };
   })
   .handler(
-    async ({ data, context }): Promise<{
+    async ({
+      data,
+      context,
+    }): Promise<{
       totalQuestions: number;
       correct: number;
       wrong: number;

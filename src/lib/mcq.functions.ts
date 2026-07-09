@@ -146,17 +146,13 @@ async function fetchCreatorNames(
   const map = new Map<string, string>();
   const unique = Array.from(new Set(ids.filter(Boolean)));
   if (!unique.length) return map;
-  const { data } = await supabase
-    .from("profiles")
-    .select("id,full_name,email")
-    .in("id", unique);
+  const { data } = await supabase.from("profiles").select("id,full_name,email").in("id", unique);
   for (const p of data ?? []) {
     map.set(p.id, p.full_name || p.email || "Unknown");
   }
   return map;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapRow(
   r: any,
   chapters: Awaited<ReturnType<typeof loadAcademicIndex>>["chapters"],
@@ -182,7 +178,7 @@ function mapRow(
     levelId: chapter?.levelId ?? "",
     levelName: chapter?.levelName ?? "",
     createdBy: r.created_by ?? null,
-    createdByName: r.created_by ? creators.get(r.created_by) ?? "Unknown" : "System",
+    createdByName: r.created_by ? (creators.get(r.created_by) ?? "Unknown") : "System",
     batchId: r.batch_id ?? null,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
@@ -202,13 +198,7 @@ export type ListMcqsInput = {
   status?: McqStatus | null;
   batchId?: string | null;
   search?: string | null;
-  sort?:
-    | "newest"
-    | "oldest"
-    | "updated"
-    | "position"
-    | "question"
-    | "chapter";
+  sort?: "newest" | "oldest" | "updated" | "position" | "question" | "chapter";
   createdWithinDays?: number | null;
 };
 
@@ -276,9 +266,7 @@ export const listMcqs = createServerFn({ method: "POST" })
     if (data.status) q = q.eq("status", data.status);
     if (data.batchId) q = q.eq("batch_id", data.batchId);
     if (data.createdWithinDays) {
-      const cutoff = new Date(
-        Date.now() - data.createdWithinDays * 24 * 3600 * 1000,
-      ).toISOString();
+      const cutoff = new Date(Date.now() - data.createdWithinDays * 24 * 3600 * 1000).toISOString();
       q = q.gte("created_at", cutoff);
     }
     if (data.search) {
@@ -343,10 +331,7 @@ async function fetchBatches(supabase: SupabaseCtx["supabase"]): Promise<string[]
   return Array.from(set);
 }
 
-function emptyListResult(
-  input: ListMcqsInput,
-  batches: string[],
-): McqListResult {
+function emptyListResult(input: ListMcqsInput, batches: string[]): McqListResult {
   return {
     rows: [],
     total: 0,
@@ -396,10 +381,7 @@ function validateUpsert(input: unknown): UpsertInput {
   return { chapterId, question, options, correctIndex, explanation, status };
 }
 
-async function nextPosition(
-  supabase: SupabaseCtx["supabase"],
-  chapterId: string,
-): Promise<number> {
+async function nextPosition(supabase: SupabaseCtx["supabase"], chapterId: string): Promise<number> {
   const { data } = await supabase
     .from("mcq_questions")
     .select("position")
@@ -475,10 +457,7 @@ export const deleteMcqs = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
-      .from("mcq_questions")
-      .delete()
-      .in("id", data.ids);
+    const { error } = await context.supabase.from("mcq_questions").delete().in("id", data.ids);
     if (error) throw new Error(error.message);
     return { deleted: data.ids.length };
   });
@@ -580,9 +559,7 @@ function validateBulkImport(input: unknown): BulkImportInput {
     const question = typeof r.question === "string" ? r.question.trim() : "";
     const explanation = typeof r.explanation === "string" ? r.explanation.trim() : "";
     const options = normalizeOptions(r.options).filter((o) => o.text.trim().length > 0);
-    const correctIndex = Number.isInteger(r.correctIndex)
-      ? (r.correctIndex as number)
-      : -1;
+    const correctIndex = Number.isInteger(r.correctIndex) ? (r.correctIndex as number) : -1;
     if (!question) throw new Error(`Row ${i + 1}: question required`);
     if (options.length < 2) throw new Error(`Row ${i + 1}: at least 2 options required`);
     if (correctIndex < 0 || correctIndex >= options.length)
@@ -632,8 +609,7 @@ export const bulkImportMcqs = createServerFn({ method: "POST" })
     });
 
     const batchId =
-      data.batchId ??
-      `Bulk-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`;
+      data.batchId ?? `Bulk-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`;
 
     if (!toInsert.length) {
       return {
@@ -690,25 +666,24 @@ export const getMcqStats = createServerFn({ method: "GET" })
     startOfDay.setHours(0, 0, 0, 0);
     const iso = startOfDay.toISOString();
 
-    const [totalR, publishedR, draftR, todayR, levelsR, subjectsR, chaptersR] =
-      await Promise.all([
-        supabase.from("mcq_questions").select("id", { count: "exact", head: true }),
-        supabase
-          .from("mcq_questions")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "published"),
-        supabase
-          .from("mcq_questions")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "draft"),
-        supabase
-          .from("mcq_questions")
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", iso),
-        supabase.from("academic_levels").select("id", { count: "exact", head: true }),
-        supabase.from("academic_subjects").select("id", { count: "exact", head: true }),
-        supabase.from("academic_chapters").select("id", { count: "exact", head: true }),
-      ]);
+    const [totalR, publishedR, draftR, todayR, levelsR, subjectsR, chaptersR] = await Promise.all([
+      supabase.from("mcq_questions").select("id", { count: "exact", head: true }),
+      supabase
+        .from("mcq_questions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published"),
+      supabase
+        .from("mcq_questions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "draft"),
+      supabase
+        .from("mcq_questions")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", iso),
+      supabase.from("academic_levels").select("id", { count: "exact", head: true }),
+      supabase.from("academic_subjects").select("id", { count: "exact", head: true }),
+      supabase.from("academic_chapters").select("id", { count: "exact", head: true }),
+    ]);
 
     return {
       total: totalR.count ?? 0,

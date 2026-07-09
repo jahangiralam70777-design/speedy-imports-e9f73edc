@@ -17,12 +17,7 @@ import {
 } from "lucide-react";
 import { AuthShell, Field } from "@/components/auth/AuthShell";
 import { GoogleButton } from "@/components/auth/GoogleButton";
-import {
-  ensureAuthReady,
-  homeForRole,
-  signInWithGoogle,
-  signUpWithEmail,
-} from "@/lib/auth";
+import { ensureAuthReady, homeForRole, signInWithGoogle, signUpWithEmail } from "@/lib/auth";
 
 export const Route = createFileRoute("/signup")({
   ssr: false,
@@ -162,9 +157,7 @@ function StudentSignupPage() {
         await router.invalidate();
         navigate({ to: "/student", replace: true });
       } else {
-        setNotice(
-          "Check your email to confirm your account, then sign in to start practising.",
-        );
+        setNotice("Check your email to confirm your account, then sign in to start practising.");
       }
     } catch (err) {
       setFormError(humanizeError(err));
@@ -208,8 +201,7 @@ function StudentSignupPage() {
           { value: "16+", label: "Subjects" },
           { value: "1.2k+", label: "Students" },
         ],
-        gradient:
-          "linear-gradient(135deg, #0f172a 0%, #4338ca 40%, #7c3aed 70%, #ec4899 130%)",
+        gradient: "linear-gradient(135deg, #0f172a 0%, #4338ca 40%, #7c3aed 70%, #ec4899 130%)",
       }}
     >
       <div className="glass shadow-glow relative overflow-hidden rounded-3xl border border-border p-6 sm:p-9">

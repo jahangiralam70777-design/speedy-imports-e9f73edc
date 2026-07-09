@@ -22,7 +22,9 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
 
   // Completion trend: last 12 weeks — average student progress rolling
   const completionTrend = useMemo(() => {
-    const base = students.length ? students.reduce((a, s) => a + s.progress, 0) / students.length : 0;
+    const base = students.length
+      ? students.reduce((a, s) => a + s.progress, 0) / students.length
+      : 0;
     return Array.from({ length: 12 }, (_, i) => {
       const step = (i - 8) * 3; // grows toward current avg
       return Math.max(0, Math.min(100, Math.round(base + step)));
@@ -33,7 +35,9 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
   const dailyHours = useMemo(() => {
     const buckets = Array.from({ length: 7 }, () => 0);
     students.forEach((s, i) => {
-      s.daily.forEach((h, idx) => { buckets[idx] += h; });
+      s.daily.forEach((h, idx) => {
+        buckets[idx] += h;
+      });
       void i;
     });
     return buckets.map((v) => Math.round(v * 10) / 10);
@@ -43,7 +47,11 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
   const weeklyPerf = useMemo(() => {
     const cols = 4;
     const totals = Array.from({ length: cols }, () => 0);
-    students.forEach((s) => s.weekly.forEach((v, i) => { totals[i] += v; }));
+    students.forEach((s) =>
+      s.weekly.forEach((v, i) => {
+        totals[i] += v;
+      }),
+    );
     return totals.map((v) => (students.length ? Math.round(v / students.length) : 0));
   }, [students]);
 
@@ -51,16 +59,26 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
   const monthlyPerf = useMemo(() => {
     const cols = 6;
     const totals = Array.from({ length: cols }, () => 0);
-    students.forEach((s) => s.monthly.forEach((v, i) => { totals[i] += v; }));
+    students.forEach((s) =>
+      s.monthly.forEach((v, i) => {
+        totals[i] += v;
+      }),
+    );
     return totals.map((v) => (students.length ? Math.round(v / students.length) : 0));
   }, [students]);
 
   const mostActive = useMemo(
-    () => [...students].sort((a, b) => b.streak * 10 + b.studyHoursTotal - (a.streak * 10 + a.studyHoursTotal)).slice(0, 6),
+    () =>
+      [...students]
+        .sort((a, b) => b.streak * 10 + b.studyHoursTotal - (a.streak * 10 + a.studyHoursTotal))
+        .slice(0, 6),
     [students],
   );
   const leastActive = useMemo(
-    () => [...students].sort((a, b) => a.progress - b.progress || b.missedDays - a.missedDays).slice(0, 6),
+    () =>
+      [...students]
+        .sort((a, b) => a.progress - b.progress || b.missedDays - a.missedDays)
+        .slice(0, 6),
     [students],
   );
 
@@ -75,7 +93,11 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
       }),
     );
     return Array.from(map.entries())
-      .map(([name, v]) => ({ name, pct: v.total ? Math.round((v.done / v.total) * 100) : 0, total: v.total }))
+      .map(([name, v]) => ({
+        name,
+        pct: v.total ? Math.round((v.done / v.total) * 100) : 0,
+        total: v.total,
+      }))
       .sort((a, b) => b.pct - a.pct)
       .slice(0, 8);
   }, [students]);
@@ -102,7 +124,10 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/60 p-6 backdrop-blur-2xl sm:p-8"
     >
-      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-gradient-to-br from-primary/25 via-accent/15 to-transparent blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-gradient-to-br from-primary/25 via-accent/15 to-transparent blur-3xl"
+      />
 
       <div className="relative flex flex-col gap-2">
         <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border/70 bg-secondary/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur">
@@ -123,11 +148,15 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
         </Card>
 
         <Card title="Daily Study Hours" subtitle="Sun → Sat aggregate" icon={BarChart3}>
-          <BarChart data={dailyHours} labels={["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]} unit="h" />
+          <BarChart
+            data={dailyHours}
+            labels={["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]}
+            unit="h"
+          />
         </Card>
 
         <Card title="Weekly Performance" subtitle="Four-week rolling average" icon={TrendingUp}>
-          <BarChart data={weeklyPerf} labels={["W1","W2","W3","W4"]} unit="%" tone="emerald" />
+          <BarChart data={weeklyPerf} labels={["W1", "W2", "W3", "W4"]} unit="%" tone="emerald" />
         </Card>
 
         <Card title="Monthly Performance" subtitle="Half-year trajectory" icon={TrendingUp}>
@@ -135,29 +164,39 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
         </Card>
 
         <Card title="Most Active Students" subtitle="Streak × study hours" icon={Flame}>
-          <StudentList items={mostActive.map((s) => ({
-            name: s.name,
-            initials: s.initials,
-            meta: `${s.routineTitle}`,
-            value: `${s.streak}d · ${s.studyHoursTotal}h`,
-            pct: s.progress,
-            tone: "emerald" as const,
-          }))} />
+          <StudentList
+            items={mostActive.map((s) => ({
+              name: s.name,
+              initials: s.initials,
+              meta: `${s.routineTitle}`,
+              value: `${s.streak}d · ${s.studyHoursTotal}h`,
+              pct: s.progress,
+              tone: "emerald" as const,
+            }))}
+          />
         </Card>
 
         <Card title="Least Active Students" subtitle="Attention needed" icon={TrendingDown}>
-          <StudentList items={leastActive.map((s) => ({
-            name: s.name,
-            initials: s.initials,
-            meta: `${s.routineTitle}`,
-            value: `${s.missedDays}d missed`,
-            pct: s.progress,
-            tone: "amber" as const,
-          }))} />
+          <StudentList
+            items={leastActive.map((s) => ({
+              name: s.name,
+              initials: s.initials,
+              meta: `${s.routineTitle}`,
+              value: `${s.missedDays}d missed`,
+              pct: s.progress,
+              tone: "amber" as const,
+            }))}
+          />
         </Card>
 
         <Card title="Chapter Completion" subtitle="Top 8 by finish rate" icon={BookOpen} span>
-          <RankedBars items={chapterCompletion.map((c) => ({ name: c.name, pct: c.pct, meta: `${c.total} learners` }))} />
+          <RankedBars
+            items={chapterCompletion.map((c) => ({
+              name: c.name,
+              pct: c.pct,
+              meta: `${c.total} learners`,
+            }))}
+          />
         </Card>
 
         <Card title="Subject Completion" subtitle="Average learner progress" icon={Award} span>
@@ -166,7 +205,9 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
               <Donut key={s.name} label={s.name} value={s.pct} meta={`${s.n} learners`} />
             ))}
             {subjectCompletion.length === 0 && (
-              <div className="col-span-full py-8 text-center text-sm text-muted-foreground">No subject data yet.</div>
+              <div className="col-span-full py-8 text-center text-sm text-muted-foreground">
+                No subject data yet.
+              </div>
             )}
           </div>
         </Card>
@@ -180,7 +221,11 @@ export function AnalyticsPanel({ routines }: { routines: TrackedRoutine[] }) {
 /* ------------------------------------------------------------------ */
 
 function Card({
-  title, subtitle, icon: Icon, children, span,
+  title,
+  subtitle,
+  icon: Icon,
+  children,
+  span,
 }: {
   title: string;
   subtitle?: string;
@@ -195,11 +240,18 @@ function Card({
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={`group relative overflow-hidden rounded-2xl border border-border/70 bg-card/60 p-5 shadow-sm backdrop-blur-2xl transition hover:-translate-y-0.5 hover:border-primary/40 ${span ? "lg:col-span-2" : ""}`}
     >
-      <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br from-primary/15 to-accent/10 blur-2xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br from-primary/15 to-accent/10 blur-2xl"
+      />
       <div className="relative flex items-start justify-between gap-3">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">{title}</div>
-          {subtitle && <div className="mt-0.5 text-[11px] text-muted-foreground/80">{subtitle}</div>}
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            {title}
+          </div>
+          {subtitle && (
+            <div className="mt-0.5 text-[11px] text-muted-foreground/80">{subtitle}</div>
+          )}
         </div>
         <div className="grid h-9 w-9 place-items-center rounded-xl border border-border/70 bg-secondary/60 text-primary">
           <Icon className="h-4 w-4" />
@@ -210,7 +262,15 @@ function Card({
   );
 }
 
-function TrendChart({ data, unit, tone = "primary" }: { data: number[]; unit?: string; tone?: "primary" | "violet" }) {
+function TrendChart({
+  data,
+  unit,
+  tone = "primary",
+}: {
+  data: number[];
+  unit?: string;
+  tone?: "primary" | "violet";
+}) {
   const max = Math.max(1, ...data);
   const min = Math.min(...data);
   const points = data.map((v, i) => {
@@ -231,7 +291,13 @@ function TrendChart({ data, unit, tone = "primary" }: { data: number[]; unit?: s
             <stop offset="100%" stopColor={stroke} stopOpacity="0" />
           </linearGradient>
         </defs>
-        <motion.path d={area} fill={`url(#${areaId})`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} />
+        <motion.path
+          d={area}
+          fill={`url(#${areaId})`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        />
         <motion.path
           d={d}
           fill="none"
@@ -247,7 +313,9 @@ function TrendChart({ data, unit, tone = "primary" }: { data: number[]; unit?: s
         {points.map(([x, y], i) => (
           <motion.circle
             key={i}
-            cx={x} cy={y} r={i === points.length - 1 ? 1.6 : 0.9}
+            cx={x}
+            cy={y}
+            r={i === points.length - 1 ? 1.6 : 0.9}
             fill={stroke}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -256,19 +324,46 @@ function TrendChart({ data, unit, tone = "primary" }: { data: number[]; unit?: s
         ))}
       </svg>
       <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span>min <span className="font-semibold text-foreground tabular-nums">{min}{unit}</span></span>
-        <span>now <span className="font-semibold text-foreground tabular-nums">{data[data.length - 1]}{unit}</span></span>
-        <span>max <span className="font-semibold text-foreground tabular-nums">{max}{unit}</span></span>
+        <span>
+          min{" "}
+          <span className="font-semibold text-foreground tabular-nums">
+            {min}
+            {unit}
+          </span>
+        </span>
+        <span>
+          now{" "}
+          <span className="font-semibold text-foreground tabular-nums">
+            {data[data.length - 1]}
+            {unit}
+          </span>
+        </span>
+        <span>
+          max{" "}
+          <span className="font-semibold text-foreground tabular-nums">
+            {max}
+            {unit}
+          </span>
+        </span>
       </div>
     </div>
   );
 }
 
-function BarChart({ data, labels, unit, tone = "primary" }: { data: number[]; labels: string[]; unit?: string; tone?: "primary" | "emerald" }) {
+function BarChart({
+  data,
+  labels,
+  unit,
+  tone = "primary",
+}: {
+  data: number[];
+  labels: string[];
+  unit?: string;
+  tone?: "primary" | "emerald";
+}) {
   const max = Math.max(1, ...data);
-  const grad = tone === "emerald"
-    ? "from-emerald-500/80 to-teal-500/60"
-    : "from-primary/80 to-accent/60";
+  const grad =
+    tone === "emerald" ? "from-emerald-500/80 to-teal-500/60" : "from-primary/80 to-accent/60";
   return (
     <div>
       <div className="flex h-40 items-end gap-2">
@@ -282,19 +377,44 @@ function BarChart({ data, labels, unit, tone = "primary" }: { data: number[]; la
                 className={`w-full rounded-t-md bg-gradient-to-t ${grad} shadow-inner`}
               />
             </div>
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{labels[i]}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              {labels[i]}
+            </span>
           </div>
         ))}
       </div>
       <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span>avg <span className="font-semibold text-foreground tabular-nums">{Math.round((data.reduce((a, b) => a + b, 0) / data.length) * 10) / 10}{unit}</span></span>
-        <span>peak <span className="font-semibold text-foreground tabular-nums">{max}{unit}</span></span>
+        <span>
+          avg{" "}
+          <span className="font-semibold text-foreground tabular-nums">
+            {Math.round((data.reduce((a, b) => a + b, 0) / data.length) * 10) / 10}
+            {unit}
+          </span>
+        </span>
+        <span>
+          peak{" "}
+          <span className="font-semibold text-foreground tabular-nums">
+            {max}
+            {unit}
+          </span>
+        </span>
       </div>
     </div>
   );
 }
 
-function StudentList({ items }: { items: { name: string; initials: string; meta: string; value: string; pct: number; tone: "emerald" | "amber" }[] }) {
+function StudentList({
+  items,
+}: {
+  items: {
+    name: string;
+    initials: string;
+    meta: string;
+    value: string;
+    pct: number;
+    tone: "emerald" | "amber";
+  }[];
+}) {
   return (
     <ul className="space-y-2">
       {items.map((s, i) => (
@@ -311,7 +431,11 @@ function StudentList({ items }: { items: { name: string; initials: string; meta:
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
               <div className="truncate text-sm font-medium text-foreground">{s.name}</div>
-              <div className={`text-[11px] font-semibold tabular-nums ${s.tone === "emerald" ? "text-emerald-500" : "text-amber-500"}`}>{s.value}</div>
+              <div
+                className={`text-[11px] font-semibold tabular-nums ${s.tone === "emerald" ? "text-emerald-500" : "text-amber-500"}`}
+              >
+                {s.value}
+              </div>
             </div>
             <div className="mt-1 flex items-center gap-2">
               <div className="h-1 flex-1 overflow-hidden rounded-full bg-secondary/70">
@@ -322,7 +446,9 @@ function StudentList({ items }: { items: { name: string; initials: string; meta:
                   className={`h-full rounded-full ${s.tone === "emerald" ? "bg-gradient-to-r from-emerald-500 to-teal-500" : "bg-gradient-to-r from-amber-500 to-rose-500"}`}
                 />
               </div>
-              <span className="w-9 text-right text-[10px] font-semibold tabular-nums text-muted-foreground">{s.pct}%</span>
+              <span className="w-9 text-right text-[10px] font-semibold tabular-nums text-muted-foreground">
+                {s.pct}%
+              </span>
             </div>
             <div className="mt-0.5 truncate text-[10px] text-muted-foreground">{s.meta}</div>
           </div>
@@ -339,7 +465,10 @@ function RankedBars({ items }: { items: { name: string; pct: number; meta: strin
   return (
     <div className="space-y-2">
       {items.map((c, i) => (
-        <div key={c.name} className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-xl border border-border/60 bg-background/40 px-3 py-2">
+        <div
+          key={c.name}
+          className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-xl border border-border/60 bg-background/40 px-3 py-2"
+        >
           <div className="min-w-0">
             <div className="flex items-center justify-between gap-2">
               <div className="truncate text-sm font-medium text-foreground">{c.name}</div>
@@ -356,10 +485,14 @@ function RankedBars({ items }: { items: { name: string; pct: number; meta: strin
               />
             </div>
           </div>
-          <div className="w-12 text-right text-sm font-semibold tabular-nums text-foreground">{c.pct}%</div>
+          <div className="w-12 text-right text-sm font-semibold tabular-nums text-foreground">
+            {c.pct}%
+          </div>
         </div>
       ))}
-      {items.length === 0 && <div className="py-6 text-center text-sm text-muted-foreground">No chapters yet.</div>}
+      {items.length === 0 && (
+        <div className="py-6 text-center text-sm text-muted-foreground">No chapters yet.</div>
+      )}
     </div>
   );
 }
@@ -372,9 +505,18 @@ function Donut({ label, value, meta }: { label: string; value: number; meta: str
     <div className="flex flex-col items-center rounded-2xl border border-border/60 bg-background/40 p-3">
       <div className="relative h-24 w-24">
         <svg viewBox="0 0 80 80" className="h-full w-full -rotate-90">
-          <circle cx="40" cy="40" r={R} fill="none" stroke="color-mix(in oklab, var(--foreground) 10%, transparent)" strokeWidth="7" />
+          <circle
+            cx="40"
+            cy="40"
+            r={R}
+            fill="none"
+            stroke="color-mix(in oklab, var(--foreground) 10%, transparent)"
+            strokeWidth="7"
+          />
           <motion.circle
-            cx="40" cy="40" r={R}
+            cx="40"
+            cy="40"
+            r={R}
             fill="none"
             stroke="url(#donutStroke)"
             strokeWidth="7"

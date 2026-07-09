@@ -97,9 +97,7 @@ function NoExam({ onBack, message }: { onBack: () => void; message?: string }) {
       <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500/15 to-amber-500/15 text-rose-500">
         <Flag className="h-5 w-5" />
       </div>
-      <h1 className="text-lg font-semibold">
-        {message ? "Couldn't load exam" : "No exam found"}
-      </h1>
+      <h1 className="text-lg font-semibold">{message ? "Couldn't load exam" : "No exam found"}</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         {message ?? "Design a new exam to get started."}
       </p>
@@ -142,7 +140,7 @@ function Runner({ session }: { session: ExamSession }) {
       const q = config.questions[i];
       const key =
         a.selectedIndex !== null && a.selectedIndex >= 0
-          ? q.options[a.selectedIndex]?.key ?? null
+          ? (q.options[a.selectedIndex]?.key ?? null)
           : null;
       out[i] = { chosen: key };
     }
@@ -167,9 +165,7 @@ function Runner({ session }: { session: ExamSession }) {
 
   const [answers, setAnswers] = useState<Record<number, AnswerRecord>>(initialAnswers);
   const [bookmarks, setBookmarks] = useState<Set<number>>(initialBookmarks);
-  const [visited, setVisited] = useState<Set<number>>(
-    () => new Set([firstUnansweredIndex]),
-  );
+  const [visited, setVisited] = useState<Set<number>>(() => new Set([firstUnansweredIndex]));
   const [cursor, setCursor] = useState<number>(
     Math.min(total - 1, Math.max(0, firstUnansweredIndex)),
   );
@@ -194,7 +190,9 @@ function Runner({ session }: { session: ExamSession }) {
   }, [cursor]);
 
   const stats = useMemo(() => {
-    let correct = 0, wrong = 0, answered = 0;
+    let correct = 0,
+      wrong = 0,
+      answered = 0;
     for (let i = 0; i < total; i++) {
       const a = answers[i]?.chosen;
       if (!a) continue;
@@ -248,10 +246,7 @@ function Runner({ session }: { session: ExamSession }) {
   );
 
   const goPrev = useCallback(() => setCursor((c) => Math.max(0, c - 1)), []);
-  const goNext = useCallback(
-    () => setCursor((c) => Math.min(total - 1, c + 1)),
-    [total],
-  );
+  const goNext = useCallback(() => setCursor((c) => Math.min(total - 1, c + 1)), [total]);
   const jumpTo = useCallback((i: number) => setCursor(i), []);
 
   const toggleBookmark = useCallback(() => {
@@ -344,19 +339,12 @@ function Runner({ session }: { session: ExamSession }) {
 
       <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 pb-40 pt-6 sm:px-6 lg:grid-cols-[1fr_320px] lg:px-8">
         <div>
-          <TopStrip
-            cursor={cursor}
-            total={total}
-            answered={answeredCount}
-            deadline={deadline}
-          />
+          <TopStrip cursor={cursor} total={total} answered={answeredCount} deadline={deadline} />
 
           <div className="mb-6">
             <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
               <span>Exam progress</span>
-              <span className="font-semibold text-foreground tabular-nums">
-                {progressPct}%
-              </span>
+              <span className="font-semibold text-foreground tabular-nums">{progressPct}%</span>
             </div>
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted/70">
               <motion.div
@@ -378,12 +366,7 @@ function Runner({ session }: { session: ExamSession }) {
         </div>
 
         <aside className="hidden flex-col gap-4 lg:sticky lg:top-24 lg:flex lg:self-start">
-          <SideStats
-            stats={stats}
-            total={total}
-            deadline={deadline}
-            examName={config.name}
-          />
+          <SideStats stats={stats} total={total} deadline={deadline} examName={config.name} />
           <NavigatorPanel
             total={total}
             answers={answers}
@@ -432,7 +415,6 @@ function Runner({ session }: { session: ExamSession }) {
   );
 }
 
-
 /* ------------------------------------------------------------------ */
 
 function ExamHeader({
@@ -466,9 +448,7 @@ function ExamHeader({
             <Sparkles className="h-3 w-3" />
             <span>Custom Exam</span>
           </div>
-          <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">
-            {name}
-          </h1>
+          <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">{name}</h1>
         </div>
         <div className="hidden items-center gap-2 sm:flex">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-2.5 py-1 text-xs font-medium">
@@ -689,7 +669,10 @@ const SideStats = memo(function SideStats({
         <MiniRow label="Answered" value={stats.answered} />
         <MiniRow label="Skipped" value={total - stats.answered} />
         <MiniRow label="Total" value={total} />
-        <MiniRow label="Complete" value={`${total === 0 ? 0 : Math.round((stats.answered / total) * 100)}%`} />
+        <MiniRow
+          label="Complete"
+          value={`${total === 0 ? 0 : Math.round((stats.answered / total) * 100)}%`}
+        />
       </div>
     </div>
   );
@@ -803,7 +786,8 @@ const NavigatorPanel = memo(function NavigatorPanel({
       )}
       <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm bg-gradient-to-br from-indigo-500 to-fuchsia-500" /> Current
+          <span className="h-2.5 w-2.5 rounded-sm bg-gradient-to-br from-indigo-500 to-fuchsia-500" />{" "}
+          Current
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500/60" /> Answered
@@ -872,11 +856,7 @@ const BottomBar = memo(function BottomBar({
               : "border-border/60 bg-card/60 text-muted-foreground hover:bg-accent hover:text-foreground"
           }`}
         >
-          {bookmarked ? (
-            <BookmarkCheck className="h-4 w-4" />
-          ) : (
-            <Bookmark className="h-4 w-4" />
-          )}
+          {bookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
           <span className="hidden sm:inline">{bookmarked ? "Bookmarked" : "Bookmark"}</span>
         </button>
         <button
@@ -1070,7 +1050,11 @@ function ResultView({
             />
           </ChartCard>
           <ChartCard title="Accuracy">
-            <AccuracyDonut accuracy={stats.accuracy} correct={stats.correct} answered={stats.answered} />
+            <AccuracyDonut
+              accuracy={stats.accuracy}
+              correct={stats.correct}
+              answered={stats.answered}
+            />
           </ChartCard>
         </div>
 
@@ -1133,13 +1117,7 @@ function ResultView({
             ) : (
               <ul className="flex flex-col gap-3">
                 {filtered.map(({ q, i, chosen }) => (
-                  <ReviewItem
-                    key={q.uid}
-                    q={q}
-                    i={i}
-                    chosen={chosen}
-                    onJump={() => onJump(i)}
-                  />
+                  <ReviewItem key={q.uid} q={q} i={i} chosen={chosen} onJump={() => onJump(i)} />
                 ))}
               </ul>
             )}
@@ -1188,7 +1166,9 @@ function ReviewItem({
                 : "bg-gradient-to-br from-rose-500 to-orange-500 shadow-md shadow-rose-500/30"
           }`}
         >
-          {isSkipped ? "—" : isCorrect ? (
+          {isSkipped ? (
+            "—"
+          ) : isCorrect ? (
             <CheckCircle2 className="h-4 w-4" />
           ) : (
             <XCircle className="h-4 w-4" />
@@ -1201,7 +1181,9 @@ function ReviewItem({
             <span>{q.subjectName}</span>
             <span>·</span>
             <span>{q.chapterName}</span>
-            <span className={`ml-auto rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusCls}`}>
+            <span
+              className={`ml-auto rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusCls}`}
+            >
               {status}
             </span>
           </div>
@@ -1209,14 +1191,18 @@ function ReviewItem({
             {q.question}
           </div>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <div className={`rounded-xl border px-3 py-2 text-xs ${
-              isSkipped
-                ? "border-amber-400/40 bg-amber-500/5"
-                : isCorrect
-                  ? "border-emerald-400/40 bg-emerald-500/5"
-                  : "border-rose-400/40 bg-rose-500/5"
-            }`}>
-              <div className="text-[10px] font-semibold uppercase tracking-wider opacity-70">Selected Answer</div>
+            <div
+              className={`rounded-xl border px-3 py-2 text-xs ${
+                isSkipped
+                  ? "border-amber-400/40 bg-amber-500/5"
+                  : isCorrect
+                    ? "border-emerald-400/40 bg-emerald-500/5"
+                    : "border-rose-400/40 bg-rose-500/5"
+              }`}
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-wider opacity-70">
+                Selected Answer
+              </div>
               <div className="mt-0.5 font-semibold">
                 {chosen ? `${chosen}. ${textOfOption(q, chosen)}` : "Not attempted"}
               </div>
@@ -1300,7 +1286,10 @@ function StackedBar({
         {segments.map((s) => {
           const pct = total === 0 ? 0 : Math.round((s.value / total) * 100);
           return (
-            <li key={s.label} className="rounded-xl border border-border/60 bg-background/50 px-3 py-2">
+            <li
+              key={s.label}
+              className="rounded-xl border border-border/60 bg-background/50 px-3 py-2"
+            >
               <div className="flex items-center gap-1.5">
                 <span className={`h-2 w-2 rounded-full ${s.cls}`} />
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -1308,7 +1297,8 @@ function StackedBar({
                 </span>
               </div>
               <div className="mt-0.5 text-sm font-semibold tabular-nums">
-                {s.value} <span className="text-[11px] font-normal text-muted-foreground">({pct}%)</span>
+                {s.value}{" "}
+                <span className="text-[11px] font-normal text-muted-foreground">({pct}%)</span>
               </div>
             </li>
           );
@@ -1377,9 +1367,7 @@ function AccuracyDonut({
             {correct}/{answered || 0}
           </span>
         </div>
-        <div>
-          Accuracy is the share of attempted questions you answered correctly.
-        </div>
+        <div>Accuracy is the share of attempted questions you answered correctly.</div>
       </div>
     </div>
   );
@@ -1407,9 +1395,7 @@ function ScoreCard({
           : "border-border/60 bg-card/60";
   return (
     <div className={`rounded-2xl border p-4 shadow-sm ${cls}`}>
-      <div className="text-[11px] font-semibold uppercase tracking-wider opacity-80">
-        {label}
-      </div>
+      <div className="text-[11px] font-semibold uppercase tracking-wider opacity-80">{label}</div>
       <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
     </div>
   );
@@ -1433,4 +1419,3 @@ function Skeleton() {
     </div>
   );
 }
-

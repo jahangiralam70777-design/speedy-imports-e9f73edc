@@ -118,7 +118,10 @@ export function StatsSection() {
     <section className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow={{ icon: <BarChart3 className="h-3.5 w-3.5 text-accent" />, label: "By the numbers" }}
+          eyebrow={{
+            icon: <BarChart3 className="h-3.5 w-3.5 text-accent" />,
+            label: "By the numbers",
+          }}
           title="Everything you need"
           gradient="for ICAB success."
           desc="Realistic content built around the ICAB syllabus — every MCQ, quiz and mock exam engineered for Bangladesh CA candidates."
@@ -179,9 +182,7 @@ function FeatureCard({
           {icon}
         </div>
         <h3 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h3>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
-          {desc}
-        </p>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-[15px]">{desc}</p>
         {children}
       </div>
     </Reveal>
@@ -194,7 +195,10 @@ export function FeaturesSection() {
       <div className="pointer-events-none absolute inset-x-0 top-1/3 -z-10 mx-auto h-[400px] max-w-6xl rounded-full bg-brand-gradient opacity-10 blur-[140px]" />
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow={{ icon: <Zap className="h-3.5 w-3.5 text-accent" />, label: "Everything you need" }}
+          eyebrow={{
+            icon: <Zap className="h-3.5 w-3.5 text-accent" />,
+            label: "Everything you need",
+          }}
           title="Every tool a CA candidate"
           gradient="actually needs."
           desc="Chapter-wise practice, custom exams, wrong-answer review, bookmarks, analytics and study streaks — purpose-built for the ICAB syllabus."
@@ -301,17 +305,36 @@ export function WhyAspireSection() {
   ];
 
   const timeline = [
-    { t: "Day 1", h: "Assess", d: "Take a short diagnostic to map your ICAB Certificate Level readiness across every subject." },
-    { t: "Week 1", h: "Practice", d: "Work through chapter-wise MCQs across Accounting, Assurance, Taxation, Business & Finance and more." },
-    { t: "Week 4", h: "Refine", d: "Review every wrong answer, revisit weak chapters and build a consistent daily study streak." },
-    { t: "Exam Day", h: "Perform", d: "Walk into your ICAB examination hall prepared, timed and confident." },
+    {
+      t: "Day 1",
+      h: "Assess",
+      d: "Take a short diagnostic to map your ICAB Certificate Level readiness across every subject.",
+    },
+    {
+      t: "Week 1",
+      h: "Practice",
+      d: "Work through chapter-wise MCQs across Accounting, Assurance, Taxation, Business & Finance and more.",
+    },
+    {
+      t: "Week 4",
+      h: "Refine",
+      d: "Review every wrong answer, revisit weak chapters and build a consistent daily study streak.",
+    },
+    {
+      t: "Exam Day",
+      h: "Perform",
+      d: "Walk into your ICAB examination hall prepared, timed and confident.",
+    },
   ];
 
   return (
     <section id="about" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow={{ icon: <Sparkles className="h-3.5 w-3.5 text-accent" />, label: "Why CL Aspire" }}
+          eyebrow={{
+            icon: <Sparkles className="h-3.5 w-3.5 text-accent" />,
+            label: "Why CL Aspire",
+          }}
           title="Built for ICAB."
           gradient="Made in Bangladesh."
           desc="Compare CL Aspire with generic study apps — then decide what your CA preparation deserves."
@@ -385,9 +408,7 @@ export function WhyAspireSection() {
                         {t.t}
                       </div>
                       <div className="mt-1 text-lg font-semibold tracking-tight">{t.h}</div>
-                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                        {t.d}
-                      </p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t.d}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -441,7 +462,10 @@ export function LearningExperienceSection() {
     <section className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow={{ icon: <BookOpen className="h-3.5 w-3.5 text-accent" />, label: "The study experience" }}
+          eyebrow={{
+            icon: <BookOpen className="h-3.5 w-3.5 text-accent" />,
+            label: "The study experience",
+          }}
           title="Every study session,"
           gradient="engineered for ICAB."
         />
@@ -484,18 +508,18 @@ export function LearningExperienceSection() {
                 >
                   {tab.title}
                 </h3>
-                <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-                  {tab.desc}
-                </p>
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground">{tab.desc}</p>
                 <ul className="mt-6 space-y-2.5">
-                  {["Chapter-wise organisation", "Instant explanations", "Detailed analytics"].map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-gradient text-white">
-                        <Check className="h-3 w-3" strokeWidth={3} />
-                      </span>
-                      {f}
-                    </li>
-                  ))}
+                  {["Chapter-wise organisation", "Instant explanations", "Detailed analytics"].map(
+                    (f) => (
+                      <li key={f} className="flex items-center gap-2 text-sm">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-gradient text-white">
+                          <Check className="h-3 w-3" strokeWidth={3} />
+                        </span>
+                        {f}
+                      </li>
+                    ),
+                  )}
                 </ul>
               </motion.div>
             </div>
@@ -526,7 +550,8 @@ export function LearningExperienceSection() {
                       <span className="text-warning font-semibold">00:42</span>
                     </div>
                     <div className="mb-5 text-lg font-semibold tracking-tight">
-                      As per IAS 2, inventories should be measured at the lower of cost and which of the following?
+                      As per IAS 2, inventories should be measured at the lower of cost and which of
+                      the following?
                     </div>
                     <div className="space-y-2">
                       {[
@@ -541,8 +566,8 @@ export function LearningExperienceSection() {
                             o.s === "correct"
                               ? "border-success bg-success/10"
                               : o.s === "wrong"
-                              ? "border-destructive bg-destructive/10"
-                              : "border-border bg-card/60"
+                                ? "border-destructive bg-destructive/10"
+                                : "border-border bg-card/60"
                           }`}
                         >
                           <div className="flex items-center gap-3">
@@ -564,10 +589,13 @@ export function LearningExperienceSection() {
                     <div className="col-span-8 aspect-video rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-cyan-500 relative overflow-hidden">
                       <div className="absolute inset-0 grid-pattern opacity-30" />
                       <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur">
-                        <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" /> LIVE · 320 attempting
+                        <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" /> LIVE
+                        · 320 attempting
                       </div>
                       <div className="absolute left-3 bottom-3 text-white">
-                        <div className="text-sm font-semibold">Assurance · Timed Quiz · Chapter 5</div>
+                        <div className="text-sm font-semibold">
+                          Assurance · Timed Quiz · Chapter 5
+                        </div>
                         <div className="text-[10px] opacity-80">30 MCQs · 30 minutes</div>
                       </div>
                     </div>
@@ -581,7 +609,10 @@ export function LearningExperienceSection() {
                         { n: "Tasnim", m: "Submitted. Aiming for top 10." },
                         { n: "You", m: "On Q22. Focused." },
                       ].map((c, i) => (
-                        <div key={i} className="rounded-xl bg-card/60 border border-border px-2.5 py-2">
+                        <div
+                          key={i}
+                          className="rounded-xl bg-card/60 border border-border px-2.5 py-2"
+                        >
                           <div className="text-[10px] font-semibold text-gradient">{c.n}</div>
                           <div className="text-xs">{c.m}</div>
                         </div>
@@ -597,7 +628,9 @@ export function LearningExperienceSection() {
                         <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                           Mock exam
                         </div>
-                        <div className="text-lg font-semibold tracking-tight">ICAB Certificate Level · Full Mock</div>
+                        <div className="text-lg font-semibold tracking-tight">
+                          ICAB Certificate Level · Full Mock
+                        </div>
                       </div>
                       <div className="rounded-xl border border-border bg-card/60 px-4 py-2 text-center">
                         <div className="text-[9px] text-muted-foreground">Time left</div>
@@ -606,7 +639,8 @@ export function LearningExperienceSection() {
                     </div>
                     <div className="grid grid-cols-10 gap-1.5">
                       {Array.from({ length: 60 }).map((_, i) => {
-                        const state = i < 22 ? "done" : i < 26 ? "mark" : i === 26 ? "curr" : "todo";
+                        const state =
+                          i < 22 ? "done" : i < 26 ? "mark" : i === 26 ? "curr" : "todo";
                         return (
                           <div
                             key={i}
@@ -614,10 +648,10 @@ export function LearningExperienceSection() {
                               state === "done"
                                 ? "bg-brand-gradient text-white"
                                 : state === "mark"
-                                ? "bg-warning/20 text-warning border border-warning/40"
-                                : state === "curr"
-                                ? "bg-accent text-white ring-2 ring-accent/40"
-                                : "bg-secondary text-muted-foreground"
+                                  ? "bg-warning/20 text-warning border border-warning/40"
+                                  : state === "curr"
+                                    ? "bg-accent text-white ring-2 ring-accent/40"
+                                    : "bg-secondary text-muted-foreground"
                             }`}
                           >
                             {i + 1}
@@ -626,10 +660,18 @@ export function LearningExperienceSection() {
                       })}
                     </div>
                     <div className="mt-4 flex flex-wrap gap-3 text-[10px] text-muted-foreground">
-                      <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-brand-gradient" /> Answered</span>
-                      <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-warning" /> Marked</span>
-                      <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-accent" /> Current</span>
-                      <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-secondary" /> To-do</span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-sm bg-brand-gradient" /> Answered
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-sm bg-warning" /> Marked
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-sm bg-accent" /> Current
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-sm bg-secondary" /> To-do
+                      </span>
                     </div>
                   </div>
                 )}
@@ -681,7 +723,19 @@ export function LearningExperienceSection() {
 /* =========================================================
    5. PROGRESS TRACKING PREVIEW
 ========================================================= */
-function Ring({ value, size = 120, stroke = 10, label, sub }: { value: number; size?: number; stroke?: number; label: string; sub: string }) {
+function Ring({
+  value,
+  size = 120,
+  stroke = 10,
+  label,
+  sub,
+}: {
+  value: number;
+  size?: number;
+  stroke?: number;
+  label: string;
+  sub: string;
+}) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const ref = useRef<SVGCircleElement>(null);
@@ -696,7 +750,14 @@ function Ring({ value, size = 120, stroke = 10, label, sub }: { value: number; s
               <stop offset="100%" stopColor="#7c3aed" />
             </linearGradient>
           </defs>
-          <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={stroke} className="stroke-secondary" fill="none" />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            strokeWidth={stroke}
+            className="stroke-secondary"
+            fill="none"
+          />
           <motion.circle
             ref={ref}
             cx={size / 2}
@@ -783,16 +844,39 @@ function AreaChart() {
 
 export function ProgressPreviewSection() {
   const activity = [
-    { icon: <Trophy className="h-3.5 w-3.5" />, t: "Ranked #128 on weekly leaderboard", ago: "2h ago", accent: "bg-brand-gradient" },
-    { icon: <Flame className="h-3.5 w-3.5" />, t: "42-day study streak unlocked", ago: "6h ago", accent: "bg-gradient-to-br from-amber-500 to-red-500" },
-    { icon: <Award className="h-3.5 w-3.5" />, t: "Financial Accounting · Ch. 4 · 92%", ago: "1d ago", accent: "bg-gradient-to-br from-emerald-500 to-teal-500" },
-    { icon: <Clock className="h-3.5 w-3.5" />, t: "Mock scheduled · ICAB Certificate Level", ago: "2d ago", accent: "bg-gradient-to-br from-cyan-500 to-blue-600" },
+    {
+      icon: <Trophy className="h-3.5 w-3.5" />,
+      t: "Ranked #128 on weekly leaderboard",
+      ago: "2h ago",
+      accent: "bg-brand-gradient",
+    },
+    {
+      icon: <Flame className="h-3.5 w-3.5" />,
+      t: "42-day study streak unlocked",
+      ago: "6h ago",
+      accent: "bg-gradient-to-br from-amber-500 to-red-500",
+    },
+    {
+      icon: <Award className="h-3.5 w-3.5" />,
+      t: "Financial Accounting · Ch. 4 · 92%",
+      ago: "1d ago",
+      accent: "bg-gradient-to-br from-emerald-500 to-teal-500",
+    },
+    {
+      icon: <Clock className="h-3.5 w-3.5" />,
+      t: "Mock scheduled · ICAB Certificate Level",
+      ago: "2d ago",
+      accent: "bg-gradient-to-br from-cyan-500 to-blue-600",
+    },
   ];
   return (
     <section className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
-          eyebrow={{ icon: <Activity className="h-3.5 w-3.5 text-accent" />, label: "Progress tracking" }}
+          eyebrow={{
+            icon: <Activity className="h-3.5 w-3.5 text-accent" />,
+            label: "Progress tracking",
+          }}
           title="See your ICAB prep"
           gradient="improve, day by day."
           desc="Daily progress, weekly performance, accuracy, average score and study streak — all in one calm dashboard."
@@ -823,7 +907,9 @@ export function ProgressPreviewSection() {
                     <button
                       key={r}
                       className={`rounded-lg px-3 py-1 text-[11px] font-semibold ${
-                        i === 3 ? "bg-brand-gradient text-white" : "border border-border bg-card/60 text-muted-foreground"
+                        i === 3
+                          ? "bg-brand-gradient text-white"
+                          : "border border-border bg-card/60 text-muted-foreground"
                       }`}
                     >
                       {r}
@@ -891,7 +977,9 @@ export function ProgressPreviewSection() {
                       transition={{ duration: 0.5, delay: i * 0.08 }}
                       className="relative flex items-start gap-3 pl-0"
                     >
-                      <div className={`relative z-10 flex h-7 w-7 flex-none items-center justify-center rounded-full text-white ${a.accent} shadow-glow`}>
+                      <div
+                        className={`relative z-10 flex h-7 w-7 flex-none items-center justify-center rounded-full text-white ${a.accent} shadow-glow`}
+                      >
                         {a.icon}
                       </div>
                       <div className="min-w-0 flex-1">

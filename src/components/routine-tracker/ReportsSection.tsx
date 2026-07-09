@@ -38,14 +38,7 @@ import {
 import type { DailyLog, ProgressMap, TaskStatus } from "@/lib/routine-progress";
 import { tasksForRoutine, type SharedRoutine } from "@/lib/routines-shared";
 
-type Range =
-  | "daily"
-  | "weekly"
-  | "d15"
-  | "d30"
-  | "d45"
-  | "monthly"
-  | "custom";
+type Range = "daily" | "weekly" | "d15" | "d30" | "d45" | "monthly" | "custom";
 
 const RANGE_OPTIONS: { key: Range; label: string; days: number | null }[] = [
   { key: "daily", label: "Daily", days: 1 },
@@ -173,7 +166,9 @@ export function ReportsSection({
             </PopoverTrigger>
             <PopoverContent align="end" className="w-auto p-0">
               <div className="flex flex-col gap-2 p-3">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">From</div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  From
+                </div>
                 <Calendar
                   mode="single"
                   selected={customFrom}
@@ -205,14 +200,62 @@ export function ReportsSection({
 
       {/* Stat tiles */}
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-        <ReportStat icon={Target} label="Assigned Hours" value={`${round1(report.assignedH)}h`} tone="text-indigo-500" bg="from-indigo-500/15 to-transparent" />
-        <ReportStat icon={Clock} label="Completed Hours" value={`${round1(report.completedH)}h`} tone="text-emerald-500" bg="from-emerald-500/15 to-transparent" />
-        <ReportStat icon={TrendingUp} label="Completion %" value={`${report.completionPct}%`} tone="text-fuchsia-500" bg="from-fuchsia-500/15 to-transparent" />
-        <ReportStat icon={ListChecks} label="Completed MCQs" value={`${report.mcqs}`} tone="text-sky-500" bg="from-sky-500/15 to-transparent" />
-        <ReportStat icon={BookOpen} label="Completed Chapters" value={`${report.chapters}`} tone="text-teal-500" bg="from-teal-500/15 to-transparent" />
-        <ReportStat icon={XCircle} label="Missed Days" value={`${report.missedDays}`} tone="text-amber-500" bg="from-amber-500/15 to-transparent" />
-        <ReportStat icon={Flame} label="Current Streak" value={`${report.currentStreak}d`} tone="text-orange-500" bg="from-orange-500/15 to-transparent" />
-        <ReportStat icon={Trophy} label="Longest Streak" value={`${report.longestStreak}d`} tone="text-rose-500" bg="from-rose-500/15 to-transparent" />
+        <ReportStat
+          icon={Target}
+          label="Assigned Hours"
+          value={`${round1(report.assignedH)}h`}
+          tone="text-indigo-500"
+          bg="from-indigo-500/15 to-transparent"
+        />
+        <ReportStat
+          icon={Clock}
+          label="Completed Hours"
+          value={`${round1(report.completedH)}h`}
+          tone="text-emerald-500"
+          bg="from-emerald-500/15 to-transparent"
+        />
+        <ReportStat
+          icon={TrendingUp}
+          label="Completion %"
+          value={`${report.completionPct}%`}
+          tone="text-fuchsia-500"
+          bg="from-fuchsia-500/15 to-transparent"
+        />
+        <ReportStat
+          icon={ListChecks}
+          label="Completed MCQs"
+          value={`${report.mcqs}`}
+          tone="text-sky-500"
+          bg="from-sky-500/15 to-transparent"
+        />
+        <ReportStat
+          icon={BookOpen}
+          label="Completed Chapters"
+          value={`${report.chapters}`}
+          tone="text-teal-500"
+          bg="from-teal-500/15 to-transparent"
+        />
+        <ReportStat
+          icon={XCircle}
+          label="Missed Days"
+          value={`${report.missedDays}`}
+          tone="text-amber-500"
+          bg="from-amber-500/15 to-transparent"
+        />
+        <ReportStat
+          icon={Flame}
+          label="Current Streak"
+          value={`${report.currentStreak}d`}
+          tone="text-orange-500"
+          bg="from-orange-500/15 to-transparent"
+        />
+        <ReportStat
+          icon={Trophy}
+          label="Longest Streak"
+          value={`${report.longestStreak}d`}
+          tone="text-rose-500"
+          bg="from-rose-500/15 to-transparent"
+        />
       </div>
 
       {/* Charts */}
@@ -238,8 +281,22 @@ export function ReportsSection({
                 <YAxis fontSize={10} stroke="var(--color-muted-foreground)" />
                 <Tooltip content={<TT />} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Area type="monotone" dataKey="assigned" name="Assigned" stroke="oklch(0.7 0.18 260)" fill="url(#gAssigned)" strokeWidth={2} />
-                <Area type="monotone" dataKey="completed" name="Completed" stroke="oklch(0.72 0.17 150)" fill="url(#gDone)" strokeWidth={2} />
+                <Area
+                  type="monotone"
+                  dataKey="assigned"
+                  name="Assigned"
+                  stroke="oklch(0.7 0.18 260)"
+                  fill="url(#gAssigned)"
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="completed"
+                  name="Completed"
+                  stroke="oklch(0.72 0.17 150)"
+                  fill="url(#gDone)"
+                  strokeWidth={2}
+                />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -253,9 +310,21 @@ export function ReportsSection({
               <LineChart data={report.series} margin={{ left: -10, right: 8, top: 8, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="label" fontSize={10} stroke="var(--color-muted-foreground)" />
-                <YAxis domain={[0, 100]} unit="%" fontSize={10} stroke="var(--color-muted-foreground)" />
+                <YAxis
+                  domain={[0, 100]}
+                  unit="%"
+                  fontSize={10}
+                  stroke="var(--color-muted-foreground)"
+                />
                 <Tooltip content={<TT suffix="%" />} />
-                <Line type="monotone" dataKey="pct" name="Completion" stroke="oklch(0.68 0.22 320)" strokeWidth={2.5} dot={false} />
+                <Line
+                  type="monotone"
+                  dataKey="pct"
+                  name="Completion"
+                  stroke="oklch(0.68 0.22 320)"
+                  strokeWidth={2.5}
+                  dot={false}
+                />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -266,10 +335,25 @@ export function ReportsSection({
             <EmptyChart />
           ) : (
             <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={report.consistency} margin={{ left: -10, right: 8, top: 8, bottom: 0 }}>
+              <BarChart
+                data={report.consistency}
+                margin={{ left: -10, right: 8, top: 8, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="name" fontSize={10} stroke="var(--color-muted-foreground)" interval={0} angle={-12} height={40} />
-                <YAxis unit="%" domain={[0, 100]} fontSize={10} stroke="var(--color-muted-foreground)" />
+                <XAxis
+                  dataKey="name"
+                  fontSize={10}
+                  stroke="var(--color-muted-foreground)"
+                  interval={0}
+                  angle={-12}
+                  height={40}
+                />
+                <YAxis
+                  unit="%"
+                  domain={[0, 100]}
+                  fontSize={10}
+                  stroke="var(--color-muted-foreground)"
+                />
                 <Tooltip content={<TT suffix="%" />} />
                 <Bar dataKey="pct" name="Consistency" radius={[6, 6, 0, 0]}>
                   {report.consistency.map((_, i) => (
@@ -297,7 +381,11 @@ export function ReportsSection({
                   paddingAngle={2}
                 >
                   {report.subjectBreakdown.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} stroke="var(--color-card)" />
+                    <Cell
+                      key={i}
+                      fill={PIE_COLORS[i % PIE_COLORS.length]}
+                      stroke="var(--color-card)"
+                    />
                   ))}
                 </Pie>
                 <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -311,10 +399,20 @@ export function ReportsSection({
             <EmptyChart />
           ) : (
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart layout="vertical" data={report.chapterBreakdown} margin={{ left: 40, right: 8, top: 8, bottom: 0 }}>
+              <BarChart
+                layout="vertical"
+                data={report.chapterBreakdown}
+                margin={{ left: 40, right: 8, top: 8, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis type="number" fontSize={10} stroke="var(--color-muted-foreground)" />
-                <YAxis type="category" dataKey="name" fontSize={10} width={110} stroke="var(--color-muted-foreground)" />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  fontSize={10}
+                  width={110}
+                  stroke="var(--color-muted-foreground)"
+                />
                 <Tooltip content={<TT suffix="h" />} />
                 <Bar dataKey="hours" name="Hours" radius={[0, 6, 6, 0]}>
                   {report.chapterBreakdown.map((_, i) => (
@@ -333,7 +431,11 @@ export function ReportsSection({
           icon={TrendingUp}
           label="Most Productive Subject"
           value={report.insights.mostProductiveSubject?.name ?? "—"}
-          detail={report.insights.mostProductiveSubject ? `${round1(report.insights.mostProductiveSubject.hours)}h logged` : "No activity yet"}
+          detail={
+            report.insights.mostProductiveSubject
+              ? `${round1(report.insights.mostProductiveSubject.hours)}h logged`
+              : "No activity yet"
+          }
           tone="from-emerald-500/20 to-transparent border-emerald-500/30"
           accent="text-emerald-500"
         />
@@ -341,7 +443,11 @@ export function ReportsSection({
           icon={TrendingDown}
           label="Least Practiced Subject"
           value={report.insights.leastPracticedSubject?.name ?? "—"}
-          detail={report.insights.leastPracticedSubject ? `${round1(report.insights.leastPracticedSubject.hours)}h logged` : "No activity yet"}
+          detail={
+            report.insights.leastPracticedSubject
+              ? `${round1(report.insights.leastPracticedSubject.hours)}h logged`
+              : "No activity yet"
+          }
           tone="from-amber-500/20 to-transparent border-amber-500/30"
           accent="text-amber-500"
         />
@@ -349,7 +455,11 @@ export function ReportsSection({
           icon={Layers}
           label="Most Missed Chapter"
           value={report.insights.mostMissedChapter?.name ?? "—"}
-          detail={report.insights.mostMissedChapter ? `${report.insights.mostMissedChapter.missed} missed day${report.insights.mostMissedChapter.missed === 1 ? "" : "s"}` : "Nothing missed"}
+          detail={
+            report.insights.mostMissedChapter
+              ? `${report.insights.mostMissedChapter.missed} missed day${report.insights.mostMissedChapter.missed === 1 ? "" : "s"}`
+              : "Nothing missed"
+          }
           tone="from-rose-500/20 to-transparent border-rose-500/30"
           accent="text-rose-500"
         />
@@ -357,7 +467,11 @@ export function ReportsSection({
           icon={CheckCircle2}
           label="Best Day"
           value={report.insights.bestDay ? short(new Date(report.insights.bestDay.date)) : "—"}
-          detail={report.insights.bestDay ? `${round1(report.insights.bestDay.completed)}h studied` : "No study logged"}
+          detail={
+            report.insights.bestDay
+              ? `${round1(report.insights.bestDay.completed)}h studied`
+              : "No study logged"
+          }
           tone="from-indigo-500/20 to-transparent border-indigo-500/30"
           accent="text-indigo-500"
         />
@@ -433,16 +547,27 @@ function buildReport(routines: SharedRoutine[], progressMap: ProgressMap, from: 
     const isSunday = d.getDay() === 0;
     const assigned = dailyAssignedH + (isSunday ? weeklyAssignedH : 0);
     const pct = assigned > 0 ? Math.min(100, Math.round((completed / assigned) * 100)) : 0;
-    return { date: iso, label: short(d), assigned: round1(assigned), completed: round1(completed), pct, mcqs, chapters };
+    return {
+      date: iso,
+      label: short(d),
+      assigned: round1(assigned),
+      completed: round1(completed),
+      pct,
+      mcqs,
+      chapters,
+    };
   });
 
   const assignedH = series.reduce((s, x) => s + x.assigned, 0);
   const completedH = series.reduce((s, x) => s + x.completed, 0);
   const totalMcqs = series.reduce((s, x) => s + x.mcqs, 0);
   const totalChapters = series.reduce((s, x) => s + x.chapters, 0);
-  const completionPct = assignedH > 0 ? Math.min(100, Math.round((completedH / assignedH) * 100)) : 0;
+  const completionPct =
+    assignedH > 0 ? Math.min(100, Math.round((completedH / assignedH) * 100)) : 0;
 
-  const activeDaysSet = new Set(series.filter((s) => s.completed > 0 || s.mcqs > 0 || s.chapters > 0).map((s) => s.date));
+  const activeDaysSet = new Set(
+    series.filter((s) => s.completed > 0 || s.mcqs > 0 || s.chapters > 0).map((s) => s.date),
+  );
   const missedDays = series.filter((s) => s.assigned > 0 && !activeDaysSet.has(s.date)).length;
 
   // Streaks across window
@@ -594,7 +719,9 @@ function ReportStat({
       <div className={`absolute inset-0 bg-gradient-to-br ${bg}`} aria-hidden />
       <div className="relative">
         <Icon className={`mb-2 h-4 w-4 ${tone}`} />
-        <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          {label}
+        </div>
         <div className="mt-1 text-xl font-semibold tabular-nums">{value}</div>
       </div>
     </div>
@@ -613,7 +740,9 @@ function ChartCard({
   wide?: boolean;
 }) {
   return (
-    <div className={`rounded-2xl border border-border/60 bg-card p-5 shadow-sm ${wide ? "lg:col-span-2" : ""}`}>
+    <div
+      className={`rounded-2xl border border-border/60 bg-card p-5 shadow-sm ${wide ? "lg:col-span-2" : ""}`}
+    >
       <div className="mb-3">
         <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
         {subtitle && <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>}
@@ -647,12 +776,18 @@ function InsightCard({
   accent: string;
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm bg-gradient-to-br ${tone}`}>
+    <div
+      className={`relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm bg-gradient-to-br ${tone}`}
+    >
       <div className="mb-2 flex items-center gap-2">
-        <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg bg-background/60 ${accent}`}>
+        <span
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg bg-background/60 ${accent}`}
+        >
           <Icon className="h-4 w-4" />
         </span>
-        <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          {label}
+        </div>
       </div>
       <div className="text-lg font-semibold tracking-tight">{value}</div>
       <div className="mt-0.5 text-xs text-muted-foreground">{detail}</div>

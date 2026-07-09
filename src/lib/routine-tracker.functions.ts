@@ -94,28 +94,25 @@ export const getMyAssignedRoutines = createServerFn({ method: "GET" })
     if (aErr) throw new Error(aErr.message);
     const routineIds = Array.from(
       new Set(
-        (assignRows ?? [])
-          .map((r) => (r as { routine_id: string }).routine_id)
-          .filter(Boolean),
+        (assignRows ?? []).map((r) => (r as { routine_id: string }).routine_id).filter(Boolean),
       ),
     );
     if (!routineIds.length) return [];
 
-    const [{ data: routines, error: rErr }, { data: tasks, error: tErr }] =
-      await Promise.all([
-        supabase
-          .from("routines")
-          .select(
-            "id,title,description,level,subject,chapter,routine_type,hours_per_day,starts_on,ends_on,is_active,is_archived,accent,created_at",
-          )
-          .in("id", routineIds)
-          .eq("is_archived", false),
-        supabase
-          .from("routine_tasks")
-          .select("id,routine_id,day_id,title,position")
-          .in("routine_id", routineIds)
-          .order("position", { ascending: true }),
-      ]);
+    const [{ data: routines, error: rErr }, { data: tasks, error: tErr }] = await Promise.all([
+      supabase
+        .from("routines")
+        .select(
+          "id,title,description,level,subject,chapter,routine_type,hours_per_day,starts_on,ends_on,is_active,is_archived,accent,created_at",
+        )
+        .in("id", routineIds)
+        .eq("is_archived", false),
+      supabase
+        .from("routine_tasks")
+        .select("id,routine_id,day_id,title,position")
+        .in("routine_id", routineIds)
+        .order("position", { ascending: true }),
+    ]);
     if (rErr) throw new Error(rErr.message);
     if (tErr) throw new Error(tErr.message);
 
@@ -238,10 +235,7 @@ export const getMyCompletions = createServerFn({ method: "POST" })
         .select("id,routine_id")
         .in("id", taskIds);
       for (const t of taskRows ?? []) {
-        routineByTask.set(
-          (t as { id: string }).id,
-          (t as { routine_id: string }).routine_id,
-        );
+        routineByTask.set((t as { id: string }).id, (t as { routine_id: string }).routine_id);
       }
     }
     return (rows ?? []).map((r) => {
@@ -284,9 +278,8 @@ function validUpsert(input: unknown): UpsertInput {
   const taskId = typeof s.taskId === "string" ? s.taskId : "";
   if (!taskId) throw new Error("taskId required");
   const iso = /^\d{4}-\d{2}-\d{2}$/;
-  const date = typeof s.date === "string" && iso.test(s.date)
-    ? s.date
-    : new Date().toISOString().slice(0, 10);
+  const date =
+    typeof s.date === "string" && iso.test(s.date) ? s.date : new Date().toISOString().slice(0, 10);
   const status = normStatus(s.status);
   const studyHours =
     typeof s.studyHours === "number" && Number.isFinite(s.studyHours) && s.studyHours >= 0

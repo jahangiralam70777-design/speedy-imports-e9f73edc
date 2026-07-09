@@ -1,4 +1,11 @@
-import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -126,15 +133,10 @@ function AdminLayout() {
     return <Outlet />;
   }
 
-
-
   return (
     <div className="min-h-screen bg-background text-foreground antialiased [font-feature-settings:'ss01','cv11']">
       {/* Ambient background */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
-      >
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 -left-32 h-[560px] w-[560px] rounded-full bg-gradient-to-br from-primary/25 via-accent/15 to-transparent blur-3xl animate-float" />
         <div className="absolute -bottom-40 -right-32 h-[560px] w-[560px] rounded-full bg-gradient-to-tr from-accent/20 via-primary/10 to-transparent blur-3xl animate-float [animation-delay:-3s]" />
         <div
@@ -143,8 +145,7 @@ function AdminLayout() {
             backgroundImage:
               "linear-gradient(var(--foreground) 1px, transparent 1px), linear-gradient(90deg, var(--foreground) 1px, transparent 1px)",
             backgroundSize: "44px 44px",
-            maskImage:
-              "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+            maskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)",
           }}
         />
       </div>
@@ -160,7 +161,6 @@ function AdminLayout() {
           <SidebarNav collapsed={collapsed} pathname={pathname} />
           <SidebarFooter collapsed={collapsed} onCollapseToggle={() => setCollapsed((c) => !c)} />
         </aside>
-
 
         {/* Mobile drawer */}
         <AnimatePresence>
@@ -213,7 +213,6 @@ function AdminLayout() {
                 <Menu className="h-4 w-4" />
               </button>
 
-
               <div className="min-w-0">
                 <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                   <span className="relative inline-flex h-1.5 w-1.5">
@@ -226,7 +225,6 @@ function AdminLayout() {
                   {title}
                 </h1>
               </div>
-
 
               <div className="ml-auto flex items-center gap-2 sm:gap-3">
                 {/* Search */}
@@ -250,7 +248,6 @@ function AdminLayout() {
                 >
                   <Search className="h-4 w-4" />
                 </button>
-
 
                 {/* Theme toggle */}
                 <button
@@ -288,7 +285,6 @@ function AdminLayout() {
                   </span>
                 </button>
 
-
                 {/* Profile */}
                 <div ref={profileRef} className="relative">
                   <button
@@ -325,17 +321,26 @@ function AdminLayout() {
                           </span>
                           <div className="min-w-0">
                             <div className="truncate text-sm font-semibold">{displayName}</div>
-                            <div className="truncate text-xs text-muted-foreground">
-                              {email}
-                            </div>
+                            <div className="truncate text-xs text-muted-foreground">{email}</div>
                           </div>
                         </div>
                         <div className="my-1 h-px bg-border/70" />
-                        <MenuBtn icon={Settings} label="Settings" onClick={() => { setProfileOpen(false); navigate({ to: "/admin/settings" }); }} />
+                        <MenuBtn
+                          icon={Settings}
+                          label="Settings"
+                          onClick={() => {
+                            setProfileOpen(false);
+                            navigate({ to: "/admin/settings" });
+                          }}
+                        />
                         <MenuBtn icon={Sparkles} label="What's new" />
                         <div className="my-1 h-px bg-border/70" />
-                        <MenuBtn icon={LogOut} label="Sign out" tone="danger" onClick={handleSignOut} />
-
+                        <MenuBtn
+                          icon={LogOut}
+                          label="Sign out"
+                          tone="danger"
+                          onClick={handleSignOut}
+                        />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -356,7 +361,9 @@ function AdminLayout() {
 
 function SidebarBrand({ collapsed }: { collapsed: boolean }) {
   return (
-    <div className={`flex items-center gap-3 px-4 pt-5 pb-4 ${collapsed ? "justify-center px-2" : ""}`}>
+    <div
+      className={`flex items-center gap-3 px-4 pt-5 pb-4 ${collapsed ? "justify-center px-2" : ""}`}
+    >
       <span className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-primary via-primary/80 to-accent text-primary-foreground shadow-[0_8px_24px_-8px_color-mix(in_oklab,var(--primary)_60%,transparent),inset_0_1px_0_0_rgba(255,255,255,0.25)]">
         <span className="text-sm font-black tracking-tight">C</span>
         <span className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/25 to-transparent opacity-70" />
@@ -413,7 +420,6 @@ function SidebarNav({ collapsed, pathname }: { collapsed: boolean; pathname: str
                 />
                 {!collapsed && <span className="truncate tracking-tight">{item.label}</span>}
               </Link>
-
             </li>
           );
         })}
@@ -438,7 +444,8 @@ function SidebarFooter({
             Pro tips
           </div>
           <p className="mt-1.5 text-xs text-muted-foreground">
-            Press <kbd className="rounded border border-border bg-card px-1 text-[10px]">⌘K</kbd> to search anywhere.
+            Press <kbd className="rounded border border-border bg-card px-1 text-[10px]">⌘K</kbd> to
+            search anywhere.
           </p>
         </div>
       )}

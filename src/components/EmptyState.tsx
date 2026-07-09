@@ -33,9 +33,7 @@ export function EmptyState({
       <div className="max-w-md space-y-1">
         <p className="text-sm font-semibold text-foreground">{title}</p>
         {description ? (
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            {description}
-          </p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {action ? <div className="pt-1">{action}</div> : null}

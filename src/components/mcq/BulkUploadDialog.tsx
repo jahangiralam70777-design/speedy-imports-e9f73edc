@@ -250,8 +250,14 @@ export function BulkUploadDialog({ open, onClose, tree, onImport }: Props) {
         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
         className="relative flex h-full w-full max-w-6xl flex-col overflow-hidden border border-border/70 bg-card/90 shadow-[0_40px_80px_-30px_color-mix(in_oklab,var(--foreground)_35%,transparent)] backdrop-blur-2xl sm:h-[92vh] sm:rounded-3xl"
       >
-        <div aria-hidden className="pointer-events-none absolute -top-32 -right-24 h-72 w-72 rounded-full bg-gradient-to-br from-primary/25 via-accent/15 to-transparent blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-gradient-to-tr from-accent/20 to-primary/10 blur-3xl" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 -right-24 h-72 w-72 rounded-full bg-gradient-to-br from-primary/25 via-accent/15 to-transparent blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-gradient-to-tr from-accent/20 to-primary/10 blur-3xl"
+        />
 
         <Header step={step} onClose={onClose} canClose={canClose} />
 
@@ -268,11 +274,24 @@ export function BulkUploadDialog({ open, onClose, tree, onImport }: Props) {
               >
                 <AcademicPanel
                   tree={tree}
-                  levelId={levelId} setLevelId={(v) => { setLevelId(v); setSubjectId(""); setChapterId(""); }}
-                  subjectId={subjectId} setSubjectId={(v) => { setSubjectId(v); setChapterId(""); }}
-                  chapterId={chapterId} setChapterId={setChapterId}
-                  subjects={subjects} chapters={chapters}
-                  levelName={levelName} subjectName={subjectName} chapterName={chapterName}
+                  levelId={levelId}
+                  setLevelId={(v) => {
+                    setLevelId(v);
+                    setSubjectId("");
+                    setChapterId("");
+                  }}
+                  subjectId={subjectId}
+                  setSubjectId={(v) => {
+                    setSubjectId(v);
+                    setChapterId("");
+                  }}
+                  chapterId={chapterId}
+                  setChapterId={setChapterId}
+                  subjects={subjects}
+                  chapters={chapters}
+                  levelName={levelName}
+                  subjectName={subjectName}
+                  chapterName={chapterName}
                 />
 
                 <PastePanel
@@ -311,7 +330,13 @@ export function BulkUploadDialog({ open, onClose, tree, onImport }: Props) {
                 {stage === "error" && <ErrorCard message={error} onRetry={process} />}
 
                 {stage === "ready" && (
-                  <PreviewPanel rows={rows} summary={summary} level={levelName} subject={subjectName} chapter={chapterName} />
+                  <PreviewPanel
+                    rows={rows}
+                    summary={summary}
+                    level={levelName}
+                    subject={subjectName}
+                    chapter={chapterName}
+                  />
                 )}
               </motion.div>
             )}
@@ -327,7 +352,9 @@ export function BulkUploadDialog({ open, onClose, tree, onImport }: Props) {
               >
                 <SuccessPanel
                   summary={importSummary}
-                  level={levelName} subject={subjectName} chapter={chapterName}
+                  level={levelName}
+                  subject={subjectName}
+                  chapter={chapterName}
                   onDone={onClose}
                   onAnother={reset}
                 />
@@ -361,7 +388,15 @@ export function BulkUploadDialog({ open, onClose, tree, onImport }: Props) {
 /* Header                                                          */
 /* -------------------------------------------------------------- */
 
-function Header({ step, onClose, canClose }: { step: 1 | 2 | 3; onClose: () => void; canClose: boolean }) {
+function Header({
+  step,
+  onClose,
+  canClose,
+}: {
+  step: 1 | 2 | 3;
+  onClose: () => void;
+  canClose: boolean;
+}) {
   const steps = [
     { n: 1, label: "Paste" },
     { n: 2, label: "Preview" },
@@ -377,7 +412,10 @@ function Header({ step, onClose, canClose }: { step: 1 | 2 | 3; onClose: () => v
           <Sparkles className="h-3 w-3 text-accent" />
           MCQ Manager · Bulk Text Import
         </div>
-        <h2 id="bulk-upload-title" className="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg">
+        <h2
+          id="bulk-upload-title"
+          className="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
+        >
           Paste MCQs to import in bulk
         </h2>
       </div>
@@ -399,7 +437,9 @@ function Header({ step, onClose, canClose }: { step: 1 | 2 | 3; onClose: () => v
               >
                 {done ? "✓" : s.n}
               </span>
-              <span className={`text-xs font-medium ${active ? "text-foreground" : "text-muted-foreground"}`}>
+              <span
+                className={`text-xs font-medium ${active ? "text-foreground" : "text-muted-foreground"}`}
+              >
                 {s.label}
               </span>
               {i < steps.length - 1 && <span className="mx-1 h-px w-6 bg-border/70" />}
@@ -426,37 +466,48 @@ function Header({ step, onClose, canClose }: { step: 1 | 2 | 3; onClose: () => v
 
 function AcademicPanel(props: {
   tree: ApiLevel[];
-  levelId: string; setLevelId: (v: string) => void;
-  subjectId: string; setSubjectId: (v: string) => void;
-  chapterId: string; setChapterId: (v: string) => void;
+  levelId: string;
+  setLevelId: (v: string) => void;
+  subjectId: string;
+  setSubjectId: (v: string) => void;
+  chapterId: string;
+  setChapterId: (v: string) => void;
   subjects: { id: string; name: string }[];
   chapters: { id: string; name: string }[];
-  levelName: string; subjectName: string; chapterName: string;
+  levelName: string;
+  subjectName: string;
+  chapterName: string;
 }) {
   return (
     <div className="rounded-2xl border border-border/70 bg-card/50 p-4 shadow-soft backdrop-blur-xl sm:p-5">
       <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-        <span className="grid h-6 w-6 place-items-center rounded-md bg-primary/15 text-primary">1</span>
+        <span className="grid h-6 w-6 place-items-center rounded-md bg-primary/15 text-primary">
+          1
+        </span>
         Choose destination
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">
-        Select where these MCQs belong.
-      </p>
+      <p className="mt-1 text-xs text-muted-foreground">Select where these MCQs belong.</p>
 
       <div className="mt-4 space-y-3">
         <SelectField
-          label="Level" value={props.levelId} onChange={props.setLevelId}
+          label="Level"
+          value={props.levelId}
+          onChange={props.setLevelId}
           options={props.tree.map((l) => ({ id: l.id, name: l.name }))}
           placeholder="Pick a level"
         />
         <SelectField
-          label="Subject" value={props.subjectId} onChange={props.setSubjectId}
+          label="Subject"
+          value={props.subjectId}
+          onChange={props.setSubjectId}
           options={props.subjects.map((s) => ({ id: s.id, name: s.name }))}
           placeholder={props.levelId ? "Pick a subject" : "Choose level first"}
           disabled={!props.levelId}
         />
         <SelectField
-          label="Chapter" value={props.chapterId} onChange={props.setChapterId}
+          label="Chapter"
+          value={props.chapterId}
+          onChange={props.setChapterId}
           options={props.chapters.map((c) => ({ id: c.id, name: c.name }))}
           placeholder={props.subjectId ? "Pick a chapter" : "Choose subject first"}
           disabled={!props.subjectId}
@@ -474,8 +525,8 @@ function AcademicPanel(props: {
         <div className="mt-4 flex items-start gap-2 rounded-xl border border-warning/25 bg-warning/8 px-3 py-2 text-[11px] text-warning">
           <AlertTriangle className="h-3.5 w-3.5 mt-0.5" />
           <span>
-            No academic taxonomy defined yet. Add levels, subjects and chapters
-            in <strong>Academic Manager</strong> first.
+            No academic taxonomy defined yet. Add levels, subjects and chapters in{" "}
+            <strong>Academic Manager</strong> first.
           </span>
         </div>
       )}
@@ -484,14 +535,25 @@ function AcademicPanel(props: {
 }
 
 function SelectField({
-  label, value, onChange, options, placeholder, disabled,
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  disabled,
 }: {
-  label: string; value: string; onChange: (v: string) => void;
-  options: { id: string; name: string }[]; placeholder: string; disabled?: boolean;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { id: string; name: string }[];
+  placeholder: string;
+  disabled?: boolean;
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</span>
+      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </span>
       <div className="relative">
         <select
           value={value}
@@ -501,7 +563,9 @@ function SelectField({
         >
           <option value="">{placeholder}</option>
           {options.map((o) => (
-            <option key={o.id} value={o.id}>{o.name}</option>
+            <option key={o.id} value={o.id}>
+              {o.name}
+            </option>
           ))}
         </select>
         <ArrowRight className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rotate-90 text-muted-foreground" />
@@ -538,7 +602,9 @@ function PastePanel(props: {
     <div className="flex min-h-0 flex-col rounded-2xl border border-border/70 bg-card/50 p-4 shadow-soft backdrop-blur-xl sm:p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          <span className="grid h-6 w-6 place-items-center rounded-md bg-primary/15 text-primary">2</span>
+          <span className="grid h-6 w-6 place-items-center rounded-md bg-primary/15 text-primary">
+            2
+          </span>
           Paste MCQs (10,000+ supported)
         </div>
         <button
@@ -562,11 +628,17 @@ function PastePanel(props: {
             onClick={copySample}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border/70 bg-card/60 px-2.5 py-1 text-[10px] font-semibold text-foreground transition hover:border-primary/40 hover:text-primary"
           >
-            {copied ? <CheckCircle2 className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+            {copied ? (
+              <CheckCircle2 className="h-3 w-3 text-success" />
+            ) : (
+              <Copy className="h-3 w-3" />
+            )}
             {copied ? "Copied" : "Copy Sample Format"}
           </button>
         </div>
-        <pre className="overflow-x-auto whitespace-pre rounded-lg bg-background/70 p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">{SAMPLE_ONE}</pre>
+        <pre className="overflow-x-auto whitespace-pre rounded-lg bg-background/70 p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
+          {SAMPLE_ONE}
+        </pre>
         <div className="mt-2 text-[10px] text-muted-foreground">
           Explanation is optional. Answer must exactly match one of the four options.
         </div>
@@ -613,14 +685,24 @@ Q2: ...`}
 /* Processing / Error                                              */
 /* -------------------------------------------------------------- */
 
-function ProcessingCard({ stageLabel, progress, detail }: { stageLabel: string; progress: number; detail?: string }) {
+function ProcessingCard({
+  stageLabel,
+  progress,
+  detail,
+}: {
+  stageLabel: string;
+  progress: number;
+  detail?: string;
+}) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-card/50 p-8 shadow-soft backdrop-blur-xl">
       <div className="relative mx-auto flex max-w-lg flex-col items-center text-center">
         <span className="grid h-14 w-14 place-items-center rounded-2xl border border-border/70 bg-background/60 text-primary shadow-soft">
           <Loader2 className="h-6 w-6 animate-spin" />
         </span>
-        <div className="mt-4 text-sm font-semibold tracking-tight text-foreground">{stageLabel}</div>
+        <div className="mt-4 text-sm font-semibold tracking-tight text-foreground">
+          {stageLabel}
+        </div>
         {detail && <div className="mt-1 text-[11px] text-muted-foreground">{detail}</div>}
 
         <div className="mt-6 w-full">
@@ -665,11 +747,17 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void 
 /* -------------------------------------------------------------- */
 
 function PreviewPanel({
-  rows, summary, level, subject, chapter,
+  rows,
+  summary,
+  level,
+  subject,
+  chapter,
 }: {
   rows: ParsedMcq[];
   summary: ReturnType<typeof summarise>;
-  level: string; subject: string; chapter: string;
+  level: string;
+  subject: string;
+  chapter: string;
 }) {
   const [filter, setFilter] = useState<"all" | "valid" | "invalid" | "duplicate">("all");
   const visible = useMemo(() => {
@@ -683,7 +771,9 @@ function PreviewPanel({
     <div className="space-y-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Preview</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Preview
+          </div>
           <div className="text-lg font-bold tracking-tight text-foreground">
             {summary.total.toLocaleString()} MCQs parsed
           </div>
@@ -693,10 +783,26 @@ function PreviewPanel({
         </div>
 
         <div className="flex flex-wrap gap-1 rounded-xl border border-border/70 bg-background/60 p-1 text-[11px] font-medium">
-          <FilterPill active={filter === "all"} onClick={() => setFilter("all")}>All · {summary.total}</FilterPill>
-          <FilterPill active={filter === "valid"} onClick={() => setFilter("valid")} tone="success">Valid · {summary.valid}</FilterPill>
-          <FilterPill active={filter === "invalid"} onClick={() => setFilter("invalid")} tone="danger">Invalid · {summary.invalid}</FilterPill>
-          <FilterPill active={filter === "duplicate"} onClick={() => setFilter("duplicate")} tone="warning">Duplicates · {summary.duplicates}</FilterPill>
+          <FilterPill active={filter === "all"} onClick={() => setFilter("all")}>
+            All · {summary.total}
+          </FilterPill>
+          <FilterPill active={filter === "valid"} onClick={() => setFilter("valid")} tone="success">
+            Valid · {summary.valid}
+          </FilterPill>
+          <FilterPill
+            active={filter === "invalid"}
+            onClick={() => setFilter("invalid")}
+            tone="danger"
+          >
+            Invalid · {summary.invalid}
+          </FilterPill>
+          <FilterPill
+            active={filter === "duplicate"}
+            onClick={() => setFilter("duplicate")}
+            tone="warning"
+          >
+            Duplicates · {summary.duplicates}
+          </FilterPill>
         </div>
       </div>
 
@@ -713,7 +819,10 @@ function PreviewPanel({
             <thead className="sticky top-0 z-10 bg-secondary/80 backdrop-blur-xl">
               <tr>
                 {["Question No.", "Question", "Answer", "Status", "Reason"].map((h) => (
-                  <th key={h} className="whitespace-nowrap border-b border-border/70 px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground first:pl-5 last:pr-5">
+                  <th
+                    key={h}
+                    className="whitespace-nowrap border-b border-border/70 px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground first:pl-5 last:pr-5"
+                  >
                     {h}
                   </th>
                 ))}
@@ -722,10 +831,14 @@ function PreviewPanel({
             <tbody>
               {visible.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-14 text-center text-xs text-muted-foreground">No rows match this filter.</td>
+                  <td colSpan={5} className="px-6 py-14 text-center text-xs text-muted-foreground">
+                    No rows match this filter.
+                  </td>
                 </tr>
               ) : (
-                visible.map((r, idx) => <PreviewRow key={r.serial} row={r} striped={idx % 2 === 1} />)
+                visible.map((r, idx) => (
+                  <PreviewRow key={r.serial} row={r} striped={idx % 2 === 1} />
+                ))
               )}
             </tbody>
           </table>
@@ -736,36 +849,70 @@ function PreviewPanel({
 }
 
 function FilterPill({
-  active, onClick, children, tone,
+  active,
+  onClick,
+  children,
+  tone,
 }: {
-  active: boolean; onClick: () => void; children: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
   tone?: "success" | "danger" | "warning";
 }) {
-  const toneCls = tone === "success" ? "text-success" : tone === "danger" ? "text-destructive" : tone === "warning" ? "text-warning" : "text-foreground";
+  const toneCls =
+    tone === "success"
+      ? "text-success"
+      : tone === "danger"
+        ? "text-destructive"
+        : tone === "warning"
+          ? "text-warning"
+          : "text-foreground";
   return (
-    <button onClick={onClick} className={`rounded-lg px-2.5 py-1.5 transition ${active ? `bg-secondary/80 shadow ${toneCls}` : "text-muted-foreground hover:text-foreground"}`}>
+    <button
+      onClick={onClick}
+      className={`rounded-lg px-2.5 py-1.5 transition ${active ? `bg-secondary/80 shadow ${toneCls}` : "text-muted-foreground hover:text-foreground"}`}
+    >
       {children}
     </button>
   );
 }
 
 function SummaryCard({
-  label, value, tone, icon: Icon,
+  label,
+  value,
+  tone,
+  icon: Icon,
 }: {
-  label: string; value: number;
+  label: string;
+  value: number;
   tone: "primary" | "success" | "danger" | "warning" | "neutral";
   icon: React.ComponentType<{ className?: string }>;
 }) {
-  const textCls = tone === "success" ? "text-success" : tone === "danger" ? "text-destructive" : tone === "warning" ? "text-warning" : tone === "primary" ? "text-primary" : "text-foreground";
+  const textCls =
+    tone === "success"
+      ? "text-success"
+      : tone === "danger"
+        ? "text-destructive"
+        : tone === "warning"
+          ? "text-warning"
+          : tone === "primary"
+            ? "text-primary"
+            : "text-foreground";
   return (
     <div className="relative overflow-hidden rounded-xl border border-border/70 bg-card/50 p-3 shadow-soft backdrop-blur-xl">
       <div className="flex items-center justify-between">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
-        <span className={`grid h-7 w-7 place-items-center rounded-lg border border-border/60 bg-background/60 ${textCls}`}>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          {label}
+        </div>
+        <span
+          className={`grid h-7 w-7 place-items-center rounded-lg border border-border/60 bg-background/60 ${textCls}`}
+        >
           <Icon className="h-3.5 w-3.5" />
         </span>
       </div>
-      <div className="mt-2 text-2xl font-bold tracking-tight text-foreground">{value.toLocaleString()}</div>
+      <div className="mt-2 text-2xl font-bold tracking-tight text-foreground">
+        {value.toLocaleString()}
+      </div>
     </div>
   );
 }
@@ -782,14 +929,18 @@ function PreviewRow({ row, striped }: { row: ParsedMcq; striped: boolean }) {
           ? row.isDuplicate
             ? "bg-warning/[0.04] hover:bg-warning/[0.08]"
             : "bg-destructive/[0.04] hover:bg-destructive/[0.08]"
-          : striped ? "bg-background/40 hover:bg-secondary/40" : "hover:bg-secondary/40"
+          : striped
+            ? "bg-background/40 hover:bg-secondary/40"
+            : "hover:bg-secondary/40"
       }`}
     >
       <td className="whitespace-nowrap border-b border-border/50 py-2.5 pl-5 pr-3 align-top font-mono text-[11px] text-muted-foreground">
         Q{row.detectedSerial ?? row.serial}
       </td>
       <td className="border-b border-border/50 px-3 py-2.5 align-top">
-        <div className="line-clamp-2 max-w-md text-sm text-foreground">{row.question || missing}</div>
+        <div className="line-clamp-2 max-w-md text-sm text-foreground">
+          {row.question || missing}
+        </div>
       </td>
       <td className="border-b border-border/50 px-3 py-2.5 align-top">
         {row.answer ? (
@@ -797,9 +948,13 @@ function PreviewRow({ row, striped }: { row: ParsedMcq; striped: boolean }) {
             <span className="mt-0.5 inline-flex h-6 min-w-[24px] items-center justify-center rounded-md bg-gradient-to-br from-success/20 to-success/5 px-1.5 text-[11px] font-bold text-success ring-1 ring-success/25">
               {row.answer}
             </span>
-            <span className="line-clamp-2 max-w-[220px] text-[12px] text-foreground">{answerText}</span>
+            <span className="line-clamp-2 max-w-[220px] text-[12px] text-foreground">
+              {answerText}
+            </span>
           </div>
-        ) : missing}
+        ) : (
+          missing
+        )}
       </td>
       <td className="whitespace-nowrap border-b border-border/50 px-3 py-2.5 align-top">
         <StatusPill row={row} />
@@ -810,7 +965,10 @@ function PreviewRow({ row, striped }: { row: ParsedMcq; striped: boolean }) {
         ) : (
           <div className="flex flex-wrap gap-1">
             {row.issues.map((iss: ParseIssue) => (
-              <span key={iss} className="inline-flex items-center gap-1 rounded-md border border-destructive/25 bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+              <span
+                key={iss}
+                className="inline-flex items-center gap-1 rounded-md border border-destructive/25 bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive"
+              >
                 <AlertTriangle className="h-3 w-3" />
                 {ISSUE_LABEL[iss]}
               </span>
@@ -849,11 +1007,19 @@ function StatusPill({ row }: { row: ParsedMcq }) {
 /* -------------------------------------------------------------- */
 
 function SuccessPanel({
-  summary, level, subject, chapter, onDone, onAnother,
+  summary,
+  level,
+  subject,
+  chapter,
+  onDone,
+  onAnother,
 }: {
   summary: { imported: number; skippedInvalid: number; skippedDuplicate: number; failed: number };
-  level: string; subject: string; chapter: string;
-  onDone: () => void; onAnother: () => void;
+  level: string;
+  subject: string;
+  chapter: string;
+  onDone: () => void;
+  onAnother: () => void;
 }) {
   return (
     <motion.div
@@ -861,7 +1027,10 @@ function SuccessPanel({
       animate={{ opacity: 1, scale: 1 }}
       className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border border-success/30 bg-card/60 p-8 text-center shadow-soft backdrop-blur-xl"
     >
-      <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-gradient-to-br from-success/30 to-primary/20 blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-gradient-to-br from-success/30 to-primary/20 blur-3xl"
+      />
       <motion.span
         initial={{ scale: 0.4, rotate: -20 }}
         animate={{ scale: 1, rotate: 0 }}
@@ -870,7 +1039,9 @@ function SuccessPanel({
       >
         <CheckCircle2 className="h-8 w-8" />
       </motion.span>
-      <h3 className="relative mt-4 text-lg font-bold tracking-tight text-foreground">Import complete</h3>
+      <h3 className="relative mt-4 text-lg font-bold tracking-tight text-foreground">
+        Import complete
+      </h3>
       <p className="relative mt-1 text-sm text-muted-foreground">
         {level} · {subject} · {chapter}
       </p>
@@ -902,11 +1073,28 @@ function SuccessPanel({
   );
 }
 
-function StatTile({ label, value, tone }: { label: string; value: number; tone: "success" | "danger" | "warning" | "neutral" }) {
-  const cls = tone === "success" ? "text-success" : tone === "danger" ? "text-destructive" : tone === "warning" ? "text-warning" : "text-foreground";
+function StatTile({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "success" | "danger" | "warning" | "neutral";
+}) {
+  const cls =
+    tone === "success"
+      ? "text-success"
+      : tone === "danger"
+        ? "text-destructive"
+        : tone === "warning"
+          ? "text-warning"
+          : "text-foreground";
   return (
     <div className="rounded-xl border border-border/70 bg-background/40 p-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </div>
       <div className={`mt-1 text-xl font-bold tracking-tight ${cls}`}>{value.toLocaleString()}</div>
     </div>
   );
@@ -917,10 +1105,23 @@ function StatTile({ label, value, tone }: { label: string; value: number; tone: 
 /* -------------------------------------------------------------- */
 
 function Footer({
-  step, stage, canSubmit, rows, onCancel, onBack, onStart, onImport,
+  step,
+  stage,
+  canSubmit,
+  rows,
+  onCancel,
+  onBack,
+  onStart,
+  onImport,
 }: {
-  step: 1 | 2 | 3; stage: Stage; canSubmit: boolean; rows: ParsedMcq[];
-  onCancel: () => void; onBack: () => void; onStart: () => void; onImport: () => void;
+  step: 1 | 2 | 3;
+  stage: Stage;
+  canSubmit: boolean;
+  rows: ParsedMcq[];
+  onCancel: () => void;
+  onBack: () => void;
+  onStart: () => void;
+  onImport: () => void;
 }) {
   const validCount = rows.filter((r) => r.valid).length;
   if (step === 3) return null;
@@ -929,7 +1130,9 @@ function Footer({
     <div className="relative flex items-center justify-between gap-3 border-t border-border/70 bg-card/60 px-5 py-3 sm:px-7">
       <div className="hidden text-[11px] text-muted-foreground sm:block">
         {step === 1 && "Only valid MCQs will be imported. Invalid rows are skipped automatically."}
-        {step === 2 && stage === "ready" && `${validCount.toLocaleString()} valid MCQs ready to import.`}
+        {step === 2 &&
+          stage === "ready" &&
+          `${validCount.toLocaleString()} valid MCQs ready to import.`}
         {step === 2 && stage === "importing" && "Importing — don't close this tab."}
       </div>
       <div className="ml-auto flex items-center gap-2">

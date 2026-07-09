@@ -1,6 +1,26 @@
-import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Bookmark, CalendarClock, Database, FileText, LayoutDashboard, ListChecks, LogOut, Menu, Settings as SettingsIcon, TrendingUp, X, XCircle } from "lucide-react";
+import {
+  Bookmark,
+  CalendarClock,
+  Database,
+  FileText,
+  LayoutDashboard,
+  ListChecks,
+  LogOut,
+  Menu,
+  Settings as SettingsIcon,
+  TrendingUp,
+  X,
+  XCircle,
+} from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { signOut } from "@/lib/auth";
@@ -117,7 +137,9 @@ function StudentLayout() {
                   )}
                   <item.icon
                     className={`h-4 w-4 transition-colors ${
-                      active ? "text-indigo-500" : "text-muted-foreground group-hover:text-foreground"
+                      active
+                        ? "text-indigo-500"
+                        : "text-muted-foreground group-hover:text-foreground"
                     }`}
                   />
                   {item.label}

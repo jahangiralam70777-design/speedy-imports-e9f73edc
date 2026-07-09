@@ -2,7 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getAcademicTree, syncAcademicTree } from "@/lib/academic.functions";
-import { AnimatePresence, motion, useMotionValue, useTransform, animate as animateMV } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useTransform,
+  animate as animateMV,
+} from "motion/react";
 import {
   Activity,
   BookOpen,
@@ -139,7 +145,6 @@ type Toast = { id: string; tone: ToastTone; message: string };
 /* ---------------------------------------------------------------- Seed */
 
 /* ---------------------------------------------------------------- Utils */
-
 
 const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -303,10 +308,13 @@ function AcademicManagerPage() {
     };
   }, [levels, loading, saveTree]);
 
-
   /* ---- Derived: totals ---- */
   const stats = useMemo(() => {
-    let l = 0, s = 0, c = 0, recent = 0, latest = 0;
+    let l = 0,
+      s = 0,
+      c = 0,
+      recent = 0,
+      latest = 0;
     const cutoff = Date.now() - 7 * 86_400_000;
     for (const lvl of levels) {
       l++;
@@ -394,14 +402,26 @@ function AcademicManagerPage() {
     try {
       if (editor.mode === "create") {
         if (editor.kind === "level") {
-          const nl: Level = { id: uid(), ...clean, createdAt: stamp, updatedAt: stamp, subjects: [] };
+          const nl: Level = {
+            id: uid(),
+            ...clean,
+            createdAt: stamp,
+            updatedAt: stamp,
+            subjects: [],
+          };
           setLevels((prev) => [...prev, nl]);
           setActiveLevelId(nl.id);
           setActiveSubjectId(null);
           pushToast("success", `Level “${clean.name}” created.`);
         } else if (editor.kind === "subject" && editor.parent?.kind === "level") {
           const parentId = editor.parent.levelId;
-          const ns: Subject = { id: uid(), ...clean, createdAt: stamp, updatedAt: stamp, chapters: [] };
+          const ns: Subject = {
+            id: uid(),
+            ...clean,
+            createdAt: stamp,
+            updatedAt: stamp,
+            chapters: [],
+          };
           setLevels((prev) =>
             prev.map((l) =>
               l.id === parentId ? { ...l, updatedAt: stamp, subjects: [...l.subjects, ns] } : l,
@@ -484,7 +504,9 @@ function AcademicManagerPage() {
   }
 
   function removeRefs(refs: NodeRef[]) {
-    let removedL = 0, removedS = 0, removedC = 0;
+    let removedL = 0,
+      removedS = 0,
+      removedC = 0;
     const levelIds = new Set(refs.filter((r) => r.kind === "level").map((r) => r.levelId));
     const subjectIds = new Set(
       refs
@@ -514,7 +536,10 @@ function AcademicManagerPage() {
             continue;
           }
           const chapters = s.chapters.filter((c) => {
-            if (chapterIds.has(c.id)) { removedC++; return false; }
+            if (chapterIds.has(c.id)) {
+              removedC++;
+              return false;
+            }
             return true;
           });
           subjects.push({ ...s, chapters });
@@ -548,7 +573,12 @@ function AcademicManagerPage() {
             id: uid(),
             createdAt: stamp,
             updatedAt: stamp,
-            chapters: s.chapters.map((c) => ({ ...c, id: uid(), createdAt: stamp, updatedAt: stamp })),
+            chapters: s.chapters.map((c) => ({
+              ...c,
+              id: uid(),
+              createdAt: stamp,
+              updatedAt: stamp,
+            })),
           })),
         };
         return [...prev, clone];
@@ -564,7 +594,12 @@ function AcademicManagerPage() {
             name: `${src.name} (Copy)`,
             createdAt: stamp,
             updatedAt: stamp,
-            chapters: src.chapters.map((c) => ({ ...c, id: uid(), createdAt: stamp, updatedAt: stamp })),
+            chapters: src.chapters.map((c) => ({
+              ...c,
+              id: uid(),
+              createdAt: stamp,
+              updatedAt: stamp,
+            })),
           };
           return { ...l, updatedAt: stamp, subjects: [...l.subjects, clone] };
         }
@@ -576,7 +611,13 @@ function AcademicManagerPage() {
             if (s.id !== ref.subjectId) return s;
             const src = s.chapters.find((c) => c.id === ref.chapterId);
             if (!src) return s;
-            const clone: Chapter = { ...src, id: uid(), name: `${src.name} (Copy)`, createdAt: stamp, updatedAt: stamp };
+            const clone: Chapter = {
+              ...src,
+              id: uid(),
+              name: `${src.name} (Copy)`,
+              createdAt: stamp,
+              updatedAt: stamp,
+            };
             return { ...s, updatedAt: stamp, chapters: [...s.chapters, clone] };
           }),
         };
@@ -631,7 +672,8 @@ function AcademicManagerPage() {
       return next;
     });
   const allChapterKeys = filteredChapters.map((c) => c.id);
-  const allSelected = allChapterKeys.length > 0 && allChapterKeys.every((k) => selectedChapters.has(k));
+  const allSelected =
+    allChapterKeys.length > 0 && allChapterKeys.every((k) => selectedChapters.has(k));
   const someSelected = !allSelected && allChapterKeys.some((k) => selectedChapters.has(k));
   const toggleAllChapters = () =>
     setSelectedChapters((prev) => {
@@ -669,7 +711,10 @@ function AcademicManagerPage() {
       {/* ================ Header ================ */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <nav
+            aria-label="Breadcrumb"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground"
+          >
             <Home className="h-3.5 w-3.5" />
             <span>Admin</span>
             <ChevronRight className="h-3 w-3 opacity-60" />
@@ -684,7 +729,8 @@ function AcademicManagerPage() {
                 Academic Manager
               </h2>
               <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
-                Curate the <span className="text-foreground">Level → Subject → Chapter</span> hierarchy. Changes autosave locally.
+                Curate the <span className="text-foreground">Level → Subject → Chapter</span>{" "}
+                hierarchy. Changes autosave locally.
               </p>
             </div>
           </div>
@@ -702,7 +748,11 @@ function AcademicManagerPage() {
               e.target.value = "";
             }}
           />
-          <Button variant="outline" className="h-10 gap-1.5 rounded-xl" onClick={() => importRef.current?.click()}>
+          <Button
+            variant="outline"
+            className="h-10 gap-1.5 rounded-xl"
+            onClick={() => importRef.current?.click()}
+          >
             <Upload className="h-4 w-4" />
             Import
           </Button>
@@ -824,7 +874,11 @@ function AcademicManagerPage() {
             onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
             className="h-10 gap-1.5 rounded-xl"
           >
-            {sortDir === "asc" ? <ArrowDownAZ className="h-4 w-4" /> : <ArrowUpAZ className="h-4 w-4" />}
+            {sortDir === "asc" ? (
+              <ArrowDownAZ className="h-4 w-4" />
+            ) : (
+              <ArrowUpAZ className="h-4 w-4" />
+            )}
             <span className="hidden sm:inline">{sortDir === "asc" ? "A → Z" : "Z → A"}</span>
           </Button>
         </div>
@@ -859,7 +913,11 @@ function AcademicManagerPage() {
             disabled={!canAddSubject}
             onClick={() =>
               activeLevel &&
-              setEditor({ mode: "create", kind: "subject", parent: { kind: "level", levelId: activeLevel.id } })
+              setEditor({
+                mode: "create",
+                kind: "subject",
+                parent: { kind: "level", levelId: activeLevel.id },
+              })
             }
           >
             <Plus className="h-3.5 w-3.5" />
@@ -924,7 +982,8 @@ function AcademicManagerPage() {
             })
           }
           onDuplicate={(sub) =>
-            activeLevel && duplicateNode({ kind: "subject", levelId: activeLevel.id, subjectId: sub.id })
+            activeLevel &&
+            duplicateNode({ kind: "subject", levelId: activeLevel.id, subjectId: sub.id })
           }
         />
 
@@ -1062,7 +1121,10 @@ function StatCard({
         className={`pointer-events-none absolute -top-16 -right-10 h-40 w-40 rounded-full bg-gradient-to-br ${t.ring} blur-2xl opacity-80 transition-opacity duration-500 group-hover:opacity-100`}
       />
       {/* Top sheen */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent"
+      />
 
       <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -1117,7 +1179,10 @@ function DonutCard({
       transition={{ delay: 0.15, duration: 0.5 }}
       className="surface-aurora relative col-span-1 overflow-hidden rounded-3xl p-6 lg:col-span-3"
     >
-      <div aria-hidden className="pointer-events-none absolute -top-24 -left-16 h-56 w-56 rounded-full bg-gradient-to-br from-primary/20 via-accent/15 to-transparent blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-24 -left-16 h-56 w-56 rounded-full bg-gradient-to-br from-primary/20 via-accent/15 to-transparent blur-3xl"
+      />
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
         <div className="flex items-center justify-center">
           <div className="relative" style={{ width: size, height: size }}>
@@ -1130,30 +1195,34 @@ function DonutCard({
                 stroke="color-mix(in oklab, var(--foreground) 10%, transparent)"
                 strokeWidth={14}
               />
-              {!loading && total > 0 && data.map((d, i) => {
-                const frac = d.value / total;
-                const len = frac * circumference;
-                const el = (
-                  <motion.circle
-                    key={d.label}
-                    cx={cx}
-                    cy={cy}
-                    r={r}
-                    fill="none"
-                    stroke={d.color}
-                    strokeWidth={14}
-                    strokeLinecap="round"
-                    strokeDasharray={`${len} ${circumference - len}`}
-                    strokeDashoffset={-offset}
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ delay: 0.2 + i * 0.15, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ filter: `drop-shadow(0 0 8px color-mix(in oklab, ${d.color} 40%, transparent))` }}
-                  />
-                );
-                offset += len;
-                return el;
-              })}
+              {!loading &&
+                total > 0 &&
+                data.map((d, i) => {
+                  const frac = d.value / total;
+                  const len = frac * circumference;
+                  const el = (
+                    <motion.circle
+                      key={d.label}
+                      cx={cx}
+                      cy={cy}
+                      r={r}
+                      fill="none"
+                      stroke={d.color}
+                      strokeWidth={14}
+                      strokeLinecap="round"
+                      strokeDasharray={`${len} ${circumference - len}`}
+                      strokeDashoffset={-offset}
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ delay: 0.2 + i * 0.15, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                      style={{
+                        filter: `drop-shadow(0 0 8px color-mix(in oklab, ${d.color} 40%, transparent))`,
+                      }}
+                    />
+                  );
+                  offset += len;
+                  return el;
+                })}
             </svg>
             <div className="absolute inset-0 grid place-items-center text-center">
               <div>
@@ -1173,7 +1242,9 @@ function DonutCard({
               <Activity className="h-4 w-4" />
             </span>
             <div>
-              <div className="text-sm font-semibold tracking-tight text-foreground">Content distribution</div>
+              <div className="text-sm font-semibold tracking-tight text-foreground">
+                Content distribution
+              </div>
               <div className="text-xs text-muted-foreground">How your curriculum is composed</div>
             </div>
           </div>
@@ -1184,11 +1255,18 @@ function DonutCard({
                 <li key={d.label} className="group flex items-center gap-3">
                   <span
                     className="h-2.5 w-2.5 rounded-full ring-4 ring-transparent transition-all group-hover:ring-[color-mix(in_oklab,var(--foreground)_6%,transparent)]"
-                    style={{ background: d.color, boxShadow: `0 0 12px 0 color-mix(in oklab, ${d.color} 45%, transparent)` }}
+                    style={{
+                      background: d.color,
+                      boxShadow: `0 0 12px 0 color-mix(in oklab, ${d.color} 45%, transparent)`,
+                    }}
                   />
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{d.label}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+                    {d.label}
+                  </span>
                   <span className="text-sm tabular-nums text-muted-foreground">{d.value}</span>
-                  <span className="w-10 text-right text-xs font-semibold tabular-nums text-muted-foreground">{pct}%</span>
+                  <span className="w-10 text-right text-xs font-semibold tabular-nums text-muted-foreground">
+                    {pct}%
+                  </span>
                 </li>
               );
             })}
@@ -1218,14 +1296,19 @@ function SystemStatusCard({
       transition={{ delay: 0.22, duration: 0.5 }}
       className="surface-aurora relative col-span-1 overflow-hidden rounded-3xl p-6 lg:col-span-2"
     >
-      <div aria-hidden className="pointer-events-none absolute -bottom-16 -right-12 h-56 w-56 rounded-full bg-gradient-to-tr from-success/25 via-accent/10 to-transparent blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-16 -right-12 h-56 w-56 rounded-full bg-gradient-to-tr from-success/25 via-accent/10 to-transparent blur-3xl"
+      />
       <div className="relative">
         <div className="flex items-center gap-2">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-success/20 to-accent/15 text-success">
             <Zap className="h-4 w-4" />
           </span>
           <div>
-            <div className="text-sm font-semibold tracking-tight text-foreground">System status</div>
+            <div className="text-sm font-semibold tracking-tight text-foreground">
+              System status
+            </div>
             <div className="text-xs text-muted-foreground">Live workspace metrics</div>
           </div>
           <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-success/25 bg-success/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-success">
@@ -1238,10 +1321,30 @@ function SystemStatusCard({
         </div>
 
         <div className="mt-5 space-y-3.5">
-          <StatusRow icon={Activity} label="Content health" value={loading ? "—" : `${health}%`} tone="success" />
-          <StatusRow icon={Timer} label="Last update" value={latest ? timeAgo(latest) : "—"} tone="default" />
-          <StatusRow icon={BookOpen} label="Total subjects" value={loading ? "—" : String(totalSubjects)} tone="default" />
-          <StatusRow icon={FileText} label="Total chapters" value={loading ? "—" : String(totalChapters)} tone="default" />
+          <StatusRow
+            icon={Activity}
+            label="Content health"
+            value={loading ? "—" : `${health}%`}
+            tone="success"
+          />
+          <StatusRow
+            icon={Timer}
+            label="Last update"
+            value={latest ? timeAgo(latest) : "—"}
+            tone="default"
+          />
+          <StatusRow
+            icon={BookOpen}
+            label="Total subjects"
+            value={loading ? "—" : String(totalSubjects)}
+            tone="default"
+          />
+          <StatusRow
+            icon={FileText}
+            label="Total chapters"
+            value={loading ? "—" : String(totalChapters)}
+            tone="default"
+          />
         </div>
       </div>
     </motion.div>
@@ -1373,7 +1476,6 @@ function SubjectsPanel({
 }) {
   return (
     <section className="surface-editorial relative overflow-hidden rounded-2xl">
-
       <div className="flex items-center justify-between gap-2 border-b border-border/60 px-5 py-4">
         <div className="min-w-0">
           <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -1383,7 +1485,13 @@ function SubjectsPanel({
             {level ? level.name : "No level selected"}
           </h3>
         </div>
-        <Button size="sm" variant="outline" className="h-8 gap-1.5 rounded-lg" onClick={onAdd} disabled={!level}>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8 gap-1.5 rounded-lg"
+          onClick={onAdd}
+          disabled={!level}
+        >
           <Plus className="h-3.5 w-3.5" />
           Add
         </Button>
@@ -1408,7 +1516,9 @@ function SubjectsPanel({
           <ul className="space-y-2">
             {subjects.map((sub, i) => {
               const active = sub.id === activeSubjectId;
-              const publishedCount = sub.chapters.filter((c) => chapterMetrics(c.id).published).length;
+              const publishedCount = sub.chapters.filter(
+                (c) => chapterMetrics(c.id).published,
+              ).length;
               return (
                 <motion.li
                   key={sub.id}
@@ -1423,7 +1533,6 @@ function SubjectsPanel({
                         ? "border border-primary/40 bg-gradient-to-br from-primary/12 via-primary/6 to-transparent shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--foreground)_6%,transparent),0_10px_28px_-16px_color-mix(in_oklab,var(--brand-to)_45%,transparent)]"
                         : "surface-tile"
                     }`}
-
                   >
                     <span
                       className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg font-mono text-xs font-bold tracking-wider ${
@@ -1436,8 +1545,13 @@ function SubjectsPanel({
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
-                        <span className="truncate text-sm font-semibold text-foreground">{sub.name}</span>
-                        <StatusPill active={publishedCount > 0} label={publishedCount > 0 ? "Live" : "Draft"} />
+                        <span className="truncate text-sm font-semibold text-foreground">
+                          {sub.name}
+                        </span>
+                        <StatusPill
+                          active={publishedCount > 0}
+                          label={publishedCount > 0 ? "Live" : "Draft"}
+                        />
                       </span>
                       {sub.description && (
                         <span className="mt-0.5 line-clamp-1 block text-xs text-muted-foreground">
@@ -1480,7 +1594,10 @@ function SubjectsSkeleton() {
   return (
     <ul className="space-y-2">
       {Array.from({ length: 4 }).map((_, i) => (
-        <li key={i} className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-3.5">
+        <li
+          key={i}
+          className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-3.5"
+        >
           <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-secondary/60" />
           <div className="flex-1 space-y-2">
             <div className="h-3.5 w-1/2 animate-pulse rounded bg-secondary/60" />
@@ -1544,7 +1661,12 @@ function ChaptersPanel({
               <span>Select all</span>
             </label>
           )}
-          <Button size="sm" className="h-8 gap-1.5 rounded-lg bg-gradient-to-r from-primary to-accent" onClick={onAdd} disabled={!subject}>
+          <Button
+            size="sm"
+            className="h-8 gap-1.5 rounded-lg bg-gradient-to-r from-primary to-accent"
+            onClick={onAdd}
+            disabled={!subject}
+          >
             <Plus className="h-3.5 w-3.5" />
             Chapter
           </Button>
@@ -1595,12 +1717,16 @@ function ChaptersPanel({
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ delay: i * 0.02 }}
                     className={`row-lux group relative flex flex-col gap-3 px-5 py-4 transition-colors md:grid md:grid-cols-[28px_20px_minmax(0,1fr)_88px_72px_72px_72px_88px_44px] md:items-center md:gap-3 md:py-3 ${
-                      isSelected ? "bg-primary/[0.05] shadow-[inset_2px_0_0_0_color-mix(in_oklab,var(--brand-to)_60%,transparent)]" : "hover:bg-secondary/30"
+                      isSelected
+                        ? "bg-primary/[0.05] shadow-[inset_2px_0_0_0_color-mix(in_oklab,var(--brand-to)_60%,transparent)]"
+                        : "hover:bg-secondary/30"
                     }`}
-
                   >
                     <span className="hidden text-muted-foreground/60 md:block">
-                      <GripVertical className="h-4 w-4 cursor-grab active:cursor-grabbing" aria-hidden />
+                      <GripVertical
+                        className="h-4 w-4 cursor-grab active:cursor-grabbing"
+                        aria-hidden
+                      />
                     </span>
                     <IndeterminateCheckbox
                       checked={isSelected}
@@ -1614,10 +1740,14 @@ function ChaptersPanel({
                         <span className="rounded-md border border-border/70 bg-secondary/40 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                           {c.code || `CH-${(i + 1).toString().padStart(2, "0")}`}
                         </span>
-                        <span className="truncate text-sm font-medium text-foreground">{c.name}</span>
+                        <span className="truncate text-sm font-medium text-foreground">
+                          {c.name}
+                        </span>
                       </div>
                       {c.description && (
-                        <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{c.description}</p>
+                        <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                          {c.description}
+                        </p>
                       )}
 
                       {/* Mobile inline metrics */}
@@ -1625,7 +1755,10 @@ function ChaptersPanel({
                         <MetricChip label="MCQ" value={m.mcq} tone="indigo" />
                         <MetricChip label="Quiz" value={m.quiz} tone="cyan" />
                         <MetricChip label="Mock" value={m.mock} tone="fuchsia" />
-                        <StatusPill active={m.published} label={m.published ? "Published" : "Draft"} />
+                        <StatusPill
+                          active={m.published}
+                          label={m.published ? "Published" : "Draft"}
+                        />
                       </div>
                     </div>
 
@@ -1699,7 +1832,15 @@ function MetricNum({ value, tone }: { value: number; tone: "indigo" | "cyan" | "
   return <span className={`text-sm font-semibold tabular-nums ${color}`}>{value}</span>;
 }
 
-function MetricChip({ label, value, tone }: { label: string; value: number; tone: "indigo" | "cyan" | "fuchsia" }) {
+function MetricChip({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "indigo" | "cyan" | "fuchsia";
+}) {
   const bg =
     tone === "indigo"
       ? "border-indigo-500/25 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300"
@@ -1707,7 +1848,9 @@ function MetricChip({ label, value, tone }: { label: string; value: number; tone
         ? "border-cyan-500/25 bg-cyan-500/10 text-cyan-600 dark:text-cyan-300"
         : "border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-300";
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${bg}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${bg}`}
+    >
       {label} <span className="tabular-nums font-semibold">{value}</span>
     </span>
   );
@@ -1722,7 +1865,9 @@ function StatusPill({ active, label }: { active: boolean; label: string }) {
           : "border-border/70 bg-secondary/60 text-muted-foreground"
       }`}
     >
-      <span className={`h-1 w-1 rounded-full ${active ? "bg-success" : "bg-muted-foreground/60"}`} />
+      <span
+        className={`h-1 w-1 rounded-full ${active ? "bg-success" : "bg-muted-foreground/60"}`}
+      />
       {label}
     </span>
   );
@@ -1952,7 +2097,9 @@ function EditorDialog({
               maxLength={32}
               className="h-11 rounded-xl font-mono uppercase"
             />
-            <p className="text-[11px] text-muted-foreground">Short identifier shown next to the name.</p>
+            <p className="text-[11px] text-muted-foreground">
+              Short identifier shown next to the name.
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="am-desc">Description</Label>
@@ -1999,9 +2146,10 @@ function ConfirmDialog({
   let body: React.ReactNode = null;
   if (state?.kind === "single") {
     title = `Delete “${state.label}”?`;
-    body = state.nested > 0
-      ? `This will also delete ${state.nested} nested item${state.nested > 1 ? "s" : ""}. This action cannot be undone.`
-      : "This action cannot be undone.";
+    body =
+      state.nested > 0
+        ? `This will also delete ${state.nested} nested item${state.nested > 1 ? "s" : ""}. This action cannot be undone.`
+        : "This action cannot be undone.";
   } else if (state?.kind === "bulk") {
     title = `Delete ${state.refs.length} chapter${state.refs.length > 1 ? "s" : ""}?`;
     body = "This action cannot be undone.";

@@ -15,12 +15,7 @@ import {
 import { z } from "zod";
 import { AuthShell, Field } from "@/components/auth/AuthShell";
 import { GoogleButton } from "@/components/auth/GoogleButton";
-import {
-  ensureAuthReady,
-  homeForRole,
-  signInWithEmail,
-  signInWithGoogle,
-} from "@/lib/auth";
+import { ensureAuthReady, homeForRole, signInWithEmail, signInWithGoogle } from "@/lib/auth";
 
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -60,7 +55,8 @@ export const Route = createFileRoute("/login")({
 function humanizeError(err: unknown): string {
   const msg = err instanceof Error ? err.message : String(err);
   if (/invalid login credentials/i.test(msg)) return "Wrong email or password.";
-  if (/email not confirmed/i.test(msg)) return "Please confirm your email address first — check your inbox.";
+  if (/email not confirmed/i.test(msg))
+    return "Please confirm your email address first — check your inbox.";
   if (/too many/i.test(msg)) return "Too many attempts. Please wait a minute and try again.";
   return msg || "We couldn't sign you in. Please try again.";
 }
@@ -146,8 +142,7 @@ function StudentLoginPage() {
           { value: "100+", label: "Mock Exams" },
           { value: "24/7", label: "Practice" },
         ],
-        gradient:
-          "linear-gradient(135deg, #312e81 0%, #4f46e5 40%, #7c3aed 75%, #06b6d4 130%)",
+        gradient: "linear-gradient(135deg, #312e81 0%, #4f46e5 40%, #7c3aed 75%, #06b6d4 130%)",
       }}
     >
       <div className="glass shadow-glow relative overflow-hidden rounded-3xl border border-border p-6 sm:p-9">
