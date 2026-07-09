@@ -146,10 +146,20 @@ type Toast = { id: string; tone: ToastTone; message: string };
 
 /* ---------------------------------------------------------------- Utils */
 
-const uid = () =>
-  typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID().slice(0, 12)
-    : `id-${Math.random().toString(36).slice(2, 10)}`;
+// Must be a valid UUID — Supabase columns are `uuid` typed and reject anything else.
+const uid = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  // RFC4122 v4 fallback
+  const b = new Uint8Array(16);
+  (typeof crypto !== "undefined" ? crypto : { getRandomValues: (a: Uint8Array) => {
+    for (let i = 0; i < a.length; i++) a[i] = Math.floor(Math.random() * 256);
+    return a;
+  } }).getRandomValues(b);
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+  return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+};
 
 function nodeKey(r: NodeRef) {
   if (r.kind === "level") return `L:${r.levelId}`;
@@ -298,9 +308,10 @@ function AcademicManagerPage() {
           })),
         })),
       };
-      saveTree({ data: payload }).catch((err) => {
+      saveTree({ data: payload }).catch((err: unknown) => {
         console.error("[academic-manager] save failed", err);
-        pushToast("error", "Cloud sync failed — retrying on next change.");
+        const msg = err instanceof Error ? err.message : String(err);
+        pushToast("error", `Save failed: ${msg}`);
       });
     }, 600);
     return () => {
