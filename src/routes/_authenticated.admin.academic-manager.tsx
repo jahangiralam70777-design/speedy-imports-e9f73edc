@@ -308,9 +308,10 @@ function AcademicManagerPage() {
           })),
         })),
       };
-      saveTree({ data: payload }).catch((err) => {
+      saveTree({ data: payload }).catch((err: unknown) => {
         console.error("[academic-manager] save failed", err);
-        pushToast("error", "Cloud sync failed — retrying on next change.");
+        const msg = err instanceof Error ? err.message : String(err);
+        pushToast("error", `Save failed: ${msg}`);
       });
     }, 600);
     return () => {
