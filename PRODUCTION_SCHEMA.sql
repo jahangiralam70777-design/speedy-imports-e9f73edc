@@ -532,5 +532,9 @@ $$;
 revoke all on function public.qbank_practice_taxonomy() from public;
 grant execute on function public.qbank_practice_taxonomy() to authenticated;
 
-revoke execute on function public.has_role(uuid, public.app_role) from public, anon, authenticated;
+-- has_role must be callable by authenticated users: server functions invoke it
+-- via PostgREST RPC to gate admin operations. It is SECURITY DEFINER with a
+-- locked search_path and only returns a boolean, so exposing EXECUTE is safe.
+revoke execute on function public.has_role(uuid, public.app_role) from public, anon;
+grant execute on function public.has_role(uuid, public.app_role) to authenticated;
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
