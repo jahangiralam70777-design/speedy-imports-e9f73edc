@@ -37,6 +37,39 @@ import {
   type RoutineRow,
   type RoutineStudentRow,
 } from "@/lib/routine.functions";
+import { getAcademicTree } from "@/lib/academic.functions";
+
+type AcademicOptions = {
+  levels: string[];
+  subjectsByLevel: Record<string, string[]>;
+  chaptersBySubject: Record<string, string[]>;
+  isLoading: boolean;
+};
+
+function useAcademicOptions(): AcademicOptions {
+  const fetchTree = useServerFn(getAcademicTree);
+  const q = useQuery({
+    queryKey: ["academic", "tree"] as const,
+    queryFn: () => fetchTree(),
+    staleTime: 60_000,
+  });
+  return useMemo(() => {
+    const tree = q.data ?? [];
+    const levels: string[] = [];
+    const subjectsByLevel: Record<string, string[]> = {};
+    const chaptersBySubject: Record<string, string[]> = {};
+    for (const l of tree) {
+      levels.push(l.name);
+      const subs: string[] = [];
+      for (const s of l.subjects) {
+        subs.push(s.name);
+        chaptersBySubject[s.name] = s.chapters.map((c) => c.name);
+      }
+      subjectsByLevel[l.name] = subs;
+    }
+    return { levels, subjectsByLevel, chaptersBySubject, isLoading: q.isLoading };
+  }, [q.data, q.isLoading]);
+}
 
 export const Route = createFileRoute("/_authenticated/admin/routine-manager")({
   head: () => ({
@@ -56,25 +89,6 @@ type RStatus = "active" | "inactive";
 type RoutineType = "daily" | "weekly" | "monthly" | "custom";
 
 type Routine = RoutineRow;
-
-const LEVELS = ["Class 8", "Class 9", "Class 10", "Class 11", "Class 12"];
-const SUBJECTS_BY_LEVEL: Record<string, string[]> = {
-  "Class 8": ["Math", "Science", "English"],
-  "Class 9": ["Math", "Science", "English", "Social Studies"],
-  "Class 10": ["Math", "Science", "English", "Social Studies"],
-  "Class 11": ["Physics", "Chemistry", "Mathematics", "Biology", "English"],
-  "Class 12": ["Physics", "Chemistry", "Mathematics", "Biology", "English"],
-};
-const CHAPTERS_BY_SUBJECT: Record<string, string[]> = {
-  Physics: ["Mechanics", "Thermodynamics", "Optics", "Electromagnetism"],
-  Chemistry: ["Organic", "Inorganic", "Physical"],
-  Mathematics: ["Algebra", "Calculus", "Geometry", "Probability"],
-  Math: ["Algebra", "Geometry", "Statistics"],
-  Biology: ["Botany", "Zoology", "Genetics", "Human Physiology"],
-  Science: ["Physics Basics", "Chemistry Basics", "Biology Basics"],
-  English: ["Grammar", "Comprehension", "Writing"],
-  "Social Studies": ["History", "Geography", "Civics"],
-};
 
 const ACCENTS = [
   "oklch(0.68 0.19 30)",
@@ -103,6 +117,7 @@ function RoutineManagerPage() {
 
   const dQuery = useDebouncedValue(query, 300);
 
+  const academic = useAcademicOptions();
   const listFn = useServerFn(listRoutines);
   const statsFn = useServerFn(getRoutineStats);
 
@@ -158,7 +173,11 @@ function RoutineManagerPage() {
         title="Design a new study routine"
         description="Fewer fields, faster shipping — publish a routine in under a minute."
       >
-        <CreateRoutineCard editing={editing} onDoneEditing={() => setEditing(null)} />
+        <CreateRoutineCard
+          editing={editing}
+          onDoneEditing={() => setEditing(null)}
+          academic={academic}
+        />
       </Section>
 
       <Section
@@ -195,6 +214,7 @@ function RoutineManagerPage() {
               .getElementById("routine-create")
               ?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
+          levels={academic.levels}
         />
       </Section>
 
@@ -436,9 +456,11 @@ const EMPTY_FORM: FormState = {
 function CreateRoutineCard({
   editing,
   onDoneEditing,
+  academic,
 }: {
   editing: Routine | null;
   onDoneEditing: () => void;
+  academic: AcademicOptions;
 }) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [advanced, setAdvanced] = useState(false);
@@ -485,8 +507,8 @@ function CreateRoutineCard({
     }
   }, [editing]);
 
-  const subjects = form.level ? (SUBJECTS_BY_LEVEL[form.level] ?? []) : [];
-  const chapters = form.subject ? (CHAPTERS_BY_SUBJECT[form.subject] ?? []) : [];
+  const subjects = form.level ? (academic.subjectsByLevel[form.level] ?? []) : [];
+  const chapters = form.subject ? (academic.chaptersBySubject[form.subject] ?? []) : [];
 
   const reset = () => {
     setForm(EMPTY_FORM);
@@ -549,8 +571,8 @@ function CreateRoutineCard({
           <Select
             value={form.level}
             onChange={(v) => setForm((f) => ({ ...f, level: v, subject: "", chapter: "" }))}
-            options={LEVELS.map((l) => ({ value: l, label: l }))}
-            placeholder="Choose a level"
+            options={academic.levels.map((l) => ({ value: l, label: l }))}
+            placeholder={academic.levels.length ? "Choose a level" : "No levels — add in Academic Manager"}
           />
         </Field>
 
@@ -841,6 +863,7 @@ function RoutineListCard(props: {
   onPageChange: (p: number) => void;
   onView: (r: Routine) => void;
   onEdit: (r: Routine) => void;
+  levels: string[];
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const qc = useQueryClient();
@@ -919,7 +942,7 @@ function RoutineListCard(props: {
             label="Level"
             value={props.levelFilter}
             onChange={props.onLevelFilterChange}
-            options={LEVELS}
+            options={props.levels}
           />
           <FilterPill
             icon={<Activity className="h-3.5 w-3.5" />}
