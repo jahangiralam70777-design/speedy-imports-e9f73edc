@@ -862,6 +862,7 @@ function RoutineListCard(props: {
   onPageChange: (p: number) => void;
   onView: (r: Routine) => void;
   onEdit: (r: Routine) => void;
+  levels: string[];
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const qc = useQueryClient();
