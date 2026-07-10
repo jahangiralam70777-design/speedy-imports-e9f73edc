@@ -37,6 +37,39 @@ import {
   type RoutineRow,
   type RoutineStudentRow,
 } from "@/lib/routine.functions";
+import { getAcademicTree } from "@/lib/academic.functions";
+
+type AcademicOptions = {
+  levels: string[];
+  subjectsByLevel: Record<string, string[]>;
+  chaptersBySubject: Record<string, string[]>;
+  isLoading: boolean;
+};
+
+function useAcademicOptions(): AcademicOptions {
+  const fetchTree = useServerFn(getAcademicTree);
+  const q = useQuery({
+    queryKey: ["academic", "tree"] as const,
+    queryFn: () => fetchTree(),
+    staleTime: 60_000,
+  });
+  return useMemo(() => {
+    const tree = q.data ?? [];
+    const levels: string[] = [];
+    const subjectsByLevel: Record<string, string[]> = {};
+    const chaptersBySubject: Record<string, string[]> = {};
+    for (const l of tree) {
+      levels.push(l.name);
+      const subs: string[] = [];
+      for (const s of l.subjects) {
+        subs.push(s.name);
+        chaptersBySubject[s.name] = s.chapters.map((c) => c.name);
+      }
+      subjectsByLevel[l.name] = subs;
+    }
+    return { levels, subjectsByLevel, chaptersBySubject, isLoading: q.isLoading };
+  }, [q.data, q.isLoading]);
+}
 
 export const Route = createFileRoute("/_authenticated/admin/routine-manager")({
   head: () => ({
