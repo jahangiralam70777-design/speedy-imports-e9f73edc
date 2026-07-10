@@ -941,7 +941,7 @@ function RoutineListCard(props: {
             label="Level"
             value={props.levelFilter}
             onChange={props.onLevelFilterChange}
-            options={LEVELS}
+            options={props.levels}
           />
           <FilterPill
             icon={<Activity className="h-3.5 w-3.5" />}
