@@ -173,7 +173,11 @@ function RoutineManagerPage() {
         title="Design a new study routine"
         description="Fewer fields, faster shipping — publish a routine in under a minute."
       >
-        <CreateRoutineCard editing={editing} onDoneEditing={() => setEditing(null)} />
+        <CreateRoutineCard
+          editing={editing}
+          onDoneEditing={() => setEditing(null)}
+          academic={academic}
+        />
       </Section>
 
       <Section
