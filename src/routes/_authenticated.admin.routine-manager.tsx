@@ -506,8 +506,8 @@ function CreateRoutineCard({
     }
   }, [editing]);
 
-  const subjects = form.level ? (SUBJECTS_BY_LEVEL[form.level] ?? []) : [];
-  const chapters = form.subject ? (CHAPTERS_BY_SUBJECT[form.subject] ?? []) : [];
+  const subjects = form.level ? (academic.subjectsByLevel[form.level] ?? []) : [];
+  const chapters = form.subject ? (academic.chaptersBySubject[form.subject] ?? []) : [];
 
   const reset = () => {
     setForm(EMPTY_FORM);
