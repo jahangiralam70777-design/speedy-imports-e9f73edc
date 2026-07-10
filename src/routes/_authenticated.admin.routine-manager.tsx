@@ -90,24 +90,23 @@ type RoutineType = "daily" | "weekly" | "monthly" | "custom";
 
 type Routine = RoutineRow;
 
-const LEVELS = ["Class 8", "Class 9", "Class 10", "Class 11", "Class 12"];
-const SUBJECTS_BY_LEVEL: Record<string, string[]> = {
-  "Class 8": ["Math", "Science", "English"],
-  "Class 9": ["Math", "Science", "English", "Social Studies"],
-  "Class 10": ["Math", "Science", "English", "Social Studies"],
-  "Class 11": ["Physics", "Chemistry", "Mathematics", "Biology", "English"],
-  "Class 12": ["Physics", "Chemistry", "Mathematics", "Biology", "English"],
-};
-const CHAPTERS_BY_SUBJECT: Record<string, string[]> = {
-  Physics: ["Mechanics", "Thermodynamics", "Optics", "Electromagnetism"],
-  Chemistry: ["Organic", "Inorganic", "Physical"],
-  Mathematics: ["Algebra", "Calculus", "Geometry", "Probability"],
-  Math: ["Algebra", "Geometry", "Statistics"],
-  Biology: ["Botany", "Zoology", "Genetics", "Human Physiology"],
-  Science: ["Physics Basics", "Chemistry Basics", "Biology Basics"],
-  English: ["Grammar", "Comprehension", "Writing"],
-  "Social Studies": ["History", "Geography", "Civics"],
-};
+const LIST_KEY = ["admin", "routines", "list"] as const;
+const STATS_KEY = ["admin", "routines", "stats"] as const;
+const STUDENTS_KEY = ["admin", "routines", "students"] as const;
+
+function RoutineManagerPage() {
+  const [editing, setEditing] = useState<Routine | null>(null);
+  const [viewing, setViewing] = useState<Routine | null>(null);
+  const [query, setQuery] = useState("");
+  const [levelFilter, setLevelFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [page, setPage] = useState(1);
+
+  const dQuery = useDebouncedValue(query, 300);
+
+  const academic = useAcademicOptions();
+  const listFn = useServerFn(listRoutines);
+  const statsFn = useServerFn(getRoutineStats);
 
 const ACCENTS = [
   "oklch(0.68 0.19 30)",
