@@ -90,24 +90,6 @@ type RoutineType = "daily" | "weekly" | "monthly" | "custom";
 
 type Routine = RoutineRow;
 
-const LIST_KEY = ["admin", "routines", "list"] as const;
-const STATS_KEY = ["admin", "routines", "stats"] as const;
-const STUDENTS_KEY = ["admin", "routines", "students"] as const;
-
-function RoutineManagerPage() {
-  const [editing, setEditing] = useState<Routine | null>(null);
-  const [viewing, setViewing] = useState<Routine | null>(null);
-  const [query, setQuery] = useState("");
-  const [levelFilter, setLevelFilter] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [page, setPage] = useState(1);
-
-  const dQuery = useDebouncedValue(query, 300);
-
-  const academic = useAcademicOptions();
-  const listFn = useServerFn(listRoutines);
-  const statsFn = useServerFn(getRoutineStats);
-
 const ACCENTS = [
   "oklch(0.68 0.19 30)",
   "oklch(0.66 0.16 165)",
@@ -135,6 +117,7 @@ function RoutineManagerPage() {
 
   const dQuery = useDebouncedValue(query, 300);
 
+  const academic = useAcademicOptions();
   const listFn = useServerFn(listRoutines);
   const statsFn = useServerFn(getRoutineStats);
 
