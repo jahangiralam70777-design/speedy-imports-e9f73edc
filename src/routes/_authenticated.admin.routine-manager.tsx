@@ -570,8 +570,8 @@ function CreateRoutineCard({
           <Select
             value={form.level}
             onChange={(v) => setForm((f) => ({ ...f, level: v, subject: "", chapter: "" }))}
-            options={LEVELS.map((l) => ({ value: l, label: l }))}
-            placeholder="Choose a level"
+            options={academic.levels.map((l) => ({ value: l, label: l }))}
+            placeholder={academic.levels.length ? "Choose a level" : "No levels — add in Academic Manager"}
           />
         </Field>
 
