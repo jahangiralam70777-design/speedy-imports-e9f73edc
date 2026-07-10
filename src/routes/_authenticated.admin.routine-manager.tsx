@@ -455,9 +455,11 @@ const EMPTY_FORM: FormState = {
 function CreateRoutineCard({
   editing,
   onDoneEditing,
+  academic,
 }: {
   editing: Routine | null;
   onDoneEditing: () => void;
+  academic: AcademicOptions;
 }) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [advanced, setAdvanced] = useState(false);
