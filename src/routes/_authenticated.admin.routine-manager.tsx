@@ -214,6 +214,7 @@ function RoutineManagerPage() {
               .getElementById("routine-create")
               ?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
+          levels={academic.levels}
         />
       </Section>
 
